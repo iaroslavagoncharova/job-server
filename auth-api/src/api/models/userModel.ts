@@ -31,12 +31,12 @@ const getUser = async (id: number): Promise<UnauthorizedUser | null> => {
   }
 };
 
-const postUser = async (user: Pick<User, 'password' | 'email' | 'fullname' | 'user_type'>): Promise<UnauthorizedUser | null> => {
+const postUser = async (user: Pick<User, 'password' | 'email' | 'fullname' | 'phone' |'user_type'>): Promise<UnauthorizedUser | null> => {
   try {
     const username = 'test';
     const result = await promisePool.execute<ResultSetHeader>(
-      'INSERT INTO Users (username, password, email, user_level_id, fullname, user_type) VALUES (?, ?, ?, ?, ?, ?)',
-      [username, user.password, user.email, 2, user.fullname, user.user_type]
+      'INSERT INTO Users (username, password, email, user_level_id, fullname, phone, user_type) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [username, user.password, user.email, 2, user.fullname, user.phone, user.user_type]
     );
     console.log(result);
     const createdUser = await getUser(result[0].insertId);

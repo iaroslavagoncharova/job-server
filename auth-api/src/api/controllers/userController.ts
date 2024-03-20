@@ -53,7 +53,7 @@ const getUserById = async (
 };
 
 const addUser = async (
-  req: Request<{}, {}, Pick<User, 'password' | 'email' | 'fullname' | 'user_type'>>,
+  req: Request<{}, {}, Pick<User, 'password' | 'email' | 'fullname' | 'phone' | 'user_type'>>,
   res: Response<UserResponse>,
   next: NextFunction
 ) => {

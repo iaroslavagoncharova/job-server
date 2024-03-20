@@ -11,6 +11,7 @@ export type User = {
     user_type: string;
     link: string;
     field: string;
+    created_at: string;
 };
 
 export type UnauthorizedUser = Omit<User, 'password'>;
