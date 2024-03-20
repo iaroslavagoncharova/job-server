@@ -53,6 +53,7 @@ const login = async (
       status: user.status,
       link: user.link,
       field: user.field,
+      created_at: user.created_at,
     };
 
     const tokenContent = {
