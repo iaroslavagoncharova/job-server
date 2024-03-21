@@ -18,8 +18,9 @@ userRoute.post(
   body('email').isEmail().normalizeEmail().isString(),
   body('fullname').isString().notEmpty().isString().escape().trim(),
   body('user_type').isString().notEmpty().isString().escape().trim(),
+  body('phone').isString().notEmpty().isString().escape().trim(),
   addUser
-);
+)
 
 userRoute.get('/:id', getUserById);
 
