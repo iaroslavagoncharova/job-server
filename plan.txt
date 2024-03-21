@@ -39,7 +39,7 @@ applications (candidate):
 - getSavedApplications (authenticate, user_id from token, status 'saved') (getting all saved job ads aka pre-made applications for saved-page)
 - getApplicationById (application_id) (getting all application info after clicking it)
 - postApplication (authenticate, user_id from token, job_id, status) (creating an application automatically after a right swipe)
-- putApplication (authenticate, application_text) (updating application text)
+- putApplication (authenticate, application_text, application_links) (updating application text and links)
 - postApplicationStatus (authenticate, user_id ftom token, application_id) (sending application by changing its status to sent)
 - deleteApplication (authenticate, user_id from token, application_id) (deleting application before it's sent)
 candidates (employer):
@@ -51,15 +51,28 @@ candidates (employer):
 job ads (employer):
 - getJobAdsByUser (authenticate, user_id from token) (getting all job ads by a company)
 - getJobAdById (job_id) (getting one job ad's info when it's clicked)
-- postJobAd (authenticate, user_id from token, job info) (adding job ad) + job skills! (job tests ?)
+- postJobAd (authenticate, user_id from token, job info) (adding job ad) + job skills! keywords! (job tests ?)
 - putJobAd (authenticate, user_id from token, job info) (updating job ad's info)
 - deleteJobAd (authenticate, user_id from token, job_id) (deleting job ad)
 job ads (candidate):
 - getJobAds (getting all job ads)
 - getJobAdsByField (field) (getting job ads by chosen field)
-- getJobAdById (job_id) (getting one job ad's info when it's clicked) + job skills! (job tests ?)
-- 
-
+- getJobAdById (job_id) (getting one job ad's info when it's clicked) + job skills! keywords! (job tests ?)
+swipes:
+- getSwipes (getting all swipes)
+- getRightSwipes (getting all right swipes for checking the matches later)
+- getSwipesByUser (authenticate, user_id from token) (getting all user's swipes)
+- getRightSwipesByUser (authenticate, user_id from token) (getting all user's right swipes)
+- postSwipe (authenticate, user_id from token, swipe info) (adding a record on swipe)
+- deleteSwipe (swipe_id) (deleting swipes after a match)
+matches:
+- postMatch (swiper_id, swiped_id) (adding a match when both users swipe each other right)
+- getMatchesByUser (authenticate, user_id from token) (getting all user's matches to display notifications)
+- deleteMatch (match_id) (deleting the match after sending a notification)
+notifications:
+- getNotificationsByUser (authenticate, user_id from token) (getting all user's notifications)
+- postNotification (match_id, user1_id, user2_id) (adding a notification after a match)
+- deleteNotification (notification_id) (deleting a notification)
 
 
 
