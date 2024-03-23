@@ -1,10 +1,13 @@
 import express from 'express';
-import {addUser, getAllUsers, getUserById} from '../controllers/userController';
+import {addUser, getAllUsers, getUserById, getUserByToken} from '../controllers/userController';
 import {body} from 'express-validator';
+import {authenticate} from '../../middlewares';
 
 const userRoute = express.Router();
 
 userRoute.get('/', getAllUsers);
+
+userRoute.get('/token', authenticate, getUserByToken);
 
 userRoute.post(
   '/',

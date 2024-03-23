@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import {NextFunction, Request, Response} from 'express';
-import {getUserByUsername} from '../models/userModel';
+import {getUserByEmail} from '../models/userModel';
 import {LoginResponse} from '@sharedTypes/MessageTypes';
 import {User} from '@sharedTypes/DBTypes';
 import { validationResult } from 'express-validator';
@@ -25,7 +25,7 @@ const login = async (
   try {
     const {email, password} = req.body;
     console.log(req.body, 'req.body');
-    const user = await getUserByUsername(email);
+    const user = await getUserByEmail(email);
     if (!user) {
       next(new CustomError("Invalid email or the user doesn't exist", 401));
       return;

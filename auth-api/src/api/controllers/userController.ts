@@ -1,5 +1,5 @@
 import {NextFunction, Response, Request} from 'express';
-import {UnauthorizedUser, User} from '../../../../hybrid-types/DBTypes';
+import {TokenUser, UnauthorizedUser, User} from '../../../../hybrid-types/DBTypes';
 import {getUsers, getUser, postUser} from '../models/userModel';
 import CustomError from '../../classes/CustomError';
 import {validationResult} from 'express-validator';
@@ -52,6 +52,24 @@ const getUserById = async (
   }
 };
 
+const getUserByToken = async (
+  req: Request,
+  res: Response<UserResponse, {user: TokenUser}>,
+  next: NextFunction
+) => {
+  const tokenUser = res.locals.user;
+  const user = await getUser(tokenUser.user_id);
+  if (!user) {
+    next(new CustomError('User not found', 404));
+    return;
+  }
+  const response: UserResponse = {
+    message: 'token is valid',
+    user: user,
+  };
+  res.json(response);
+};
+
 const addUser = async (
   req: Request<{}, {}, Pick<User, 'password' | 'email' | 'fullname' | 'phone' | 'user_type'>>,
   res: Response<UserResponse>,
@@ -88,4 +106,4 @@ const addUser = async (
   }
 }
 
-export {getAllUsers, getUserById, addUser};
+export {getAllUsers, getUserById, addUser, getUserByToken};

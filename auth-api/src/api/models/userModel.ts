@@ -31,6 +31,20 @@ const getUser = async (id: number): Promise<UnauthorizedUser | null> => {
   }
 };
 
+const getUserByEmail = async (email: string): Promise<User | null> => {
+  try {
+    const [result] = await promisePool.execute<
+      RowDataPacket[] & User[]
+    >('SELECT * FROM Users WHERE email = ?', [email]);
+    if (result.length === 0) {
+      return null;
+    }
+    return result[0];
+  } catch (e) {
+    throw new Error((e as Error).message);
+  }
+};
+
 const postUser = async (user: Pick<User, 'password' | 'email' | 'fullname' | 'phone' |'user_type'>): Promise<UnauthorizedUser | null> => {
   try {
     const username = 'test';
@@ -46,19 +60,10 @@ const postUser = async (user: Pick<User, 'password' | 'email' | 'fullname' | 'ph
   }
 };
 
-const getUserByUsername = async (email: string): Promise<User | null> => {
-  try {
-    const [result] = await promisePool.execute<
-      RowDataPacket[] & User[]
-    >('SELECT * FROM Users WHERE email = ?', [email]);
-    if (result.length === 0) {
-      return null;
-    }
-    return result[0];
-  } catch (e) {
-    console.error('getUserByUsername', (e as Error).message);
-    throw new Error((e as Error).message);
-  }
-};
+export {getUsers, getUser, postUser, getUserByEmail};
 
-export {getUsers, getUser, postUser, getUserByUsername};
+// - getUserByEmail (email)
+// - getUserByToken (token)
+// - postUser (user info)
+// - putUser (authenticate, user_id from token, email | fullname | phone | password | address)
+// - deleteUser (authenticate, user_id from token)
