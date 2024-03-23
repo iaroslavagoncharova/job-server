@@ -21,3 +21,19 @@ export type TokenUser = {
     user_level_id: number;
     user_type: string;
 };
+
+export interface EducationInfo {
+    school: string;
+    degree: string;
+    field: string;
+    graduation: Date;
+  }
+  
+ export interface ExperienceInfo {
+    job_title: string;
+    job_place: string;
+    job_city: string;
+    description: string;
+    start_date: Date;
+    end_date: Date;
+  }
