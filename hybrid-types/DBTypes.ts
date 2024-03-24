@@ -23,17 +23,17 @@ export type TokenUser = {
 };
 
 export interface EducationInfo {
-    school: string;
-    degree: string;
-    field: string;
-    graduation: Date;
+    school?: string | null | undefined;
+    degree?: string | null | undefined;
+    field?: string | null | undefined;
+    graduation?: Date | null | undefined;
   }
   
  export interface ExperienceInfo {
-    job_title: string;
-    job_place: string;
-    job_city: string;
-    description: string;
-    start_date: Date;
-    end_date: Date;
+    job_title?: string | null | undefined;
+    job_place?: string | null | undefined;
+    job_city?: string | null | undefined;
+    description?: string | null | undefined;
+    start_date?: Date | null | undefined;
+    end_date?: Date | null | undefined;
   }

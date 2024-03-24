@@ -1,18 +1,10 @@
 Auth server
 users:
-- getUsers
-- getUserById (user_id)
 - getUserByEmail (email)
 - getUserByToken (token)
-- postUser (user info)
 - putUser (authenticate, user_id from token, email | fullname | phone | password | address)
 - deleteUser (authenticate, user_id from token)
-auth:
-- login (email, password)
 profile (candidate):
-- postEducation(authenticate, user_id from token, education info) (for adding education)
-- putEducation (authenticate, user_id from token, education_id, education info) (for updating education)
-- deleteEducation (authenticate, user_id from token, education_id) (for deleting education)
 - postExperience (authenticate, user_id from token, experience info) (for adding job experience)
 - putExperience (authenticate, user_id from token, experience_id, experience info) (for updating job experience)
 - deleteExperience (authenticate, user_id from token, experience_id) (for deleting job experience)
@@ -74,5 +66,17 @@ notifications:
 - postNotification (match_id, user1_id, user2_id) (adding a notification after a match)
 - deleteNotification (notification_id) (deleting a notification)
 
+DONE:
+users:
+- getUsers
+- getUserById (user_id)
+- postUser (user info)
+auth:
+- login (email, password)
+profile (candidate):
+- getEducation (authenticate, user_id from token, education id) (for development purposes, will be changed later)
+- postEducation(authenticate, user_id from token, education info) (for adding education)
+- putEducation (authenticate, user_id from token, education_id, education info) (for updating education)
+- deleteEducation (authenticate, user_id from token, education_id) (for deleting education)
 
 
