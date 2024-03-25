@@ -1,18 +1,31 @@
+import {Chats, Message} from '@sharedTypes/DBTypes';
 import {promisePool} from '../../lib/db';
+import {RowDataPacket} from 'mysql2';
+import CustomError from '../../classes/CustomError';
 
-const getChatsByUser = async (userId: number): Promise<any[]> => {
-  const [rows] = await promisePool.execute('SELECT * FROM Chats WHERE user_id = ?', [userId]);
-  return rows as any[];
+const getChatsByUser = async (userId: number): Promise<Chats[]> => {
+  const [rows] = await promisePool.execute<RowDataPacket[] & Chats[]>(
+    'SELECT * FROM UserChats WHERE user_id = ?',
+    [userId]
+  );
+  if (rows.length === 0) {
+    throw new CustomError('Chats not found', 404);
+  }
+  return rows;
 };
 
-const getMessagesByChatAndUser = async (chatId: number, userId: number): Promise<any[]> => {
-  const [rows] = await promisePool.execute(`
-      SELECT Messages.*,
-      CASE WHEN Messages.user_id = ? THEN 'right' ELSE 'left' END as message_side
-      FROM Messages
-      WHERE chat_id = ?`,
-      [userId, chatId]);
-  return rows as any[];
+const getMessagesByChatAndUser = async (
+  chatId: number,
+  userId: number
+): Promise<Message[]> => {
+  const [rows] = await promisePool.execute<RowDataPacket[] & Message[]>(
+    `SELECT * FROM Messages WHERE chat_id = ? AND user_id = ?`,
+    [chatId, userId]
+  );
+  if (rows.length === 0) {
+    throw new CustomError('Messages not found', 404);
+  }
+  return rows;
 };
 
-export { getChatsByUser, getMessagesByChatAndUser };
+export {getChatsByUser, getMessagesByChatAndUser};

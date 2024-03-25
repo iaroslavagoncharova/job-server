@@ -4,7 +4,7 @@ import { authenticate } from '../../middlewares';
 
 const chatsRoute = express.Router();
 
-chatsRoute.get('/userChats', authenticate, handleGetChatsByUser);
+chatsRoute.get('/user', authenticate, handleGetChatsByUser);
 chatsRoute.get('/messages/:chatId', authenticate, handleGetMessagesByChatAndUser);
 
 export default chatsRoute;
