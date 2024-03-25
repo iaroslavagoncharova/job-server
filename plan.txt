@@ -1,13 +1,5 @@
 Auth server
-users:
-- getUserByEmail (email)
-- getUserByToken (token)
-- putUser (authenticate, user_id from token, email | fullname | phone | password | address)
-- deleteUser (authenticate, user_id from token)
 profile (candidate):
-- postExperience (authenticate, user_id from token, experience info) (for adding job experience)
-- putExperience (authenticate, user_id from token, experience_id, experience info) (for updating job experience)
-- deleteExperience (authenticate, user_id from token, experience_id) (for deleting job experience)
 - postAboutMe (authenticate, user_id from token, text) (adding about me text)
 - putAboutMe (authenticate, user_id from token, text) (updating about me text)
 - postSkills (authenticate, skill_id, user_id from token, skills) (adding user's skills)
@@ -18,13 +10,6 @@ profile (candidate):
 profile (employer):
 - postAboutMe (authenticate, user_id from token, text) (adding about me text)
 - putAboutMe (authenticate, user_id from token, text) (updating about me text)
-chats:
-- getChatsByUser (authenticate, user_id from token) (getting chats for a user)
-- getMessagesByChatAndUser (authenticate, chat_id) (get all info about messages in a chat, if a user is an owner, display right, if not, display left)
-- postMessage (authenticate, user_id from token, chat_id, message_text) (sending a message)
-- put? delete?
-- postChat (authenticate) (start a chat - automatically after a match or manually after an employer approves an application) (post chat, get chat_id, add to UserChats user_ids and chat_id)
-- deleteChat (authenticate, chat_id) (deleting a chat) 
 applications (candidate):
 - getApplicationsByUser (authenticate, user_id from token) (getting all applications of a user)
 - getSentApplications (authenticate, user_id from token, status 'sent') (getting all sent applications for sent-page)
@@ -70,13 +55,24 @@ DONE:
 users:
 - getUsers
 - getUserById (user_id)
+- getUserByEmail (email)
+- getUserByToken (token)
 - postUser (user info)
+- putUser (authenticate, user_id from token, email | fullname | phone | password | address)
+- deleteUser (authenticate, user_id from token)
 auth:
 - login (email, password)
 profile (candidate):
-- getEducation (authenticate, user_id from token, education id) (for development purposes, will be changed later)
 - postEducation(authenticate, user_id from token, education info) (for adding education)
 - putEducation (authenticate, user_id from token, education_id, education info) (for updating education)
 - deleteEducation (authenticate, user_id from token, education_id) (for deleting education)
-
+- postExperience (authenticate, user_id from token, experience info) (for adding job experience)
+- putExperience (authenticate, user_id from token, experience_id, experience info) (for updating job experience)
+- deleteExperience (authenticate, user_id from token, experience_id) (for deleting job experience)
+chats:
+- getChatsByUser (authenticate, user_id from token) (getting chats for a user)
+- getMessagesByChatAndUser (authenticate, chat_id) (get all info about messages in a chat, if a user is an owner, display right, if not, display left)
+- postMessage (authenticate, user_id from token, chat_id, message_text) (sending a message)
+- postChat (authenticate) (start a chat - automatically after a match or manually after an employer approves an application) (post chat, get chat_id, add to UserChats user_ids and chat_id)
+- deleteChat (authenticate, chat_id) (deleting a chat) 
 
