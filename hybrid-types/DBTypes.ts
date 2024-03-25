@@ -46,12 +46,9 @@ export type ApplicationLink = {
 
 export type Chat = {
     chat_id: number;
+    user1_id: number;
+    user2_id: number;
     created_at: Date | string;
-};
-
-export type UserChat = {
-    user_id: number;
-    chat_id: number;
 };
 
 export type Message = {

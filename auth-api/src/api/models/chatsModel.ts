@@ -1,5 +1,5 @@
 import {promisePool} from '../../lib/db';
-import {Message, Chat, UserChat, TokenContent} from '@sharedTypes/DBTypes';
+import {Message, Chat, TokenContent} from '@sharedTypes/DBTypes';
 import {ResultSetHeader, RowDataPacket} from 'mysql2';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 import CustomError from '../../classes/CustomError';
@@ -32,9 +32,9 @@ const getChatById = async (chatId: number): Promise<Chat | null> => {
 };
 
 
-const getChatsByUser = async (userId: number): Promise<UserChat[]> => {
-  const [rows] = await promisePool.execute<RowDataPacket[] & UserChat[]>(
-    'SELECT * FROM UserChats WHERE user_id = ?',
+const getChatsByUser = async (userId: number): Promise<Chat[]> => {
+  const [rows] = await promisePool.execute<RowDataPacket[] & Chat[]>(
+    'SELECT * FROM Chats WHERE user_id = ?',
     [userId]
   );
   if (rows.length === 0) {
@@ -87,7 +87,7 @@ const postChat = async (matchId: number): Promise<Chat | null> => {
     const chat_id = createdChat?.chat_id;
 
     const userChats = await promisePool.execute<ResultSetHeader>(`
-      INSERT INTO UserChats (user_id, chat_id)
+      INSERT INTO Chats (user_id, chat_id)
       VALUES (?, ?), (?, ?);
     `, [user1_id, chat_id, user2_id, chat_id]);
 
@@ -109,7 +109,7 @@ const deleteChat = async (chatId: number, user: TokenContent): Promise<MessageRe
   try {
     await connection.beginTransaction();
     await promisePool.execute(`DELETE FROM Messages WHERE chat_id = ?`, [chatId]);
-    await promisePool.execute(`DELETE FROM UserChats WHERE chat_id = ?`, [chatId]);
+    await promisePool.execute(`DELETE FROM Chats WHERE chat_id = ?`, [chatId]);
     const [result] = await promisePool.execute<ResultSetHeader>(`DELETE FROM Chats WHERE chat_id = ? AND user_id = ?;`, [chatId, user.user_id]);
 
     if (result.affectedRows === 0) {

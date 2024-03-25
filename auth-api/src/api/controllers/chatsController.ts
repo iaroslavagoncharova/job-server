@@ -1,13 +1,13 @@
 import {Request, Response, NextFunction} from 'express';
 import {getChatsByUser, getMessagesByChatAndUser} from '../models/chatsModel';
 import CustomError from '../../classes/CustomError';
-import {Chats, Message} from '@sharedTypes/DBTypes';
+import {Chat, Message} from '@sharedTypes/DBTypes';
 
 export const handleGetChatsByUser = async (
   req: Request,
-  res: Response<Chats[]>,
+  res: Response<Chat[]>,
   next: NextFunction
-): Promise<Chats[] | void> => {
+): Promise<Chat[] | void> => {
   try {
     const userId = res.locals.user.user_id;
     const chats = await getChatsByUser(userId);
