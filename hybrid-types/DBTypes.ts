@@ -49,11 +49,6 @@ export type Chat = {
     created_at: Date | string;
 };
 
-export type UserChat = {
-    user_id: number;
-    chat_id: number;
-};
-
 export type Message = {
     message_id: number;
     user_id: number;

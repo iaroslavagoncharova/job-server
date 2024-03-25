@@ -1,7 +1,7 @@
 import {Request, Response, NextFunction} from 'express';
 import {deleteChat, getChatById, getChatsByUser, getMessage, getMessagesByChatAndUser, postChat, postMessage} from '../models/chatsModel';
 import CustomError from '../../classes/CustomError';
-import {Chat, UserChat, Message, TokenContent} from '@sharedTypes/DBTypes';
+import {Chat, Message, TokenContent} from '@sharedTypes/DBTypes';
 import {ChatResponse} from '@sharedTypes/MessageTypes';
 
 export const handleGetMessage = async (
@@ -42,9 +42,9 @@ export const handleGetChatById = async (
 
 export const handleGetChatsByUser = async (
   req: Request,
-  res: Response<UserChat[]>,
+  res: Response<Chat[]>,
   next: NextFunction
-): Promise<UserChat[] | void> => {
+): Promise<Chat[] | void> => {
   try {
     const userId = res.locals.user.user_id;
     const chats = await getChatsByUser(userId);

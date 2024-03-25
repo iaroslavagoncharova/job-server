@@ -1,5 +1,5 @@
 import {promisePool} from '../../lib/db';
-import {Message, Chat, UserChat, TokenContent, Match} from '@sharedTypes/DBTypes';
+import {Message, Chat, TokenContent, Match} from '@sharedTypes/DBTypes';
 import {ResultSetHeader, RowDataPacket} from 'mysql2';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 import CustomError from '../../classes/CustomError';
@@ -32,10 +32,10 @@ const getChatById = async (chatId: number): Promise<Chat | null> => {
 };
 
 
-const getChatsByUser = async (userId: number): Promise<UserChat[]> => {
-  const [rows] = await promisePool.execute<RowDataPacket[] & UserChat[]>(
-    'SELECT * FROM UserChats WHERE user_id = ?',
-    [userId]
+const getChatsByUser = async (userId: number): Promise<Chat[]> => {
+  const [rows] = await promisePool.execute<RowDataPacket[] & Chat[]>(
+    'SELECT * FROM Chats WHERE user1_id = ? OR user2_id = ?',
+    [userId, userId]
   );
   if (rows.length === 0) {
     throw new CustomError('Chats not found', 404);
@@ -117,7 +117,6 @@ const deleteChat = async (chatId: number, user: TokenContent): Promise<MessageRe
   try {
     await connection.beginTransaction();
     await promisePool.execute(`DELETE FROM Messages WHERE chat_id = ?`, [chatId]);
-    await promisePool.execute(`DELETE FROM UserChats WHERE chat_id = ?`, [chatId]);
     const [result] = await promisePool.execute<ResultSetHeader>(`DELETE FROM Chats WHERE chat_id = ? AND user_id = ?;`, [chatId, user.user_id]);
 
     if (result.affectedRows === 0) {
