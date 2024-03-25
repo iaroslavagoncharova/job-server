@@ -57,3 +57,16 @@ export type Experience = {
     start_date?: Date | null | undefined;
     end_date?: Date | null | undefined;
   }
+
+export type Chats = {
+    chat_id: number;
+    created_at: string;
+};  
+
+export type Message = {
+    message_id: number;
+    user_id: number;
+    chat_id: number;
+    message_text: string;
+    sent_at: string;
+};
