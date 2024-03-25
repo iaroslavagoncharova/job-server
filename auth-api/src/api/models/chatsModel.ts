@@ -1,7 +1,8 @@
 import {promisePool} from '../../lib/db';
-import {Message, Chat, UserChat, TokenContent} from '../../../../hybrid-types/DBTypes';
+import {Message, Chat, UserChat, TokenContent} from '@sharedTypes/DBTypes';
 import {ResultSetHeader, RowDataPacket} from 'mysql2';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
+import CustomError from '../../classes/CustomError';
 
 const getMessage = async (messageId: number): Promise<Message | null> => {
   try {
@@ -30,19 +31,30 @@ const getChatById = async (chatId: number): Promise<Chat | null> => {
   }
 };
 
-const getChatsByUser = async (userId: number): Promise<any[]> => {
-  const [rows] = await promisePool.execute<RowDataPacket[] & UserChat>('SELECT * FROM UserChats WHERE user_id = ?', [userId]);
-  return rows as any[];
+
+const getChatsByUser = async (userId: number): Promise<UserChat[]> => {
+  const [rows] = await promisePool.execute<RowDataPacket[] & UserChat[]>(
+    'SELECT * FROM UserChats WHERE user_id = ?',
+    [userId]
+  );
+  if (rows.length === 0) {
+    throw new CustomError('Chats not found', 404);
+  }
+  return rows;
 };
 
-const getMessagesByChatAndUser = async (chatId: number, userId: number): Promise<any[]> => {
-  const [rows] = await promisePool.execute(`
-      SELECT Messages.*,
-      CASE WHEN Messages.user_id = ? THEN 'right' ELSE 'left' END as message_side
-      FROM Messages
-      WHERE chat_id = ?`,
-      [userId, chatId]);
-  return rows as any[];
+const getMessagesByChatAndUser = async (
+  chatId: number,
+  userId: number
+): Promise<Message[]> => {
+  const [rows] = await promisePool.execute<RowDataPacket[] & Message[]>(
+    `SELECT * FROM Messages WHERE chat_id = ? AND user_id = ?`,
+    [chatId, userId]
+  );
+  if (rows.length === 0) {
+    throw new CustomError('Messages not found', 404);
+  }
+  return rows;
 };
 
 const postMessage = async (message: Pick<Message, 'user_id' | 'chat_id' | 'message_text'>): Promise<Message | null> => {
@@ -114,8 +126,5 @@ const deleteChat = async (chatId: number, user: TokenContent): Promise<MessageRe
     connection.release();
   }
 };
-
-
-
 
 export {getMessage, getChatById, getChatsByUser, getMessagesByChatAndUser, postMessage, postChat, deleteChat};
