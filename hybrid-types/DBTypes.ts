@@ -1,3 +1,8 @@
+export type UserLevel = {
+    level_id: number;
+    level_name: string;
+};
+
 export type User = {
     user_id: number;
     username: string;
@@ -22,51 +27,41 @@ export type TokenUser = {
     user_type: string;
 };
 
-export interface EducationInfo {
-    school?: string | null | undefined;
-    degree?: string | null | undefined;
-    field?: string | null | undefined;
-    graduation?: Date | null | undefined;
-  }
+export type TokenContent = Pick<User, 'user_id'> & Pick<UserLevel, 'level_name'>;
 
-export type Education = {
-    education_id: number;
+export type Application = {
+    application_id: number;
     user_id: number;
-    school: string;
-    degree: string;
-    field: string;
-    graduation: string;
+    job_id: number;
+    status: string;
+    application_text: string | null;
+    created_at: Date | string;
 };
 
-export type Experience = {
-    experience_id: number;
-    user_id: number;
-    job_title: string;
-    job_place: string;
-    job_city: string;
-    description: string;
-    start_date: string;
-    end_date: string;
+export type ApplicationLink = {
+    link_id: number;
+    application_id: number;
+    link: string;
 };
-  
- export interface ExperienceInfo {
-    job_title?: string | null | undefined;
-    job_place?: string | null | undefined;
-    job_city?: string | null | undefined;
-    description?: string | null | undefined;
-    start_date?: Date | null | undefined;
-    end_date?: Date | null | undefined;
-  }
 
-export type Chats = {
+export type Chat = {
     chat_id: number;
-    created_at: string;
-};  
+    user1_id: number;
+    user2_id: number;
+    created_at: Date | string;
+};
 
 export type Message = {
     message_id: number;
     user_id: number;
     chat_id: number;
     message_text: string;
-    sent_at: string;
+    sent_at: Date | string;
+};
+
+export type Match = {
+    match_id: number;
+    user1_id: number;
+    user2_id: number;
+    created_at: Date | string;
 };
