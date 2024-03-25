@@ -3,9 +3,11 @@ import {
   getEducation,
   getExperienceById,
   postEducation,
+  postExperience,
   removeEducation,
   removeExperience,
   updateEducation,
+  updateExperience,
 } from '../controllers/profileController';
 import {authenticate} from '../../middlewares';
 import {body} from 'express-validator';
@@ -37,18 +39,22 @@ profileRoute.delete('/education/:education_id', authenticate, removeEducation);
 
 // routes for experience
 profileRoute.get('/experience', authenticate, getExperienceById);
-// profileRoute.post(
-//   '/experience',
-//   body('job_title').isString().notEmpty().escape().trim(),
-//   body('job_place').isString().notEmpty().escape().trim(),
-//   body('job_city').isString().optional().escape().trim(),
-//   body('description').isString().optional().escape().trim(),
-//   body('start_date').isString().notEmpty().escape().trim(),
-//   body('end_date').isString().optional().escape().trim(),
-//   authenticate,
-//   addExperience
-// );
-// router.put('/experience', authenticate, updateExperience);
+profileRoute.post('/experience',
+body('job_title').isString().notEmpty().escape().trim(),
+body('job_place').isString().notEmpty().escape().trim(),
+body('job_city').isString().optional().escape().trim(),
+body('description').isString().optional().escape().trim(),
+body('start_date').isString().notEmpty().escape().trim(),
+body('end_date').isString().optional().escape().trim(),
+authenticate, postExperience);
+profileRoute.put('/experience/:experience_id',
+body('job_title').isString().optional().escape().trim(),
+body('job_place').isString().optional().escape().trim(),
+body('job_city').isString().optional().escape().trim(),
+body('description').isString().optional().escape().trim(),
+body('start_date').isString().optional().escape().trim(),
+body('end_date').isString().optional().escape().trim(),
+authenticate, updateExperience);
 profileRoute.delete('/experience/:experience_id', authenticate, removeExperience);
 
 export default profileRoute;

@@ -1,6 +1,6 @@
 import {Pool, ResultSetHeader} from 'mysql2/promise';
 import CustomError from '../../classes/CustomError';
-import {EducationInfo, ExperienceInfo} from '@sharedTypes/DBTypes';
+import {EducationInfo, Experience, ExperienceInfo} from '@sharedTypes/DBTypes';
 import {promisePool} from '../../lib/db';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 
@@ -99,10 +99,10 @@ const deleteEducation = async (
   }
 };
 
-const getExperience = async (id: number): Promise<ExperienceInfo[]> => {
+const getExperience = async (id: number): Promise<Experience[]> => {
   try {
     const [result] = await promisePool.execute<
-      ResultSetHeader & ExperienceInfo[]
+      ResultSetHeader & Experience[]
     >('SELECT * FROM JobExperience WHERE user_id = ?', [id]);
     console.log(result);
     return result;
@@ -111,44 +111,76 @@ const getExperience = async (id: number): Promise<ExperienceInfo[]> => {
   }
 };
 
-// // Add experience
-// const postExperience = async (user_id: number, experience: ExperienceInfo): Promise<MessageResponse> => {
-//   try {
-//     console.log(user_id, experience);
-//     const sql = promisePool.format(
-//       'INSERT INTO JobExperience (user_id, job_title, job_place, job_city, description, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?, ?);',
-//       [
-//         user_id,
-//         experience.job_title,
-//         experience.job_place,
-//         experience.job_city,
-//         experience.description,
-//         experience.start_date,
-//         experience.end_date,
-//       ]
-//     );
-//     console.log(sql);
-//     const result = await promisePool.execute<ResultSetHeader>(
-//       'INSERT INTO JobExperience (user_id, job_title, job_place, job_city, description, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?, ?)',
-//         [
-//           user_id,
-//           experience.job_title,
-//           experience.job_place,
-//           experience.job_city,
-//           experience.description,
-//           experience.start_date,
-//           experience.end_date,
-//       ]
-//     );
-//     if (result[0].affectedRows === 0) {
-//       console.log('result', result);
-//       throw new CustomError('Failed to add experience', 500);
-//     }
-//     return {message: 'Experience added'};
-//   } catch (error) {
-//     throw new CustomError('Failed to add experience', 500);
-//   }
-// };
+// add experience
+const addExperience = async (
+  experience: ExperienceInfo,
+  user_id: number
+) => {
+  try {
+    console.log(experience, user_id);
+    const result = await promisePool.execute<ResultSetHeader>(
+      'INSERT INTO JobExperience (user_id, job_title, job_place, job_city, description, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [
+        user_id,
+        experience.job_title,
+        experience.job_place,
+        experience.job_city,
+        experience.description,
+        experience.start_date,
+        experience.end_date,
+      ]
+    );
+    console.log(result);
+    if (result[0].affectedRows === 0) {
+      return null;
+    }
+    return {message: 'Experience added'};
+  } catch (error) {
+    throw new Error((error as Error).message);
+  }
+};
+
+const putExperience = async (
+  user_id: number,
+  experience_id: number,
+  experience: ExperienceInfo
+) => {
+  try {
+    const experienceUpdate: ExperienceInfo = {};
+    if (experience.job_title !== null && experience.job_title !== undefined) {
+      experienceUpdate.job_title = experience.job_title;
+    }
+    if (experience.job_place !== null && experience.job_place !== undefined) {
+      experienceUpdate.job_place = experience.job_place;
+    }
+    if (experience.job_city !== null && experience.job_city !== undefined) {
+      experienceUpdate.job_city = experience.job_city;
+    }
+    if (experience.description !== null && experience.description !== undefined) {
+      experienceUpdate.description = experience.description;
+    }
+    if (experience.start_date !== null && experience.start_date !== undefined) {
+      experienceUpdate.start_date = experience.start_date;
+    }
+    if (experience.end_date !== null && experience.end_date !== undefined) {
+      experienceUpdate.end_date = experience.end_date;
+    }
+    console.log(experienceUpdate);
+    const sql = promisePool.format(
+      'UPDATE JobExperience SET ? WHERE experience_id = ? AND user_id = ?',
+      [experienceUpdate, experience_id, user_id]
+    );
+    console.log(sql);
+    const result = await promisePool.execute<ResultSetHeader>(sql);
+    if (result[0].affectedRows === 0) {
+      return null;
+    }
+    return {message: 'Experience updated'};
+  } catch (e) {
+    console.error('putExperience error', (e as Error).message);
+    throw new Error((e as Error).message);
+  }
+};
 
   // Delete experience
   const deleteExperience = async (user_id: number, experience_id: number): Promise<MessageResponse> => {
@@ -172,6 +204,8 @@ export {
   putEducation,
   deleteEducation,
   getExperience,
+  addExperience,
+  putExperience,
   deleteExperience,
 };
 

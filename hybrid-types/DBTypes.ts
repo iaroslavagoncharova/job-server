@@ -28,6 +28,26 @@ export interface EducationInfo {
     field?: string | null | undefined;
     graduation?: Date | null | undefined;
   }
+
+export type Education = {
+    education_id: number;
+    user_id: number;
+    school: string;
+    degree: string;
+    field: string;
+    graduation: string;
+};
+
+export type Experience = {
+    experience_id: number;
+    user_id: number;
+    job_title: string;
+    job_place: string;
+    job_city: string;
+    description: string;
+    start_date: string;
+    end_date: string;
+};
   
  export interface ExperienceInfo {
     job_title?: string | null | undefined;
