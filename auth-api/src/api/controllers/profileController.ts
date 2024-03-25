@@ -1,7 +1,7 @@
 import {Request, Response, NextFunction} from 'express';
 import {Pool} from 'mysql2/promise';
 import CustomError from '../../classes/CustomError';
-import {addEducation, deleteEducation, getEducationByUser, getExperience, putEducation} from '../models/profileModel';
+import {addEducation, deleteEducation, deleteExperience, getEducationByUser, getExperience, putEducation} from '../models/profileModel';
 import {EducationInfo, ExperienceInfo} from '@sharedTypes/DBTypes';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 import {validationResult} from 'express-validator';
@@ -30,10 +30,14 @@ const postEducation = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const id = res.locals.user.user_id; // Assuming user ID is stored in res.locals.user
+    const id = res.locals.user.user_id;
     const education = req.body;
-    await addEducation(id, education);
-    res.status(200).json({message: 'Education added successfully.'});
+    const result = await addEducation(id, education);
+    if (!result) {
+      next(new CustomError('Failed to add education', 500));
+      return;
+    }
+    res.json(result);
   } catch (error) {
     next(new CustomError('Adding education failed', 500));
   }
@@ -118,18 +122,34 @@ const getExperienceById = async (
   }
 }
 
-// export const addExperience = async (
+// const addExperience = async (
 //   req: Request,
 //   res: Response,
 //   next: NextFunction
-// ): Promise<void> => {
+// ) => {
+//   const errors = validationResult(req);
+//   if (!errors.isEmpty()) {
+//     const messages: string = errors
+//       .array()
+//       .map((error) => `${error.msg}: ${error.type}`)
+//       .join(', ');
+//     console.log('addExperience validation', messages);
+//     next(new CustomError(messages, 400));
+//     return;
+//   }
 //   try {
-//     const userId = res.locals.user.user_id;
+//     const user_id = res.locals.user.user_id;
 //     const experienceInfo = req.body;
-//     await profileModel.addExperience(userId, experienceInfo);
-//     res.status(200).json({message: 'Experience added successfully.'});
+//     console.log(user_id, experienceInfo);
+//     const result = await postExperience(user_id, experienceInfo);
+//     console.log(result, 'result');
+//     if (!result) {
+//       next(new CustomError('Failed to add experience', 500));
+//       return;
+//     }
+//     res.json(result);
 //   } catch (error) {
-//     next(new CustomError('Adding experience failed', 500));
+//     next(new CustomError('Duplicate entry', 500));
 //   }
 // };
 
@@ -148,19 +168,24 @@ const getExperienceById = async (
 //   }
 // };
 
-// export const deleteExperience = async (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ): Promise<void> => {
-//   try {
-//     const {experienceId} = req.body;
-//     const userId = res.locals.user.user_id;
-//     await profileModel.deleteExperience(userId, experienceId);
-//     res.status(200).json({message: 'Experience deleted successfully.'});
-//   } catch (error) {
-//     next(new CustomError('Deleting experience failed', 500));
-//   }
-// };
+const removeExperience = async (
+  req: Request<{experience_id: string}>,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const experience_id = req.params.experience_id;
+    console.log(experience_id, 'experience_id');
+    const user_id = res.locals.user.user_id;
+    const result = await deleteExperience(user_id, +experience_id);
+    if (!result) {
+      next(new CustomError('Failed to delete experience', 500));
+      return;
+    }
+    res.json(result);
+  } catch (error) {
+    next(new CustomError('Deleting experience failed', 500));
+  }
+};
 
-export {postEducation, getEducation, updateEducation, removeEducation, getExperienceById};
+export {postEducation, getEducation, updateEducation, removeEducation, getExperienceById, deleteExperience, removeExperience};

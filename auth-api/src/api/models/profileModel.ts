@@ -80,52 +80,100 @@ const putEducation = async (
   }
 };
 
-
-  // Delete education
-  const deleteEducation = async (user_id: number, education_id: number): Promise<MessageResponse> => {
-    try {
-      const result = await promisePool.execute(
-        'DELETE FROM Education WHERE education_id = ? AND user_id = ?',
-        [education_id, user_id]
-      );
-      if (!result) {
-        throw new CustomError('Failed to delete education', 500);
-      }
-      return { message: 'Education deleted' };
-    } catch (error) {
+// Delete education
+const deleteEducation = async (
+  user_id: number,
+  education_id: number
+): Promise<MessageResponse> => {
+  try {
+    const result = await promisePool.execute(
+      'DELETE FROM Education WHERE education_id = ? AND user_id = ?',
+      [education_id, user_id]
+    );
+    if (!result) {
       throw new CustomError('Failed to delete education', 500);
     }
-  };
+    return {message: 'Education deleted'};
+  } catch (error) {
+    throw new CustomError('Failed to delete education', 500);
+  }
+};
 
-  const getExperience = async (
-    id: number
-  ): Promise<ExperienceInfo[]> => {
+const getExperience = async (id: number): Promise<ExperienceInfo[]> => {
+  try {
+    const [result] = await promisePool.execute<
+      ResultSetHeader & ExperienceInfo[]
+    >('SELECT * FROM JobExperience WHERE user_id = ?', [id]);
+    console.log(result);
+    return result;
+  } catch (error) {
+    throw new CustomError('Failed to get experience', 500);
+  }
+};
+
+// // Add experience
+// const postExperience = async (user_id: number, experience: ExperienceInfo): Promise<MessageResponse> => {
+//   try {
+//     console.log(user_id, experience);
+//     const sql = promisePool.format(
+//       'INSERT INTO JobExperience (user_id, job_title, job_place, job_city, description, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?, ?);',
+//       [
+//         user_id,
+//         experience.job_title,
+//         experience.job_place,
+//         experience.job_city,
+//         experience.description,
+//         experience.start_date,
+//         experience.end_date,
+//       ]
+//     );
+//     console.log(sql);
+//     const result = await promisePool.execute<ResultSetHeader>(
+//       'INSERT INTO JobExperience (user_id, job_title, job_place, job_city, description, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?, ?)',
+//         [
+//           user_id,
+//           experience.job_title,
+//           experience.job_place,
+//           experience.job_city,
+//           experience.description,
+//           experience.start_date,
+//           experience.end_date,
+//       ]
+//     );
+//     if (result[0].affectedRows === 0) {
+//       console.log('result', result);
+//       throw new CustomError('Failed to add experience', 500);
+//     }
+//     return {message: 'Experience added'};
+//   } catch (error) {
+//     throw new CustomError('Failed to add experience', 500);
+//   }
+// };
+
+  // Delete experience
+  const deleteExperience = async (user_id: number, experience_id: number): Promise<MessageResponse> => {
     try {
-      const [result] = await promisePool.execute<
-        ResultSetHeader & ExperienceInfo[]
-      >('SELECT * FROM JobExperience WHERE user_id = ?', [id]);
-      console.log(result);
-      return result;
+      const result = await promisePool.execute(
+        'DELETE FROM JobExperience WHERE experience_id = ? AND user_id = ?',
+        [experience_id, user_id]
+      );
+      if (!result) {
+        throw new CustomError('Failed to delete experience', 500);
+      }
+      return {message: 'Experience deleted'};
     } catch (error) {
-      throw new CustomError('Failed to get experience', 500);
+      throw new CustomError('Failed to delete experience', 500);
     }
   };
 
-  export {addEducation, getEducationByUser, putEducation, deleteEducation, getExperience};
-
-
-//   // Add experience
-//   async addExperience(userId: number, experienceInfo: ExperienceInfo): Promise<void> {
-//     const { job_title, job_place, job_city, description, start_date, end_date } = experienceInfo;
-//     try {
-//       await promisePool.execute(
-//         'INSERT INTO JobExperience (user_id, job_title, job_place, job_city, description, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?, ?)',
-//         [userId, job_title, job_place, job_city, description, start_date, end_date]
-//       );
-//     } catch (error) {
-//       throw new CustomError('Failed to add experience', 500);
-//     }
-//   }
+export {
+  addEducation,
+  getEducationByUser,
+  putEducation,
+  deleteEducation,
+  getExperience,
+  deleteExperience,
+};
 
 //   // Update experience
 //   async updateExperience(userId: number, experienceId: number, experienceInfo: ExperienceInfo): Promise<void> {
@@ -137,18 +185,6 @@ const putEducation = async (
 //       );
 //     } catch (error) {
 //       throw new CustomError('Failed to update experience', 500);
-//     }
-//   }
-
-//   // Delete experience
-//   async deleteExperience(userId: number, experienceId: number): Promise<void> {
-//     try {
-//       await promisePool.execute(
-//         'DELETE FROM JobExperience WHERE experience_id = ? AND user_id = ?',
-//         [experienceId, userId]
-//       );
-//     } catch (error) {
-//       throw new CustomError('Failed to delete experience', 500);
 //     }
 //   }
 // }

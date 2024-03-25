@@ -4,6 +4,7 @@ import {
   getExperienceById,
   postEducation,
   removeEducation,
+  removeExperience,
   updateEducation,
 } from '../controllers/profileController';
 import {authenticate} from '../../middlewares';
@@ -36,8 +37,18 @@ profileRoute.delete('/education/:education_id', authenticate, removeEducation);
 
 // routes for experience
 profileRoute.get('/experience', authenticate, getExperienceById);
-// router.post('/experience', authenticate, addExperience);
+// profileRoute.post(
+//   '/experience',
+//   body('job_title').isString().notEmpty().escape().trim(),
+//   body('job_place').isString().notEmpty().escape().trim(),
+//   body('job_city').isString().optional().escape().trim(),
+//   body('description').isString().optional().escape().trim(),
+//   body('start_date').isString().notEmpty().escape().trim(),
+//   body('end_date').isString().optional().escape().trim(),
+//   authenticate,
+//   addExperience
+// );
 // router.put('/experience', authenticate, updateExperience);
-// router.delete('/experience', authenticate, deleteExperience);
+profileRoute.delete('/experience/:experience_id', authenticate, removeExperience);
 
 export default profileRoute;

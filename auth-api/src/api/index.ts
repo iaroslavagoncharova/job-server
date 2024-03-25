@@ -2,7 +2,7 @@ import express from 'express';
 import userRoute from './routes/userRoute';
 import {MessageResponse} from '../../../hybrid-types/MessageTypes';
 import authRoute from './routes/authRoute';
-import profileRoute from './routes/profileRouter';
+import profileRoute from './routes/profileRoute';
 
 const router = express.Router();
 
