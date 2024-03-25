@@ -21,3 +21,16 @@ export type TokenUser = {
     user_level_id: number;
     user_type: string;
 };
+
+export type Chats = {
+    chat_id: number;
+    created_at: string;
+};  
+
+export type Message = {
+    message_id: number;
+    user_id: number;
+    chat_id: number;
+    message_text: string;
+    sent_at: string;
+};
