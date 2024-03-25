@@ -1,4 +1,4 @@
-import { UnauthorizedUser } from "./DBTypes";
+import { Message, UnauthorizedUser } from "./DBTypes";
 type MessageResponse = {
   message: string;
 };
@@ -11,10 +11,14 @@ type UserResponse = MessageResponse & {
   user: UnauthorizedUser;
 };
 
+type ChatResponse = MessageResponse & {
+  media: Message | Message[];
+};
+
 type LoginResponse = MessageResponse & {
   token: string;
   message: string;
   user: UnauthorizedUser;
 };
 
-export type { MessageResponse, ErrorResponse, UserResponse, LoginResponse };
+export type { MessageResponse, ErrorResponse, UserResponse, ChatResponse, LoginResponse };

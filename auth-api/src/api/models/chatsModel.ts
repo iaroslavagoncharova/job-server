@@ -1,5 +1,5 @@
 import {promisePool} from '../../lib/db';
-import {Message, Chat, TokenContent} from '@sharedTypes/DBTypes';
+import {Message, Chat, TokenContent, Match} from '@sharedTypes/DBTypes';
 import {ResultSetHeader, RowDataPacket} from 'mysql2';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 import CustomError from '../../classes/CustomError';
@@ -34,8 +34,8 @@ const getChatById = async (chatId: number): Promise<Chat | null> => {
 
 const getChatsByUser = async (userId: number): Promise<Chat[]> => {
   const [rows] = await promisePool.execute<RowDataPacket[] & Chat[]>(
-    'SELECT * FROM Chats WHERE user_id = ?',
-    [userId]
+    'SELECT * FROM Chats WHERE user1_id = ? OR user2_id = ?',
+    [userId, userId]
   );
   if (rows.length === 0) {
     throw new CustomError('Chats not found', 404);
@@ -60,12 +60,20 @@ const getMessagesByChatAndUser = async (
 const postMessage = async (message: Pick<Message, 'user_id' | 'chat_id' | 'message_text'>): Promise<Message | null> => {
   try {
     const result = await promisePool.execute<ResultSetHeader>(`
-    INSERT INTO Messages (user_id, chat_id, message_text)
-    VALUES (?, ?, ?);`,
-    [message.user_id, message.chat_id, message.message_text]);
+      INSERT INTO Messages (user_id, chat_id, message_text)
+      VALUES (?, ?, ?);`,
+      [message.user_id, message.chat_id, message.message_text]
+    );
     console.log(result);
-    const createdMessage = await getMessage(result[0].insertId);
-    return createdMessage;
+    const [rows] = await promisePool.execute<RowDataPacket[] & Message[]>(
+      'SELECT * FROM Messages WHERE message_id = ?',
+      [result[0].insertId]
+    );
+
+    if (rows.length === 0) {
+      return null;
+    }
+    return rows[0];
   } catch (e) {
     throw new Error((e as Error).message);
   }
@@ -73,26 +81,26 @@ const postMessage = async (message: Pick<Message, 'user_id' | 'chat_id' | 'messa
 
 const postChat = async (matchId: number): Promise<Chat | null> => {
   try {
-    const userIds = await promisePool.execute(`
+    const [userIds] = await promisePool.execute<RowDataPacket[] & Pick<Match, 'user1_id' | 'user2_id'>>(`
     SELECT user1_id, user2_id FROM Matches WHERE match_id = ?`,
-    [matchId]);
+    [matchId]
+    );
+    if (userIds.length === 0) {
+      return null;
+    }
     const user1_id = userIds[0];
     const user2_id = userIds[1];
 
     const chat = await promisePool.execute<ResultSetHeader>(`INSERT INTO Chats (user1_id, user2_id) VALUES (?, ?)`, [user1_id, user2_id]);
-    const createdChat = await getChatById(chat[0].insertId);
-    if (!createdChat) {
+    const [rows] = await promisePool.execute<RowDataPacket[] & Chat[]>(
+      'SELECT * FROM Chats WHERE chat_id = ?',
+      [chat[0].insertId]
+    );
+    if (rows.length === 0) {
       return null;
     }
-    const chat_id = createdChat?.chat_id;
 
-    const userChats = await promisePool.execute<ResultSetHeader>(`
-      INSERT INTO Chats (user_id, chat_id)
-      VALUES (?, ?), (?, ?);
-    `, [user1_id, chat_id, user2_id, chat_id]);
-
-    return createdChat;
-
+    return rows[0];
   } catch (e) {
     throw new Error((e as Error).message);
   }
@@ -109,7 +117,6 @@ const deleteChat = async (chatId: number, user: TokenContent): Promise<MessageRe
   try {
     await connection.beginTransaction();
     await promisePool.execute(`DELETE FROM Messages WHERE chat_id = ?`, [chatId]);
-    await promisePool.execute(`DELETE FROM Chats WHERE chat_id = ?`, [chatId]);
     const [result] = await promisePool.execute<ResultSetHeader>(`DELETE FROM Chats WHERE chat_id = ? AND user_id = ?;`, [chatId, user.user_id]);
 
     if (result.affectedRows === 0) {
