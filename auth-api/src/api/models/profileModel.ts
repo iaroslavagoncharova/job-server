@@ -1,6 +1,6 @@
 import {Pool, ResultSetHeader} from 'mysql2/promise';
 import CustomError from '../../classes/CustomError';
-import {EducationInfo, Experience, ExperienceInfo} from '@sharedTypes/DBTypes';
+import {Education, EducationInfo, Experience, ExperienceInfo} from '@sharedTypes/DBTypes';
 import {promisePool} from '../../lib/db';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 
@@ -8,7 +8,7 @@ import {MessageResponse} from '@sharedTypes/MessageTypes';
 const getEducationByUser = async (id: number): Promise<EducationInfo[]> => {
   try {
     const [result] = await promisePool.execute<
-      ResultSetHeader & EducationInfo[]
+      ResultSetHeader & Education[]
     >('SELECT * FROM Education WHERE user_id = ?', [id]);
     return result;
   } catch (error) {
@@ -19,7 +19,7 @@ const getEducationByUser = async (id: number): Promise<EducationInfo[]> => {
 // add education
 const addEducation = async (
   id: number,
-  education: EducationInfo
+  education: Omit<Education, 'education_id'>
 ): Promise<MessageResponse> => {
   try {
     console.log(id, education);
@@ -113,7 +113,7 @@ const getExperience = async (id: number): Promise<Experience[]> => {
 
 // add experience
 const addExperience = async (
-  experience: ExperienceInfo,
+  experience: Omit<Experience, 'experience_id'>,
   user_id: number
 ) => {
   try {
@@ -208,17 +208,3 @@ export {
   putExperience,
   deleteExperience,
 };
-
-//   // Update experience
-//   async updateExperience(userId: number, experienceId: number, experienceInfo: ExperienceInfo): Promise<void> {
-//     const { job_title, job_place, job_city, description, start_date, end_date } = experienceInfo;
-//     try {
-//       await promisePool.execute(
-//         'UPDATE JobExperience SET job_title = ?, job_place = ?, job_city = ?, description = ?, start_date = ?, end_date = ? WHERE experience_id = ? AND user_id = ?',
-//         [job_title, job_place, job_city, description, start_date, end_date, experienceId, userId]
-//       );
-//     } catch (error) {
-//       throw new CustomError('Failed to update experience', 500);
-//     }
-//   }
-// }
