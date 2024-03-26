@@ -43,7 +43,7 @@ const getUserAsCandidate = async (
     const [result] = await promisePool.execute<
       RowDataPacket[] & CandidateProfile[]
     >(
-      'SELECT Users.username, Users.email, Users.fullname, Users.phone, Users.about_me, Users.field, Users.link FROM Users WHERE user_id = ?',
+      'SELECT Users.*, GROUP_CONCAT(DISTINCT CONCAT(Skills.skill_name, Skills.type)) AS user_skills, GROUP_CONCAT(DISTINCT CONCAT(JobExperience.job_title, JobExperience.job_place, JobExperience.job_city, JobExperience.description, JobExperience.start_date, JobExperience.end_date)) AS job_experiences, GROUP_CONCAT(DISTINCT CONCAT(Education.school, Education.degree, Education.field, Education.graduation)) AS educations, GROUP_CONCAT(DISTINCT Attachments.attachment_id) AS attachments, GROUP_CONCAT(DISTINCT CONCAT(UserTests.test_id, Tests.test_type)) AS tests FROM Users LEFT JOIN UserSkills ON Users.user_id = UserSkills.user_id LEFT JOIN Skills ON UserSkills.skill_id = Skills.skill_id LEFT JOIN JobExperience ON Users.user_id = JobExperience.user_id LEFT JOIN Education ON Users.user_id = Education.user_id LEFT JOIN Attachments ON Users.user_id = Attachments.user_id LEFT JOIN UserTests ON Users.user_id = UserTests.user_id LEFT JOIN Tests ON UserTests.test_id = Tests.test_id WHERE Users.user_id = ? GROUP BY Users.user_id;',
       [id]
     );
     if (result.length === 0) {

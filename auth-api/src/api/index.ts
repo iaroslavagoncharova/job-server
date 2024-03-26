@@ -5,6 +5,7 @@ import authRoute from './routes/authRoute';
 
 import profileRoute from './routes/profileRoute';
 import chatsRoute from './routes/chatsRoute';
+import jobRoute from './routes/jobRoute';
 
 const router = express.Router();
 
@@ -16,5 +17,6 @@ router.use('/auth', authRoute);
 router.use('/users', userRoute);
 router.use('/profile', profileRoute);
 router.use('/chats', chatsRoute);
+router.use('/jobs', jobRoute);
 
 export default router;
