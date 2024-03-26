@@ -1,4 +1,4 @@
-import {Pool, ResultSetHeader} from 'mysql2/promise';
+import {ResultSetHeader} from 'mysql2/promise';
 import CustomError from '../../classes/CustomError';
 import {Education, EducationInfo, Experience, ExperienceInfo} from '@sharedTypes/DBTypes';
 import {promisePool} from '../../lib/db';

@@ -132,7 +132,7 @@ const getExperienceById = async (
 };
 
 const postExperience = async (
-  req: Request<{}, {}, ExperienceInfo>,
+  req: Request,
   res: Response<MessageResponse>,
   next: NextFunction
 ) => {

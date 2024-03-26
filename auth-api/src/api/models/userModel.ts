@@ -82,18 +82,32 @@ const deleteUser = async (id: number): Promise<MessageResponse> => {
     await connection.execute('DELETE FROM Attachments WHERE user_id = ?', [id]);
     await connection.execute('DELETE FROM JobAds WHERE user_id = ?', [id]);
     await connection.execute('DELETE FROM UserSkills WHERE user_id = ?', [id]);
+    // delete application links that have application id that has user id
+    await connection.execute(
+      'DELETE FROM ApplicationLinks WHERE application_id IN (SELECT application_id FROM Applications WHERE user_id = ?)',
+      [id]
+    );
     await connection.execute('DELETE FROM Applications WHERE user_id = ?', [
       id,
     ]);
     await connection.execute('DELETE FROM Tests WHERE user_id = ?', [id]);
     await connection.execute('DELETE FROM UserTests WHERE user_id = ?', [id]);
+    // delete messages that have user id and are from the chats that have user id
+    await connection.execute(
+      'DELETE FROM Messages WHERE chat_id IN (SELECT chat_id FROM Chats WHERE user1_id = ? OR user2_id = ?)',
+      [id, id]
+    );
     await connection.execute(
       'DELETE FROM Chats WHERE user1_id = ? OR user2_id = ?',
       [id, id]
     );
-    await connection.execute('DELETE FROM Messages WHERE user_id = ?', [id]);
     await connection.execute(
       'DELETE FROM Swipes WHERE swiped_id = ? OR swiper_id = ?',
+      [id, id]
+    );
+    //delete from notifications that are from the matches that have user id
+    await connection.execute(
+      'DELETE FROM Notifications WHERE match_id IN (SELECT match_id FROM Matches WHERE user1_id = ? OR user2_id = ?)',
       [id, id]
     );
     await connection.execute(
