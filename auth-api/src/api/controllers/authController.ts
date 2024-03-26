@@ -54,6 +54,7 @@ const login = async (
       link: user.link,
       field: user.field,
       created_at: user.created_at,
+      address: user.address,
     };
 
     const tokenContent = {

@@ -17,9 +17,21 @@ export type User = {
     link: string;
     field: string;
     created_at: string;
+    address: string;
+};
+
+export type UpdateUser = {
+    email?: string | undefined;
+    fullname?: string | undefined;
+    phone?: string | undefined;
+    password?: string | undefined;
+    address?: string | undefined;
+    about_me?: string | undefined;
 };
 
 export type UnauthorizedUser = Omit<User, 'password'>;
+
+export type CandidateProfile = Omit<User, 'user_id'| 'password' | 'status' | 'user_level_id' | 'user_type' | 'created_at' | 'address'>;
 
 export type TokenUser = {
     user_id: number;
@@ -88,3 +100,27 @@ export type Education = {
 };
 
 export type EducationInfo = Partial<Omit<Education, 'education_id' | 'user_id'>>;
+
+export type Skill = {
+    skill_id: number;
+    skill_name: string;
+    type: string;
+};
+
+export type UserSkill = {
+    userskill_id: number;
+    user_id: number;
+    skill_id: number;
+};
+
+export type Attachment = {
+    attachment_id: number;
+    user_id: number;
+    attachment_name: string;
+    link: string;
+};
+
+export type UpdateAttachment = {
+    attachment_name?: string | undefined;
+    link?: string | undefined;
+};

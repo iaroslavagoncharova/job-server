@@ -1,17 +1,28 @@
 import {Request, Response, NextFunction} from 'express';
-import {Pool} from 'mysql2/promise';
 import CustomError from '../../classes/CustomError';
 import {
   addEducation,
   addExperience,
+  deleteAttachment,
   deleteEducation,
   deleteExperience,
+  getAttachments,
   getEducationByUser,
   getExperience,
+  getUserSkills,
+  postAttachment,
+  postUserSkill,
+  putAttachment,
   putEducation,
   putExperience,
+  putUserSkill,
 } from '../models/profileModel';
-import {EducationInfo, Experience, ExperienceInfo} from '@sharedTypes/DBTypes';
+import {
+  Attachment,
+  EducationInfo,
+  Experience,
+  Skill,
+} from '@sharedTypes/DBTypes';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 import {validationResult} from 'express-validator';
 
@@ -201,7 +212,7 @@ const updateExperience = async (
   } catch (error) {
     next(new CustomError('Adding experience failed', 500));
   }
-}
+};
 
 const removeExperience = async (
   req: Request<{experience_id: string}>,
@@ -223,6 +234,140 @@ const removeExperience = async (
   }
 };
 
+const getSkillsByUser = async (
+  req: Request<{user_id: string}>,
+  res: Response<Skill[]>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const id = res.locals.user.user_id;
+    console.log(id, 'id');
+    const result = await getUserSkills(id);
+    if (result.length === 0) {
+      next(new CustomError('No skills found', 404));
+      return;
+    }
+    res.json(result);
+  } catch (error) {
+    next(new CustomError('Failed to get skills', 500));
+  }
+};
+
+const addUserSkill = async (
+  req: Request<{skill_id: string}>,
+  res: Response<MessageResponse>,
+  next: NextFunction
+): Promise<MessageResponse | void> => {
+  try {
+    const id = res.locals.user.user_id;
+    const skill_id = req.params.skill_id;
+    console.log(skill_id, 'skill_id');
+    console.log(id, 'id');
+    const result = await postUserSkill(id, +skill_id);
+    if (!result) {
+      next(new CustomError('Failed to add skill', 500));
+      return;
+    }
+    res.json(result);
+  } catch (error) {
+    next(new CustomError('Failed to add skill', 500));
+  }
+};
+
+const updateUserSkill = async (
+  req: Request<{skill_id: string}>,
+  res: Response<MessageResponse>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const id = res.locals.user.user_id;
+    const skill_id = req.params.skill_id;
+    const new_skill_id = req.body.skill_id;
+    const result = await putUserSkill(id, +skill_id, new_skill_id);
+    if (!result) {
+      next(new CustomError('Failed to update skill', 500));
+      return;
+    }
+    res.json(result);
+  } catch (error) {
+    next(new CustomError('Failed to update skill', 500));
+  }
+};
+
+const getUserAttachments = async (
+  req: Request<{user_id: string}>,
+  res: Response<Attachment[]>,
+  next: NextFunction
+): Promise<Attachment[] | void> => {
+  try {
+    const id = res.locals.user.user_id;
+    const result = await getAttachments(id);
+    if (result.length === 0) {
+      next(new CustomError('No attachments found', 404));
+      return;
+    }
+    res.json(result);
+  } catch (error) {
+    next(new CustomError('Failed to get attachments', 500));
+  }
+}
+
+const addAttachment = async (
+  req: Request<{}, {}, Attachment>,
+  res: Response,
+  next: NextFunction
+): Promise<MessageResponse | void> => {
+  try {
+    const result = await postAttachment(res.locals.user.user_id, req.body);
+    if (!result) {
+      next(new CustomError('Failed to add attachment', 500));
+      return;
+    }
+    res.json({message: 'Attachment added'});
+  } catch (error) {
+    next(new CustomError('Failed to add attachment', 500));
+  }
+};
+
+const updateAttachment = async (
+  req: Request<{attachment_id: string}>,
+  res: Response<MessageResponse>,
+  next: NextFunction
+): Promise<MessageResponse | void> => {
+  try {
+    const attachment_id = req.params.attachment_id;
+    const user_id = res.locals.user.user_id;
+    const attachment = req.body;
+    const result = await putAttachment(user_id, +attachment_id, attachment);
+    if (!result) {
+      next(new CustomError('Failed to update attachment', 500));
+      return;
+    }
+    res.json(result);
+  } catch (error) {
+    next(new CustomError('Failed to update attachment', 500));
+  }
+};
+
+const removeAttachment = async (
+  req: Request<{attachment_id: string}>,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const attachment_id = req.params.attachment_id;
+    const user_id = res.locals.user.user_id;
+    const result = await deleteAttachment(user_id, +attachment_id);
+    if (!result) {
+      next(new CustomError('Failed to delete attachment', 500));
+      return;
+    }
+    res.json(result);
+  } catch (error) {
+    next(new CustomError('Failed to delete attachment', 500));
+  }
+};
+
 export {
   postEducation,
   getEducation,
@@ -232,4 +377,11 @@ export {
   updateExperience,
   removeExperience,
   postExperience,
+  getSkillsByUser,
+  addUserSkill,
+  updateUserSkill,
+  getUserAttachments,
+  addAttachment,
+  updateAttachment,
+  removeAttachment,
 };

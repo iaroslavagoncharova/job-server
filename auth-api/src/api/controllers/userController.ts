@@ -1,6 +1,19 @@
 import {NextFunction, Response, Request} from 'express';
-import {TokenUser, UnauthorizedUser, User} from '../../../../hybrid-types/DBTypes';
-import {getUsers, getUser, postUser, deleteUser} from '../models/userModel';
+import {
+  CandidateProfile,
+  TokenUser,
+  UnauthorizedUser,
+  UpdateUser,
+  User,
+} from '../../../../hybrid-types/DBTypes';
+import {
+  getUsers,
+  getUser,
+  postUser,
+  deleteUser,
+  putUser,
+  getUserAsCandidate,
+} from '../models/userModel';
 import CustomError from '../../classes/CustomError';
 import {validationResult} from 'express-validator';
 import {UserResponse} from '@sharedTypes/MessageTypes';
@@ -52,6 +65,23 @@ const getUserById = async (
   }
 };
 
+const getCandidateUser = async (
+  req: Request<{id: number}>,
+  res: Response<CandidateProfile>,
+  next: NextFunction
+) => {
+  try {
+    const user = await getUserAsCandidate(req.params.id);
+    if (user === null) {
+      next(new CustomError('User not found', 404));
+      return;
+    }
+    res.json(user);
+  } catch (e) {
+    next(new CustomError((e as Error).message, 500));
+  }
+};
+
 const getUserByToken = async (
   req: Request,
   res: Response<UserResponse, {user: TokenUser}>,
@@ -71,7 +101,11 @@ const getUserByToken = async (
 };
 
 const addUser = async (
-  req: Request<{}, {}, Pick<User, 'password' | 'email' | 'fullname' | 'phone' | 'user_type'>>,
+  req: Request<
+    {},
+    {},
+    Pick<User, 'password' | 'email' | 'fullname' | 'phone' | 'user_type'>
+  >,
   res: Response<UserResponse>,
   next: NextFunction
 ) => {
@@ -106,11 +140,29 @@ const addUser = async (
   }
 };
 
-const removeUser = async (
-  req: Request,
-  res: Response,
+const updateUser = async (
+  req: Request<UpdateUser>,
+  res: Response<UserResponse>,
   next: NextFunction
 ) => {
+  try {
+    const tokenUser = res.locals.user;
+    const result = await putUser(tokenUser.user_id, req.body);
+    if (!result) {
+      next(new CustomError('User not updated', 500));
+      return;
+    }
+    const response = {
+      message: 'User updated',
+      user: result,
+    };
+    res.json(response);
+  } catch (e) {
+    next(new CustomError((e as Error).message, 500));
+  }
+};
+
+const removeUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const tokenUser = res.locals.user;
     const user = await getUser(tokenUser.user_id);
@@ -123,6 +175,14 @@ const removeUser = async (
   } catch (e) {
     next(new CustomError((e as Error).message, 500));
   }
-}
+};
 
-export {getAllUsers, getUserById, addUser, getUserByToken, removeUser};
+export {
+  getAllUsers,
+  getUserById,
+  getCandidateUser,
+  addUser,
+  getUserByToken,
+  removeUser,
+  updateUser,
+};
