@@ -1,6 +1,11 @@
 import {ResultSetHeader, RowDataPacket} from 'mysql2';
 import {promisePool} from '../../lib/db';
-import {UnauthorizedUser, UpdateUser, User} from '../../../../hybrid-types/DBTypes';
+import {
+  CandidateProfile,
+  UnauthorizedUser,
+  UpdateUser,
+  User,
+} from '../../../../hybrid-types/DBTypes';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 
 const getUsers = async (): Promise<UnauthorizedUser[] | null> => {
@@ -22,6 +27,25 @@ const getUser = async (id: number): Promise<UnauthorizedUser | null> => {
     const [result] = await promisePool.execute<
       RowDataPacket[] & UnauthorizedUser[]
     >('SELECT * FROM Users WHERE user_id = ?', [id]);
+    if (result.length === 0) {
+      return null;
+    }
+    return result[0];
+  } catch (e) {
+    throw new Error((e as Error).message);
+  }
+};
+
+const getUserAsCandidate = async (
+  id: number
+): Promise<CandidateProfile | null> => {
+  try {
+    const [result] = await promisePool.execute<
+      RowDataPacket[] & CandidateProfile[]
+    >(
+      'SELECT Users.username, Users.email, Users.fullname, Users.phone, Users.about_me, Users.field, Users.link FROM Users WHERE user_id = ?',
+      [id]
+    );
     if (result.length === 0) {
       return null;
     }
@@ -96,10 +120,10 @@ const putUser = async (
       updateInfo.about_me = user.about_me;
     }
     console.log(updateInfo);
-    const sql = promisePool.format(
-      'UPDATE Users SET ? WHERE user_id = ?',
-      [updateInfo, id]
-    );
+    const sql = promisePool.format('UPDATE Users SET ? WHERE user_id = ?', [
+      updateInfo,
+      id,
+    ]);
     console.log(sql);
     const result = await promisePool.execute<ResultSetHeader>(sql);
     if (result[0].affectedRows === 0) {
@@ -170,5 +194,12 @@ const deleteUser = async (id: number): Promise<MessageResponse> => {
   }
 };
 
-export {getUsers, getUser, postUser, getUserByEmail, deleteUser, putUser};
-
+export {
+  getUsers,
+  getUser,
+  getUserAsCandidate,
+  postUser,
+  getUserByEmail,
+  deleteUser,
+  putUser,
+};

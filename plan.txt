@@ -1,8 +1,4 @@
 Auth server
-profile (candidate):
-- postAttachment (authenticate, user_id from token, link, name) (add attachment links)
-- putAttachment (authenticate, user_id from token, attachment_id, link, name) (update attachment links)
-- deleteAttachment (authenticate, user_id from token, attachment_id) (delete attachment links)
 applications (candidate):
 - getApplicationsByUser (authenticate, user_id from token) (getting all applications of a user)
 - getSentApplications (authenticate, user_id from token, status 'sent') (getting all sent applications for sent-page)
@@ -13,10 +9,6 @@ applications (candidate):
 - postApplicationStatus (authenticate, user_id ftom token, application_id) (sending application by changing its status to sent)
 - deleteApplication (authenticate, user_id from token, application_id) (deleting application before it's sent)
 candidates (employer):
-- getProfiles (getting user profiles for the swipe page) (fetch user info, e.g. about me, field, username)
-- getEducation (user_id) (getting user education if exists (open on the new page of the card))
-- getExperience (user_id) (getting user experience if exists (open on the new page of the card))
-- getAttachments (user_id) (getting user attachments if exist (open on the new page of the card))
 - getApplicationsByJob (job_id, status 'sent') (getting all sent applications by job id for sent-page)
 job ads (employer):
 - getJobAdsByUser (authenticate, user_id from token) (getting all job ads by a company)
@@ -64,10 +56,18 @@ profile (candidate):
 - deleteExperience (authenticate, user_id from token, experience_id) (for deleting job experience)
 - postSkills (authenticate, skill_id, user_id from token, skills) (adding user's skills)
 - putSkills (authenticate, skill_id, user_id from token, skills) (remove a skill from UserSkills by userskill_id, create a new row) (updating user's skills)
+- postAttachment (authenticate, user_id from token, link, name) (add attachment links)
+- putAttachment (authenticate, user_id from token, attachment_id, link, name) (update attachment links)
+- deleteAttachment (authenticate, user_id from token, attachment_id) (delete attachment links)
 chats:
 - getChatsByUser (authenticate, user_id from token) (getting chats for a user)
 - getMessagesByChatAndUser (authenticate, chat_id) (get all info about messages in a chat, if a user is an owner, display right, if not, display left)
 - postMessage (authenticate, user_id from token, chat_id, message_text) (sending a message)
 - postChat (authenticate) (start a chat - automatically after a match or manually after an employer approves an application) (post chat, get chat_id, add to UserChats user_ids and chat_id)
 - deleteChat (authenticate, chat_id) (deleting a chat) 
+candidates (employer): 
+- getProfiles (getting user profiles for the swipe page) (fetch user info, e.g. about me, field, username)
+- getEducation (user_id) (getting user education if exists (open on the new page of the card))
+- getExperience (user_id) (getting user experience if exists (open on the new page of the card))
+- getAttachments (user_id) (getting user attachments if exist (open on the new page of the card))
 
