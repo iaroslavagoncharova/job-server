@@ -1,15 +1,24 @@
-import {ResultSetHeader} from 'mysql2/promise';
+import {ResultSetHeader, RowDataPacket} from 'mysql2/promise';
 import CustomError from '../../classes/CustomError';
-import {Education, EducationInfo, Experience, ExperienceInfo} from '@sharedTypes/DBTypes';
+import {
+  Education,
+  EducationInfo,
+  Experience,
+  ExperienceInfo,
+  Message,
+  Skill,
+} from '@sharedTypes/DBTypes';
 import {promisePool} from '../../lib/db';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
+import {NextFunction, Request, Response} from 'express';
 
 // get education by user id
 const getEducationByUser = async (id: number): Promise<EducationInfo[]> => {
   try {
-    const [result] = await promisePool.execute<
-      ResultSetHeader & Education[]
-    >('SELECT * FROM Education WHERE user_id = ?', [id]);
+    const [result] = await promisePool.execute<ResultSetHeader & Education[]>(
+      'SELECT * FROM Education WHERE user_id = ?',
+      [id]
+    );
     return result;
   } catch (error) {
     throw new CustomError('Failed to get education', 500);
@@ -101,9 +110,10 @@ const deleteEducation = async (
 
 const getExperience = async (id: number): Promise<Experience[]> => {
   try {
-    const [result] = await promisePool.execute<
-      ResultSetHeader & Experience[]
-    >('SELECT * FROM JobExperience WHERE user_id = ?', [id]);
+    const [result] = await promisePool.execute<ResultSetHeader & Experience[]>(
+      'SELECT * FROM JobExperience WHERE user_id = ?',
+      [id]
+    );
     console.log(result);
     return result;
   } catch (error) {
@@ -156,7 +166,10 @@ const putExperience = async (
     if (experience.job_city !== null && experience.job_city !== undefined) {
       experienceUpdate.job_city = experience.job_city;
     }
-    if (experience.description !== null && experience.description !== undefined) {
+    if (
+      experience.description !== null &&
+      experience.description !== undefined
+    ) {
       experienceUpdate.description = experience.description;
     }
     if (experience.start_date !== null && experience.start_date !== undefined) {
@@ -182,21 +195,53 @@ const putExperience = async (
   }
 };
 
-  // Delete experience
-  const deleteExperience = async (user_id: number, experience_id: number): Promise<MessageResponse> => {
-    try {
-      const result = await promisePool.execute(
-        'DELETE FROM JobExperience WHERE experience_id = ? AND user_id = ?',
-        [experience_id, user_id]
-      );
-      if (!result) {
-        throw new CustomError('Failed to delete experience', 500);
-      }
-      return {message: 'Experience deleted'};
-    } catch (error) {
+// Delete experience
+const deleteExperience = async (
+  user_id: number,
+  experience_id: number
+): Promise<MessageResponse> => {
+  try {
+    const result = await promisePool.execute(
+      'DELETE FROM JobExperience WHERE experience_id = ? AND user_id = ?',
+      [experience_id, user_id]
+    );
+    if (!result) {
       throw new CustomError('Failed to delete experience', 500);
     }
-  };
+    return {message: 'Experience deleted'};
+  } catch (error) {
+    throw new CustomError('Failed to delete experience', 500);
+  }
+};
+
+const getUserSkills = async (id: number) => {
+  try {
+    const [result] = await promisePool.execute<RowDataPacket[] & Skill[]>(
+      `SELECT * FROM Skills WHERE skill_id IN (SELECT skill_id FROM UserSkills WHERE user_id = ?)`,
+      [id]
+    );
+    console.log(result);
+    return result;
+  } catch (error) {
+    throw new CustomError('Failed to get user skills', 500);
+  }
+};
+
+const postUserSkill = async (id: number, skill_id: number) => {
+  try {
+    const result = await promisePool.execute<ResultSetHeader>(
+      'INSERT INTO UserSkills (user_id, skill_id) VALUES (?, ?)',
+      [id, skill_id]
+    );
+
+    if (result[0].affectedRows === 0) {
+      return null;
+    }
+    return {message: 'Skill added'};
+  } catch (error) {
+    throw new CustomError('Failed to add user skill', 500);
+  }
+};
 
 export {
   addEducation,
@@ -207,4 +252,6 @@ export {
   addExperience,
   putExperience,
   deleteExperience,
+  getUserSkills,
+  postUserSkill,
 };

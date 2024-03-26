@@ -26,6 +26,7 @@ export type UpdateUser = {
     phone?: string | undefined;
     password?: string | undefined;
     address?: string | undefined;
+    about_me?: string | undefined;
 };
 
 export type UnauthorizedUser = Omit<User, 'password'>;
@@ -97,3 +98,15 @@ export type Education = {
 };
 
 export type EducationInfo = Partial<Omit<Education, 'education_id' | 'user_id'>>;
+
+export type Skill = {
+    skill_id: number;
+    skill_name: string;
+    type: string;
+};
+
+export type UserSkill = {
+    userskill_id: number;
+    user_id: number;
+    skill_id: number;
+};

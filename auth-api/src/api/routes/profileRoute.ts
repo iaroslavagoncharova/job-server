@@ -1,7 +1,9 @@
 import express from 'express';
 import {
+  addUserSkill,
   getEducation,
   getExperienceById,
+  getSkillsByUser,
   postEducation,
   postExperience,
   removeEducation,
@@ -11,7 +13,6 @@ import {
 } from '../controllers/profileController';
 import {authenticate} from '../../middlewares';
 import {body} from 'express-validator';
-import {profile} from 'console';
 
 const profileRoute = express.Router();
 
@@ -56,5 +57,9 @@ body('start_date').isString().optional().escape().trim(),
 body('end_date').isString().optional().escape().trim(),
 authenticate, updateExperience);
 profileRoute.delete('/experience/:experience_id', authenticate, removeExperience);
+
+// routes for skills
+profileRoute.get('/skills', authenticate, getSkillsByUser);
+profileRoute.post('/skills/:skill_id', authenticate, addUserSkill);
 
 export default profileRoute;

@@ -8,10 +8,17 @@ import {
   deleteExperience,
   getEducationByUser,
   getExperience,
+  getUserSkills,
+  postUserSkill,
   putEducation,
   putExperience,
 } from '../models/profileModel';
-import {EducationInfo, Experience, ExperienceInfo} from '@sharedTypes/DBTypes';
+import {
+  EducationInfo,
+  Experience,
+  ExperienceInfo,
+  Skill,
+} from '@sharedTypes/DBTypes';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 import {validationResult} from 'express-validator';
 
@@ -201,7 +208,7 @@ const updateExperience = async (
   } catch (error) {
     next(new CustomError('Adding experience failed', 500));
   }
-}
+};
 
 const removeExperience = async (
   req: Request<{experience_id: string}>,
@@ -223,6 +230,45 @@ const removeExperience = async (
   }
 };
 
+const getSkillsByUser = async (
+  req: Request<{user_id: string}>,
+  res: Response<Skill[]>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const id = res.locals.user.user_id;
+    console.log(id, 'id');
+    const result = await getUserSkills(id);
+    if (result.length === 0) {
+      next(new CustomError('No skills found', 404));
+      return;
+    }
+    res.json(result);
+  } catch (error) {
+    next(new CustomError('Failed to get skills', 500));
+  }
+};
+
+const addUserSkill = async (
+  req: Request<{skill_id: string}>,
+  res: Response<MessageResponse>,
+  next: NextFunction
+): Promise<MessageResponse | void> => {
+  try {
+    const id = res.locals.user.user_id;
+    const skill_id = req.params.skill_id;
+    console.log(skill_id, 'skill_id');
+    console.log(id, 'id');
+    const result = await postUserSkill(id, +skill_id);
+    if (!result) {
+      next(new CustomError('Failed to add skill', 500));
+      return;
+    }
+    res.json(result);
+  } catch (error) {
+    next(new CustomError('Failed to add skill', 500));
+  }
+};
 export {
   postEducation,
   getEducation,
@@ -232,4 +278,6 @@ export {
   updateExperience,
   removeExperience,
   postExperience,
+  getSkillsByUser,
+  addUserSkill,
 };

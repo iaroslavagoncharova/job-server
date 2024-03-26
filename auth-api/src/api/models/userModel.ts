@@ -92,6 +92,9 @@ const putUser = async (
     if (user.address !== undefined) {
       updateInfo.address = user.address;
     }
+    if (user.about_me !== undefined) {
+      updateInfo.about_me = user.about_me;
+    }
     console.log(updateInfo);
     const sql = promisePool.format(
       'UPDATE Users SET ? WHERE user_id = ?',

@@ -1,7 +1,5 @@
 Auth server
 profile (candidate):
-- postAboutMe (authenticate, user_id from token, text) (adding about me text)
-- putAboutMe (authenticate, user_id from token, text) (updating about me text)
 - postSkills (authenticate, skill_id, user_id from token, skills) (adding user's skills)
 - putSkills (authenticate, skill_id, user_id from token, skills) (remove a skill from UserSkills by userskill_id, create a new row) (updating user's skills)
 - postAttachment (authenticate, user_id from token, link, name) (add attachment links)
