@@ -1,23 +1,24 @@
 import {Request, Response, NextFunction} from 'express';
-import {Pool} from 'mysql2/promise';
 import CustomError from '../../classes/CustomError';
 import {
   addEducation,
   addExperience,
   deleteEducation,
   deleteExperience,
+  getAttachments,
   getEducationByUser,
   getExperience,
   getUserSkills,
+  postAttachment,
   postUserSkill,
   putEducation,
   putExperience,
   putUserSkill,
 } from '../models/profileModel';
 import {
+  Attachment,
   EducationInfo,
   Experience,
-  ExperienceInfo,
   Skill,
 } from '@sharedTypes/DBTypes';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
@@ -289,6 +290,41 @@ const updateUserSkill = async (
   } catch (error) {
     next(new CustomError('Failed to update skill', 500));
   }
+};
+
+const getUserAttachments = async (
+  req: Request<{user_id: string}>,
+  res: Response<Attachment[]>,
+  next: NextFunction
+): Promise<Attachment[] | void> => {
+  try {
+    const id = res.locals.user.user_id;
+    const result = await getAttachments(id);
+    if (result.length === 0) {
+      next(new CustomError('No attachments found', 404));
+      return;
+    }
+    res.json(result);
+  } catch (error) {
+    next(new CustomError('Failed to get attachments', 500));
+  }
+}
+
+const addAttachment = async (
+  req: Request<{}, {}, Attachment>,
+  res: Response,
+  next: NextFunction
+): Promise<MessageResponse | void> => {
+  try {
+    const result = await postAttachment(res.locals.user.user_id, req.body);
+    if (!result) {
+      next(new CustomError('Failed to add attachment', 500));
+      return;
+    }
+    res.json({message: 'Attachment added'});
+  } catch (error) {
+    next(new CustomError('Failed to add attachment', 500));
+  }
 }
 export {
   postEducation,
@@ -302,4 +338,6 @@ export {
   getSkillsByUser,
   addUserSkill,
   updateUserSkill,
+  getUserAttachments,
+  addAttachment,
 };

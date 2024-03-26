@@ -1,6 +1,7 @@
 import {ResultSetHeader, RowDataPacket} from 'mysql2/promise';
 import CustomError from '../../classes/CustomError';
 import {
+  Attachment,
   Education,
   EducationInfo,
   Experience,
@@ -261,6 +262,37 @@ const putUserSkill = async (
   } catch (error) {
     throw new CustomError('Failed to update user skill', 500);
   }
+};
+
+const getAttachments = async (id: number): Promise<Attachment[]> => {
+  try {
+    const [result] = await promisePool.execute<RowDataPacket[] & Attachment[]>(
+      'SELECT * FROM Attachments WHERE user_id = ?',
+      [id]
+    );
+    return result;
+  } catch (error) {
+    throw new CustomError('Failed to get attachments', 500);
+  }
+};
+
+const postAttachment = async (
+  user_id: number,
+  attachment: Attachment
+): Promise<MessageResponse> => {
+  try {
+    const result = await promisePool.execute<ResultSetHeader>(
+      'INSERT INTO Attachments (user_id, attachment_name, link) VALUES (?, ?, ?)',
+      [user_id, attachment.attachment_name, attachment.link]
+    );
+
+    if (result[0].affectedRows === 0) {
+      return {message: 'Attachment not added'};
+    }
+    return {message: 'Attachment added'};
+  } catch (error) {
+    throw new CustomError('Failed to add attachment', 500);
+  }
 }
 
 export {
@@ -275,4 +307,6 @@ export {
   getUserSkills,
   postUserSkill,
   putUserSkill,
+  getAttachments,
+  postAttachment,
 };

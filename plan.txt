@@ -1,12 +1,8 @@
 Auth server
 profile (candidate):
-- putSkills (authenticate, skill_id, user_id from token, skills) (remove a skill from UserSkills by userskill_id, create a new row) (updating user's skills)
 - postAttachment (authenticate, user_id from token, link, name) (add attachment links)
 - putAttachment (authenticate, user_id from token, attachment_id, link, name) (update attachment links)
 - deleteAttachment (authenticate, user_id from token, attachment_id) (delete attachment links)
-profile (employer):
-- postAboutMe (authenticate, user_id from token, text) (adding about me text)
-- putAboutMe (authenticate, user_id from token, text) (updating about me text)
 applications (candidate):
 - getApplicationsByUser (authenticate, user_id from token) (getting all applications of a user)
 - getSentApplications (authenticate, user_id from token, status 'sent') (getting all sent applications for sent-page)
@@ -67,6 +63,7 @@ profile (candidate):
 - putExperience (authenticate, user_id from token, experience_id, experience info) (for updating job experience)
 - deleteExperience (authenticate, user_id from token, experience_id) (for deleting job experience)
 - postSkills (authenticate, skill_id, user_id from token, skills) (adding user's skills)
+- putSkills (authenticate, skill_id, user_id from token, skills) (remove a skill from UserSkills by userskill_id, create a new row) (updating user's skills)
 chats:
 - getChatsByUser (authenticate, user_id from token) (getting chats for a user)
 - getMessagesByChatAndUser (authenticate, chat_id) (get all info about messages in a chat, if a user is an owner, display right, if not, display left)

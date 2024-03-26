@@ -1,9 +1,11 @@
 import express from 'express';
 import {
+  addAttachment,
   addUserSkill,
   getEducation,
   getExperienceById,
   getSkillsByUser,
+  getUserAttachments,
   postEducation,
   postExperience,
   removeEducation,
@@ -63,5 +65,9 @@ profileRoute.delete('/experience/:experience_id', authenticate, removeExperience
 profileRoute.get('/skills', authenticate, getSkillsByUser);
 profileRoute.post('/skills/:skill_id', authenticate, addUserSkill);
 profileRoute.put('/skills/:skill_id', authenticate, updateUserSkill);
+
+//routes for attachments
+profileRoute.get('/attachments', authenticate, getUserAttachments);
+profileRoute.post('/attachments', authenticate, addAttachment);
 
 export default profileRoute;

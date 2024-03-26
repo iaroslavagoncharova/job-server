@@ -110,3 +110,15 @@ export type UserSkill = {
     user_id: number;
     skill_id: number;
 };
+
+export type Attachment = {
+    attachment_id: number;
+    user_id: number;
+    attachment_name: string;
+    link: string;
+};
+
+export type UpdateAttachment = {
+    attachment_name?: string | undefined;
+    link?: string | undefined;
+};
