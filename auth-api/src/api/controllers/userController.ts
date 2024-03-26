@@ -1,6 +1,6 @@
 import {NextFunction, Response, Request} from 'express';
 import {TokenUser, UnauthorizedUser, User} from '../../../../hybrid-types/DBTypes';
-import {getUsers, getUser, postUser} from '../models/userModel';
+import {getUsers, getUser, postUser, deleteUser} from '../models/userModel';
 import CustomError from '../../classes/CustomError';
 import {validationResult} from 'express-validator';
 import {UserResponse} from '@sharedTypes/MessageTypes';
@@ -104,6 +104,25 @@ const addUser = async (
   } catch (e) {
     next(new CustomError((e as Error).message, 500));
   }
+};
+
+const removeUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const tokenUser = res.locals.user;
+    const user = await getUser(tokenUser.user_id);
+    if (user === null) {
+      next(new CustomError('User not found', 404));
+      return;
+    }
+    const response = await deleteUser(tokenUser.user_id);
+    res.json(response);
+  } catch (e) {
+    next(new CustomError((e as Error).message, 500));
+  }
 }
 
-export {getAllUsers, getUserById, addUser, getUserByToken};
+export {getAllUsers, getUserById, addUser, getUserByToken, removeUser};
