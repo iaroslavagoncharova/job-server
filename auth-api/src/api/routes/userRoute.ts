@@ -1,5 +1,5 @@
 import express from 'express';
-import {addUser, getAllUsers, getUserById, getUserByToken, removeUser} from '../controllers/userController';
+import {addUser, getAllUsers, getUserById, getUserByToken, removeUser, updateUser} from '../controllers/userController';
 import {body} from 'express-validator';
 import {authenticate} from '../../middlewares';
 
@@ -26,6 +26,8 @@ userRoute.post(
 )
 
 userRoute.get('/:id', getUserById);
+
+userRoute.put('/', authenticate, updateUser);
 
 userRoute.delete('/', authenticate, removeUser);
 

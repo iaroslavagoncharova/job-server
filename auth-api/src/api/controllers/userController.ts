@@ -1,6 +1,6 @@
 import {NextFunction, Response, Request} from 'express';
-import {TokenUser, UnauthorizedUser, User} from '../../../../hybrid-types/DBTypes';
-import {getUsers, getUser, postUser, deleteUser} from '../models/userModel';
+import {TokenUser, UnauthorizedUser, UpdateUser, User} from '../../../../hybrid-types/DBTypes';
+import {getUsers, getUser, postUser, deleteUser, putUser} from '../models/userModel';
 import CustomError from '../../classes/CustomError';
 import {validationResult} from 'express-validator';
 import {UserResponse} from '@sharedTypes/MessageTypes';
@@ -106,6 +106,28 @@ const addUser = async (
   }
 };
 
+const updateUser = async (
+  req: Request<UpdateUser>,
+  res: Response<UserResponse>,
+  next: NextFunction
+) => {
+  try {
+    const tokenUser = res.locals.user;
+    const result = await putUser(tokenUser.user_id, req.body);
+    if (!result) {
+      next(new CustomError('User not updated', 500));
+      return;
+    }
+    const response = {
+      message: 'User updated',
+      user: result,
+    };
+    res.json(response);
+  } catch (e) {
+    next(new CustomError((e as Error).message, 500));
+  }
+};
+
 const removeUser = async (
   req: Request,
   res: Response,
@@ -125,4 +147,4 @@ const removeUser = async (
   }
 }
 
-export {getAllUsers, getUserById, addUser, getUserByToken, removeUser};
+export {getAllUsers, getUserById, addUser, getUserByToken, removeUser, updateUser};

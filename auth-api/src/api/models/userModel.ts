@@ -1,6 +1,6 @@
 import {ResultSetHeader, RowDataPacket} from 'mysql2';
 import {promisePool} from '../../lib/db';
-import {UnauthorizedUser, User} from '../../../../hybrid-types/DBTypes';
+import {UnauthorizedUser, UpdateUser, User} from '../../../../hybrid-types/DBTypes';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 
 const getUsers = async (): Promise<UnauthorizedUser[] | null> => {
@@ -71,6 +71,44 @@ const postUser = async (
   }
 };
 
+const putUser = async (
+  id: number,
+  user: UpdateUser
+): Promise<UnauthorizedUser | null> => {
+  try {
+    const updateInfo: UpdateUser = {};
+    if (user.email !== undefined) {
+      updateInfo.email = user.email;
+    }
+    if (user.fullname !== undefined) {
+      updateInfo.fullname = user.fullname;
+    }
+    if (user.phone !== undefined) {
+      updateInfo.phone = user.phone;
+    }
+    if (user.password !== undefined) {
+      updateInfo.password = user.password;
+    }
+    if (user.address !== undefined) {
+      updateInfo.address = user.address;
+    }
+    console.log(updateInfo);
+    const sql = promisePool.format(
+      'UPDATE Users SET ? WHERE user_id = ?',
+      [updateInfo, id]
+    );
+    console.log(sql);
+    const result = await promisePool.execute<ResultSetHeader>(sql);
+    if (result[0].affectedRows === 0) {
+      return null;
+    }
+    const updatedUser = await getUser(id);
+    return updatedUser;
+  } catch (e) {
+    throw new Error((e as Error).message);
+  }
+};
+
 const deleteUser = async (id: number): Promise<MessageResponse> => {
   const connection = await promisePool.getConnection();
   try {
@@ -129,7 +167,5 @@ const deleteUser = async (id: number): Promise<MessageResponse> => {
   }
 };
 
-export {getUsers, getUser, postUser, getUserByEmail, deleteUser};
+export {getUsers, getUser, postUser, getUserByEmail, deleteUser, putUser};
 
-// - putUser (authenticate, user_id from token, email | fullname | phone | password | address)
-// - deleteUser (authenticate, user_id from token)

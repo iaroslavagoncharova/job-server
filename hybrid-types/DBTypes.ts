@@ -17,6 +17,15 @@ export type User = {
     link: string;
     field: string;
     created_at: string;
+    address: string;
+};
+
+export type UpdateUser = {
+    email?: string | undefined;
+    fullname?: string | undefined;
+    phone?: string | undefined;
+    password?: string | undefined;
+    address?: string | undefined;
 };
 
 export type UnauthorizedUser = Omit<User, 'password'>;
