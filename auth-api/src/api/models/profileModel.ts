@@ -243,6 +243,26 @@ const postUserSkill = async (id: number, skill_id: number) => {
   }
 };
 
+const putUserSkill = async (
+  id: number,
+  skill_id: number,
+  new_skill_id: number
+): Promise<MessageResponse> => {
+  try {
+    const result = await promisePool.execute<ResultSetHeader>(
+      'UPDATE UserSkills SET skill_id = ? WHERE user_id = ? AND skill_id = ?',
+      [new_skill_id, id, skill_id]
+    );
+
+    if (result[0].affectedRows === 0) {
+      return {message: 'Skill not updated'};
+    }
+    return {message: 'Skill updated'};
+  } catch (error) {
+    throw new CustomError('Failed to update user skill', 500);
+  }
+}
+
 export {
   addEducation,
   getEducationByUser,
@@ -254,4 +274,5 @@ export {
   deleteExperience,
   getUserSkills,
   postUserSkill,
+  putUserSkill,
 };

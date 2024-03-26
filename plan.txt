@@ -1,6 +1,5 @@
 Auth server
 profile (candidate):
-- postSkills (authenticate, skill_id, user_id from token, skills) (adding user's skills)
 - putSkills (authenticate, skill_id, user_id from token, skills) (remove a skill from UserSkills by userskill_id, create a new row) (updating user's skills)
 - postAttachment (authenticate, user_id from token, link, name) (add attachment links)
 - putAttachment (authenticate, user_id from token, attachment_id, link, name) (update attachment links)
@@ -67,6 +66,7 @@ profile (candidate):
 - postExperience (authenticate, user_id from token, experience info) (for adding job experience)
 - putExperience (authenticate, user_id from token, experience_id, experience info) (for updating job experience)
 - deleteExperience (authenticate, user_id from token, experience_id) (for deleting job experience)
+- postSkills (authenticate, skill_id, user_id from token, skills) (adding user's skills)
 chats:
 - getChatsByUser (authenticate, user_id from token) (getting chats for a user)
 - getMessagesByChatAndUser (authenticate, chat_id) (get all info about messages in a chat, if a user is an owner, display right, if not, display left)

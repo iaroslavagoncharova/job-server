@@ -10,6 +10,7 @@ import {
   removeExperience,
   updateEducation,
   updateExperience,
+  updateUserSkill,
 } from '../controllers/profileController';
 import {authenticate} from '../../middlewares';
 import {body} from 'express-validator';
@@ -61,5 +62,6 @@ profileRoute.delete('/experience/:experience_id', authenticate, removeExperience
 // routes for skills
 profileRoute.get('/skills', authenticate, getSkillsByUser);
 profileRoute.post('/skills/:skill_id', authenticate, addUserSkill);
+profileRoute.put('/skills/:skill_id', authenticate, updateUserSkill);
 
 export default profileRoute;

@@ -12,6 +12,7 @@ import {
   postUserSkill,
   putEducation,
   putExperience,
+  putUserSkill,
 } from '../models/profileModel';
 import {
   EducationInfo,
@@ -269,6 +270,26 @@ const addUserSkill = async (
     next(new CustomError('Failed to add skill', 500));
   }
 };
+
+const updateUserSkill = async (
+  req: Request<{skill_id: string}>,
+  res: Response<MessageResponse>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const id = res.locals.user.user_id;
+    const skill_id = req.params.skill_id;
+    const new_skill_id = req.body.skill_id;
+    const result = await putUserSkill(id, +skill_id, new_skill_id);
+    if (!result) {
+      next(new CustomError('Failed to update skill', 500));
+      return;
+    }
+    res.json(result);
+  } catch (error) {
+    next(new CustomError('Failed to update skill', 500));
+  }
+}
 export {
   postEducation,
   getEducation,
@@ -280,4 +301,5 @@ export {
   postExperience,
   getSkillsByUser,
   addUserSkill,
+  updateUserSkill,
 };
