@@ -65,3 +65,26 @@ export type Match = {
     user2_id: number;
     created_at: Date | string;
 };
+
+export type Experience = {
+    experience_id: number;
+    user_id: number;
+    job_title: string;
+    job_place: string;
+    job_city: string;
+    description: string;
+    start_date: Date | string;
+    end_date: Date | string;
+};
+export type ExperienceInfo = Partial<Omit<Experience, 'experience_id' | 'user_id'>>;
+
+export type Education = {
+    education_id: number;
+    user_id: number;
+    school: string;
+    degree: string;
+    field: string;
+    graduation: Date | string;
+};
+
+export type EducationInfo = Partial<Omit<Education, 'education_id' | 'user_id'>>;
