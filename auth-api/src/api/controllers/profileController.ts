@@ -3,6 +3,7 @@ import CustomError from '../../classes/CustomError';
 import {
   addEducation,
   addExperience,
+  deleteAttachment,
   deleteEducation,
   deleteExperience,
   getAttachments,
@@ -11,6 +12,7 @@ import {
   getUserSkills,
   postAttachment,
   postUserSkill,
+  putAttachment,
   putEducation,
   putExperience,
   putUserSkill,
@@ -325,7 +327,47 @@ const addAttachment = async (
   } catch (error) {
     next(new CustomError('Failed to add attachment', 500));
   }
-}
+};
+
+const updateAttachment = async (
+  req: Request<{attachment_id: string}>,
+  res: Response<MessageResponse>,
+  next: NextFunction
+): Promise<MessageResponse | void> => {
+  try {
+    const attachment_id = req.params.attachment_id;
+    const user_id = res.locals.user.user_id;
+    const attachment = req.body;
+    const result = await putAttachment(user_id, +attachment_id, attachment);
+    if (!result) {
+      next(new CustomError('Failed to update attachment', 500));
+      return;
+    }
+    res.json(result);
+  } catch (error) {
+    next(new CustomError('Failed to update attachment', 500));
+  }
+};
+
+const removeAttachment = async (
+  req: Request<{attachment_id: string}>,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const attachment_id = req.params.attachment_id;
+    const user_id = res.locals.user.user_id;
+    const result = await deleteAttachment(user_id, +attachment_id);
+    if (!result) {
+      next(new CustomError('Failed to delete attachment', 500));
+      return;
+    }
+    res.json(result);
+  } catch (error) {
+    next(new CustomError('Failed to delete attachment', 500));
+  }
+};
+
 export {
   postEducation,
   getEducation,
@@ -340,4 +382,6 @@ export {
   updateUserSkill,
   getUserAttachments,
   addAttachment,
+  updateAttachment,
+  removeAttachment,
 };

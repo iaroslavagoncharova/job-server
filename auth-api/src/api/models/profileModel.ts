@@ -8,6 +8,7 @@ import {
   ExperienceInfo,
   Message,
   Skill,
+  UpdateAttachment,
 } from '@sharedTypes/DBTypes';
 import {promisePool} from '../../lib/db';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
@@ -293,7 +294,53 @@ const postAttachment = async (
   } catch (error) {
     throw new CustomError('Failed to add attachment', 500);
   }
-}
+};
+
+const putAttachment = async (
+  user_id: number,
+  attachment_id: number,
+  attachment: UpdateAttachment
+): Promise<MessageResponse> => {
+  try {
+    const updateAttachment: UpdateAttachment = {};
+    if (attachment.attachment_name !== undefined) {
+      updateAttachment.attachment_name = attachment.attachment_name;
+    }
+    if (attachment.link !== undefined) {
+      updateAttachment.link = attachment.link;
+    }
+    const sql = promisePool.format(
+      'UPDATE Attachments SET ? WHERE attachment_id = ? AND user_id = ?',
+      [updateAttachment, attachment_id, user_id]
+    );
+    const result = await promisePool.execute<ResultSetHeader>(sql);
+
+    if (result[0].affectedRows === 0) {
+      return {message: 'Attachment not updated'};
+    }
+    return {message: 'Attachment updated'};
+  } catch (error) {
+    throw new CustomError('Failed to update attachment', 500);
+  }
+};
+
+const deleteAttachment = async (
+  user_id: number,
+  attachment_id: number
+): Promise<MessageResponse> => {
+  try {
+    const result = await promisePool.execute(
+      'DELETE FROM Attachments WHERE attachment_id = ? AND user_id = ?',
+      [attachment_id, user_id]
+    );
+    if (!result) {
+      throw new CustomError('Failed to delete attachment', 500);
+    }
+    return {message: 'Attachment deleted'};
+  } catch (error) {
+    throw new CustomError('Failed to delete attachment', 500);
+  }
+};
 
 export {
   addEducation,
@@ -309,4 +356,6 @@ export {
   putUserSkill,
   getAttachments,
   postAttachment,
+  putAttachment,
+  deleteAttachment,
 };

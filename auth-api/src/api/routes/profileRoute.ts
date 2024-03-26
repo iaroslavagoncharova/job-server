@@ -8,8 +8,10 @@ import {
   getUserAttachments,
   postEducation,
   postExperience,
+  removeAttachment,
   removeEducation,
   removeExperience,
+  updateAttachment,
   updateEducation,
   updateExperience,
   updateUserSkill,
@@ -69,5 +71,7 @@ profileRoute.put('/skills/:skill_id', authenticate, updateUserSkill);
 //routes for attachments
 profileRoute.get('/attachments', authenticate, getUserAttachments);
 profileRoute.post('/attachments', authenticate, addAttachment);
+profileRoute.put('/attachments/:attachment_id', authenticate, updateAttachment);
+profileRoute.delete('/attachments/:attachment_id', authenticate, removeAttachment);
 
 export default profileRoute;
