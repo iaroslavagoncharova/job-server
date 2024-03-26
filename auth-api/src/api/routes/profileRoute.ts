@@ -1,17 +1,23 @@
 import express from 'express';
 import {
+  addAttachment,
+  addUserSkill,
   getEducation,
   getExperienceById,
+  getSkillsByUser,
+  getUserAttachments,
   postEducation,
   postExperience,
+  removeAttachment,
   removeEducation,
   removeExperience,
+  updateAttachment,
   updateEducation,
   updateExperience,
+  updateUserSkill,
 } from '../controllers/profileController';
 import {authenticate} from '../../middlewares';
 import {body} from 'express-validator';
-import {profile} from 'console';
 
 const profileRoute = express.Router();
 
@@ -56,5 +62,16 @@ body('start_date').isString().optional().escape().trim(),
 body('end_date').isString().optional().escape().trim(),
 authenticate, updateExperience);
 profileRoute.delete('/experience/:experience_id', authenticate, removeExperience);
+
+// routes for skills
+profileRoute.get('/skills', authenticate, getSkillsByUser);
+profileRoute.post('/skills/:skill_id', authenticate, addUserSkill);
+profileRoute.put('/skills/:skill_id', authenticate, updateUserSkill);
+
+//routes for attachments
+profileRoute.get('/attachments', authenticate, getUserAttachments);
+profileRoute.post('/attachments', authenticate, addAttachment);
+profileRoute.put('/attachments/:attachment_id', authenticate, updateAttachment);
+profileRoute.delete('/attachments/:attachment_id', authenticate, removeAttachment);
 
 export default profileRoute;

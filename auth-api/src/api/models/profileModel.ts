@@ -1,15 +1,26 @@
-import {ResultSetHeader} from 'mysql2/promise';
+import {ResultSetHeader, RowDataPacket} from 'mysql2/promise';
 import CustomError from '../../classes/CustomError';
-import {Education, EducationInfo, Experience, ExperienceInfo} from '@sharedTypes/DBTypes';
+import {
+  Attachment,
+  Education,
+  EducationInfo,
+  Experience,
+  ExperienceInfo,
+  Message,
+  Skill,
+  UpdateAttachment,
+} from '@sharedTypes/DBTypes';
 import {promisePool} from '../../lib/db';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
+import {NextFunction, Request, Response} from 'express';
 
 // get education by user id
 const getEducationByUser = async (id: number): Promise<EducationInfo[]> => {
   try {
-    const [result] = await promisePool.execute<
-      ResultSetHeader & Education[]
-    >('SELECT * FROM Education WHERE user_id = ?', [id]);
+    const [result] = await promisePool.execute<ResultSetHeader & Education[]>(
+      'SELECT * FROM Education WHERE user_id = ?',
+      [id]
+    );
     return result;
   } catch (error) {
     throw new CustomError('Failed to get education', 500);
@@ -101,9 +112,10 @@ const deleteEducation = async (
 
 const getExperience = async (id: number): Promise<Experience[]> => {
   try {
-    const [result] = await promisePool.execute<
-      ResultSetHeader & Experience[]
-    >('SELECT * FROM JobExperience WHERE user_id = ?', [id]);
+    const [result] = await promisePool.execute<ResultSetHeader & Experience[]>(
+      'SELECT * FROM JobExperience WHERE user_id = ?',
+      [id]
+    );
     console.log(result);
     return result;
   } catch (error) {
@@ -156,7 +168,10 @@ const putExperience = async (
     if (experience.job_city !== null && experience.job_city !== undefined) {
       experienceUpdate.job_city = experience.job_city;
     }
-    if (experience.description !== null && experience.description !== undefined) {
+    if (
+      experience.description !== null &&
+      experience.description !== undefined
+    ) {
       experienceUpdate.description = experience.description;
     }
     if (experience.start_date !== null && experience.start_date !== undefined) {
@@ -182,21 +197,150 @@ const putExperience = async (
   }
 };
 
-  // Delete experience
-  const deleteExperience = async (user_id: number, experience_id: number): Promise<MessageResponse> => {
-    try {
-      const result = await promisePool.execute(
-        'DELETE FROM JobExperience WHERE experience_id = ? AND user_id = ?',
-        [experience_id, user_id]
-      );
-      if (!result) {
-        throw new CustomError('Failed to delete experience', 500);
-      }
-      return {message: 'Experience deleted'};
-    } catch (error) {
+// Delete experience
+const deleteExperience = async (
+  user_id: number,
+  experience_id: number
+): Promise<MessageResponse> => {
+  try {
+    const result = await promisePool.execute(
+      'DELETE FROM JobExperience WHERE experience_id = ? AND user_id = ?',
+      [experience_id, user_id]
+    );
+    if (!result) {
       throw new CustomError('Failed to delete experience', 500);
     }
-  };
+    return {message: 'Experience deleted'};
+  } catch (error) {
+    throw new CustomError('Failed to delete experience', 500);
+  }
+};
+
+const getUserSkills = async (id: number) => {
+  try {
+    const [result] = await promisePool.execute<RowDataPacket[] & Skill[]>(
+      `SELECT * FROM Skills WHERE skill_id IN (SELECT skill_id FROM UserSkills WHERE user_id = ?)`,
+      [id]
+    );
+    console.log(result);
+    return result;
+  } catch (error) {
+    throw new CustomError('Failed to get user skills', 500);
+  }
+};
+
+const postUserSkill = async (id: number, skill_id: number) => {
+  try {
+    const result = await promisePool.execute<ResultSetHeader>(
+      'INSERT INTO UserSkills (user_id, skill_id) VALUES (?, ?)',
+      [id, skill_id]
+    );
+
+    if (result[0].affectedRows === 0) {
+      return null;
+    }
+    return {message: 'Skill added'};
+  } catch (error) {
+    throw new CustomError('Failed to add user skill', 500);
+  }
+};
+
+const putUserSkill = async (
+  id: number,
+  skill_id: number,
+  new_skill_id: number
+): Promise<MessageResponse> => {
+  try {
+    const result = await promisePool.execute<ResultSetHeader>(
+      'UPDATE UserSkills SET skill_id = ? WHERE user_id = ? AND skill_id = ?',
+      [new_skill_id, id, skill_id]
+    );
+
+    if (result[0].affectedRows === 0) {
+      return {message: 'Skill not updated'};
+    }
+    return {message: 'Skill updated'};
+  } catch (error) {
+    throw new CustomError('Failed to update user skill', 500);
+  }
+};
+
+const getAttachments = async (id: number): Promise<Attachment[]> => {
+  try {
+    const [result] = await promisePool.execute<RowDataPacket[] & Attachment[]>(
+      'SELECT * FROM Attachments WHERE user_id = ?',
+      [id]
+    );
+    return result;
+  } catch (error) {
+    throw new CustomError('Failed to get attachments', 500);
+  }
+};
+
+const postAttachment = async (
+  user_id: number,
+  attachment: Attachment
+): Promise<MessageResponse> => {
+  try {
+    const result = await promisePool.execute<ResultSetHeader>(
+      'INSERT INTO Attachments (user_id, attachment_name, link) VALUES (?, ?, ?)',
+      [user_id, attachment.attachment_name, attachment.link]
+    );
+
+    if (result[0].affectedRows === 0) {
+      return {message: 'Attachment not added'};
+    }
+    return {message: 'Attachment added'};
+  } catch (error) {
+    throw new CustomError('Failed to add attachment', 500);
+  }
+};
+
+const putAttachment = async (
+  user_id: number,
+  attachment_id: number,
+  attachment: UpdateAttachment
+): Promise<MessageResponse> => {
+  try {
+    const updateAttachment: UpdateAttachment = {};
+    if (attachment.attachment_name !== undefined) {
+      updateAttachment.attachment_name = attachment.attachment_name;
+    }
+    if (attachment.link !== undefined) {
+      updateAttachment.link = attachment.link;
+    }
+    const sql = promisePool.format(
+      'UPDATE Attachments SET ? WHERE attachment_id = ? AND user_id = ?',
+      [updateAttachment, attachment_id, user_id]
+    );
+    const result = await promisePool.execute<ResultSetHeader>(sql);
+
+    if (result[0].affectedRows === 0) {
+      return {message: 'Attachment not updated'};
+    }
+    return {message: 'Attachment updated'};
+  } catch (error) {
+    throw new CustomError('Failed to update attachment', 500);
+  }
+};
+
+const deleteAttachment = async (
+  user_id: number,
+  attachment_id: number
+): Promise<MessageResponse> => {
+  try {
+    const result = await promisePool.execute(
+      'DELETE FROM Attachments WHERE attachment_id = ? AND user_id = ?',
+      [attachment_id, user_id]
+    );
+    if (!result) {
+      throw new CustomError('Failed to delete attachment', 500);
+    }
+    return {message: 'Attachment deleted'};
+  } catch (error) {
+    throw new CustomError('Failed to delete attachment', 500);
+  }
+};
 
 export {
   addEducation,
@@ -207,4 +351,11 @@ export {
   addExperience,
   putExperience,
   deleteExperience,
+  getUserSkills,
+  postUserSkill,
+  putUserSkill,
+  getAttachments,
+  postAttachment,
+  putAttachment,
+  deleteAttachment,
 };

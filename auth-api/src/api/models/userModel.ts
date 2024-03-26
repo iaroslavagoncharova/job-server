@@ -1,6 +1,11 @@
 import {ResultSetHeader, RowDataPacket} from 'mysql2';
 import {promisePool} from '../../lib/db';
-import {UnauthorizedUser, User} from '../../../../hybrid-types/DBTypes';
+import {
+  CandidateProfile,
+  UnauthorizedUser,
+  UpdateUser,
+  User,
+} from '../../../../hybrid-types/DBTypes';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 
 const getUsers = async (): Promise<UnauthorizedUser[] | null> => {
@@ -22,6 +27,25 @@ const getUser = async (id: number): Promise<UnauthorizedUser | null> => {
     const [result] = await promisePool.execute<
       RowDataPacket[] & UnauthorizedUser[]
     >('SELECT * FROM Users WHERE user_id = ?', [id]);
+    if (result.length === 0) {
+      return null;
+    }
+    return result[0];
+  } catch (e) {
+    throw new Error((e as Error).message);
+  }
+};
+
+const getUserAsCandidate = async (
+  id: number
+): Promise<CandidateProfile | null> => {
+  try {
+    const [result] = await promisePool.execute<
+      RowDataPacket[] & CandidateProfile[]
+    >(
+      'SELECT Users.username, Users.email, Users.fullname, Users.phone, Users.about_me, Users.field, Users.link FROM Users WHERE user_id = ?',
+      [id]
+    );
     if (result.length === 0) {
       return null;
     }
@@ -66,6 +90,47 @@ const postUser = async (
     console.log(result);
     const createdUser = await getUser(result[0].insertId);
     return createdUser;
+  } catch (e) {
+    throw new Error((e as Error).message);
+  }
+};
+
+const putUser = async (
+  id: number,
+  user: UpdateUser
+): Promise<UnauthorizedUser | null> => {
+  try {
+    const updateInfo: UpdateUser = {};
+    if (user.email !== undefined) {
+      updateInfo.email = user.email;
+    }
+    if (user.fullname !== undefined) {
+      updateInfo.fullname = user.fullname;
+    }
+    if (user.phone !== undefined) {
+      updateInfo.phone = user.phone;
+    }
+    if (user.password !== undefined) {
+      updateInfo.password = user.password;
+    }
+    if (user.address !== undefined) {
+      updateInfo.address = user.address;
+    }
+    if (user.about_me !== undefined) {
+      updateInfo.about_me = user.about_me;
+    }
+    console.log(updateInfo);
+    const sql = promisePool.format('UPDATE Users SET ? WHERE user_id = ?', [
+      updateInfo,
+      id,
+    ]);
+    console.log(sql);
+    const result = await promisePool.execute<ResultSetHeader>(sql);
+    if (result[0].affectedRows === 0) {
+      return null;
+    }
+    const updatedUser = await getUser(id);
+    return updatedUser;
   } catch (e) {
     throw new Error((e as Error).message);
   }
@@ -129,7 +194,12 @@ const deleteUser = async (id: number): Promise<MessageResponse> => {
   }
 };
 
-export {getUsers, getUser, postUser, getUserByEmail, deleteUser};
-
-// - putUser (authenticate, user_id from token, email | fullname | phone | password | address)
-// - deleteUser (authenticate, user_id from token)
+export {
+  getUsers,
+  getUser,
+  getUserAsCandidate,
+  postUser,
+  getUserByEmail,
+  deleteUser,
+  putUser,
+};
