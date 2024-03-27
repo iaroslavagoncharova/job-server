@@ -40,12 +40,7 @@ export type CandidateProfile = Omit<
   | "user_type"
   | "created_at"
   | "address"
-> & {
-  experiences: Experience[];
-  educations: Education[];
-  skills: Skill[];
-  attachments: Attachment[];
-};
+>;
 
 export type TokenUser = {
   user_id: number;
