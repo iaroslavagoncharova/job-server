@@ -43,7 +43,7 @@ const getUserAsCandidate = async (
     const [result] = await promisePool.execute<
       RowDataPacket[] & CandidateProfile[]
     >(
-      'SELECT Users.username, Users.email, Users.fullname, Users.phone, Users.about_me, Users.field, Users.link FROM Users WHERE user_id = ?',
+      'SELECT Users.username, Users.email, Users.fullname, Users.phone, Users.about_me, Users.link, Users.field FROM Users WHERE user_id = ?',
       [id]
     );
     if (result.length === 0) {

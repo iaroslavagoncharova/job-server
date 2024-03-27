@@ -10,23 +10,6 @@ applications (candidate):
 - deleteApplication (authenticate, user_id from token, application_id) (deleting application before it's sent)
 candidates (employer):
 - getApplicationsByJob (job_id, status 'sent') (getting all sent applications by job id for sent-page)
-job ads (employer):
-- getJobAdsByUser (authenticate, user_id from token) (getting all job ads by a company)
-- getJobAdById (job_id) (getting one job ad's info when it's clicked)
-- postJobAd (authenticate, user_id from token, job info) (adding job ad) + job skills! keywords! (job tests ?)
-- putJobAd (authenticate, user_id from token, job info) (updating job ad's info)
-- deleteJobAd (authenticate, user_id from token, job_id) (deleting job ad)
-job ads (candidate):
-- getJobAds (getting all job ads)
-- getJobAdsByField (field) (getting job ads by chosen field)
-- getJobAdById (job_id) (getting one job ad's info when it's clicked) + job skills! keywords! (job tests ?)
-swipes:
-- getSwipes (getting all swipes)
-- getRightSwipes (getting all right swipes for checking the matches later)
-- getSwipesByUser (authenticate, user_id from token) (getting all user's swipes)
-- getRightSwipesByUser (authenticate, user_id from token) (getting all user's right swipes)
-- postSwipe (authenticate, user_id from token, swipe info) (adding a record on swipe)
-- deleteSwipe (swipe_id) (deleting swipes after a match)
 matches:
 - postMatch (swiper_id, swiped_id) (adding a match when both users swipe each other right)
 - getMatchesByUser (authenticate, user_id from token) (getting all user's matches to display notifications)
@@ -70,4 +53,20 @@ candidates (employer):
 - getEducation (user_id) (getting user education if exists (open on the new page of the card))
 - getExperience (user_id) (getting user experience if exists (open on the new page of the card))
 - getAttachments (user_id) (getting user attachments if exist (open on the new page of the card))
-
+job ads (employer):
+- getJobAdsByUser (authenticate, user_id from token) (getting all job ads by a company)
+- getJobAdById (job_id) (getting one job ad's info when it's clicked)
+- deleteJobAd (authenticate, user_id from token, job_id) (deleting job ad)
+- postJobAd (authenticate, user_id from token, job info) (adding job ad) + job skills! keywords! (job tests ?)
+- putJobAd (authenticate, user_id from token, job info) (updating job ad's info)
+job ads (candidate):
+- getJobAds (getting all job ads)
+- getJobAdsByField (field) (getting job ads by chosen field)
+- getJobAdById (job_id) (getting one job ad's info when it's clicked) + job skills! keywords! (job tests ?)
+swipes:
+- getSwipes (getting all swipes)
+- getRightSwipes (getting all right swipes for checking the matches later)
+- getSwipesByUser (authenticate, user_id from token) (getting all user's swipes)
+- getRightSwipesByUser (authenticate, user_id from token) (getting all user's right swipes)
+- deleteSwipe (swipe_id) (deleting swipes after a match)
+- postSwipe (authenticate, user_id from token, swipe info) (adding a record on swipe)
