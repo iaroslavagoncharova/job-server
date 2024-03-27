@@ -4,6 +4,7 @@ import {ResultSetHeader, RowDataPacket} from 'mysql2';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 import CustomError from '../../classes/CustomError';
 
+// get a message by id
 const getMessage = async (messageId: number): Promise<Message | null> => {
   try {
     const [result] = await promisePool.execute<
@@ -19,6 +20,26 @@ const getMessage = async (messageId: number): Promise<Message | null> => {
   }
 };
 
+// get the other user in a chat
+const getOtherChatUser = async (chatId: number, userId: number): Promise<number | null> => {
+  try {
+    const [chat] = await promisePool.execute<RowDataPacket[] & Chat[]>('SELECT * FROM Chats WHERE chat_id = ?', [chatId]);
+    if (chat.length === 0) {
+      return null;
+    }
+    if (chat[0].user1_id === userId) {
+      return chat[0].user2_id;
+    } else if (chat[0].user2_id === userId) {
+      return chat[0].user1_id;
+    } else {
+      return null;
+    }
+  } catch (e) {
+    throw new Error('getOtherChatUser error' + (e as Error).message);
+  }
+};
+
+// get a chat by id
 const getChatById = async (chatId: number): Promise<Chat | null> => {
   try {
     const [rows] = await promisePool.execute<RowDataPacket[] & Chat[]>('SELECT * FROM Chats WHERE chat_id = ?', [chatId]);
@@ -31,7 +52,7 @@ const getChatById = async (chatId: number): Promise<Chat | null> => {
   }
 };
 
-
+// getting chats for a user
 const getChatsByUser = async (userId: number): Promise<Chat[]> => {
   const [rows] = await promisePool.execute<RowDataPacket[] & Chat[]>(
     'SELECT * FROM Chats WHERE user1_id = ? OR user2_id = ?',
@@ -43,20 +64,32 @@ const getChatsByUser = async (userId: number): Promise<Chat[]> => {
   return rows;
 };
 
+// get all info about messages in a chat, if a user is an owner, display right, if not, display left
 const getMessagesByChatAndUser = async (
   chatId: number,
   userId: number
-): Promise<Message[]> => {
-  const [rows] = await promisePool.execute<RowDataPacket[] & Message[]>(
-    `SELECT * FROM Messages WHERE chat_id = ? AND user_id = ?`,
+) => {
+  const otherUserId = await getOtherChatUser(chatId, userId);
+  if (!otherUserId) {
+    throw new CustomError('Chat not found', 404);
+  }
+  const [myMessages] = await promisePool.execute<RowDataPacket[] & Message[]>(
+    `SELECT * FROM Messages WHERE chat_id = ? AND user_id = ? ORDER BY sent_at;`,
     [chatId, userId]
   );
-  if (rows.length === 0) {
+  const [theirMessages] = await promisePool.execute<RowDataPacket[] & Message[]>(`
+    SELECT * FROM Messages WHERE chat_id = ? AND user_id = ? ORDER BY sent_at;`,
+    [chatId, otherUserId]
+  );
+  if (myMessages.length === 0 && theirMessages.length === 0) {
     throw new CustomError('Messages not found', 404);
   }
-  return rows;
+
+  // returns an array of two arrays, first array is messages of the user, second array is messages of the other user
+  return [myMessages, theirMessages];
 };
 
+// sending a message to a chat
 const postMessage = async (message: Pick<Message, 'user_id' | 'chat_id' | 'message_text'>): Promise<Message | null> => {
   try {
     const result = await promisePool.execute<ResultSetHeader>(`
@@ -79,6 +112,7 @@ const postMessage = async (message: Pick<Message, 'user_id' | 'chat_id' | 'messa
   }
 };
 
+// start a chat - automatically after a match or manually after an employer approves an application
 const postChat = async (matchId: number): Promise<Chat | null> => {
   try {
     const [userIds] = await promisePool.execute<RowDataPacket[] & Pick<Match, 'user1_id' | 'user2_id'>>(`
@@ -106,6 +140,7 @@ const postChat = async (matchId: number): Promise<Chat | null> => {
   }
 };
 
+// delete a chat
 const deleteChat = async (chatId: number, user: TokenContent): Promise<MessageResponse> => {
   const chat = await getChatById(chatId);
 
@@ -134,4 +169,4 @@ const deleteChat = async (chatId: number, user: TokenContent): Promise<MessageRe
   }
 };
 
-export {getMessage, getChatById, getChatsByUser, getMessagesByChatAndUser, postMessage, postChat, deleteChat};
+export {getMessage, getOtherChatUser, getChatById, getChatsByUser, getMessagesByChatAndUser, postMessage, postChat, deleteChat};

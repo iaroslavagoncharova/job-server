@@ -60,9 +60,9 @@ export const handleGetChatsByUser = async (
 
 export const handleGetMessagesByChatAndUser = async (
   req: Request<{chatId: string}>,
-  res: Response<Message[]>,
+  res: Response,
   next: NextFunction
-): Promise<Message[] | void> => {
+) => {
   try {
     const chatId = parseInt(req.params.chatId);
     const tokenUser = res.locals.user;
@@ -131,4 +131,4 @@ export const handleDeleteChat = async (
   } catch (error) {
     next(error);
   }
-}
+};
