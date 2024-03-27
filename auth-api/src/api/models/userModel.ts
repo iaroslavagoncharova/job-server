@@ -1,6 +1,11 @@
 import {ResultSetHeader, RowDataPacket} from 'mysql2';
 import {promisePool} from '../../lib/db';
-import {UnauthorizedUser, User} from '../../../../hybrid-types/DBTypes';
+import {
+  CandidateProfile,
+  UnauthorizedUser,
+  UpdateUser,
+  User,
+} from '../../../../hybrid-types/DBTypes';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 
 const getUsers = async (): Promise<UnauthorizedUser[] | null> => {
@@ -22,6 +27,25 @@ const getUser = async (id: number): Promise<UnauthorizedUser | null> => {
     const [result] = await promisePool.execute<
       RowDataPacket[] & UnauthorizedUser[]
     >('SELECT * FROM Users WHERE user_id = ?', [id]);
+    if (result.length === 0) {
+      return null;
+    }
+    return result[0];
+  } catch (e) {
+    throw new Error((e as Error).message);
+  }
+};
+
+const getUserAsCandidate = async (
+  id: number
+): Promise<CandidateProfile | null> => {
+  try {
+    const [result] = await promisePool.execute<
+      RowDataPacket[] & CandidateProfile[]
+    >(
+      'SELECT Users.username, Users.email, Users.fullname, Users.phone, Users.about_me, Users.field, Users.link FROM Users WHERE user_id = ?',
+      [id]
+    );
     if (result.length === 0) {
       return null;
     }
@@ -71,6 +95,47 @@ const postUser = async (
   }
 };
 
+const putUser = async (
+  id: number,
+  user: UpdateUser
+): Promise<UnauthorizedUser | null> => {
+  try {
+    const updateInfo: UpdateUser = {};
+    if (user.email !== undefined) {
+      updateInfo.email = user.email;
+    }
+    if (user.fullname !== undefined) {
+      updateInfo.fullname = user.fullname;
+    }
+    if (user.phone !== undefined) {
+      updateInfo.phone = user.phone;
+    }
+    if (user.password !== undefined) {
+      updateInfo.password = user.password;
+    }
+    if (user.address !== undefined) {
+      updateInfo.address = user.address;
+    }
+    if (user.about_me !== undefined) {
+      updateInfo.about_me = user.about_me;
+    }
+    console.log(updateInfo);
+    const sql = promisePool.format('UPDATE Users SET ? WHERE user_id = ?', [
+      updateInfo,
+      id,
+    ]);
+    console.log(sql);
+    const result = await promisePool.execute<ResultSetHeader>(sql);
+    if (result[0].affectedRows === 0) {
+      return null;
+    }
+    const updatedUser = await getUser(id);
+    return updatedUser;
+  } catch (e) {
+    throw new Error((e as Error).message);
+  }
+};
+
 const deleteUser = async (id: number): Promise<MessageResponse> => {
   const connection = await promisePool.getConnection();
   try {
@@ -82,18 +147,32 @@ const deleteUser = async (id: number): Promise<MessageResponse> => {
     await connection.execute('DELETE FROM Attachments WHERE user_id = ?', [id]);
     await connection.execute('DELETE FROM JobAds WHERE user_id = ?', [id]);
     await connection.execute('DELETE FROM UserSkills WHERE user_id = ?', [id]);
+    // delete application links that have application id that has user id
+    await connection.execute(
+      'DELETE FROM ApplicationLinks WHERE application_id IN (SELECT application_id FROM Applications WHERE user_id = ?)',
+      [id]
+    );
     await connection.execute('DELETE FROM Applications WHERE user_id = ?', [
       id,
     ]);
     await connection.execute('DELETE FROM Tests WHERE user_id = ?', [id]);
     await connection.execute('DELETE FROM UserTests WHERE user_id = ?', [id]);
+    // delete messages that have user id and are from the chats that have user id
+    await connection.execute(
+      'DELETE FROM Messages WHERE chat_id IN (SELECT chat_id FROM Chats WHERE user1_id = ? OR user2_id = ?)',
+      [id, id]
+    );
     await connection.execute(
       'DELETE FROM Chats WHERE user1_id = ? OR user2_id = ?',
       [id, id]
     );
-    await connection.execute('DELETE FROM Messages WHERE user_id = ?', [id]);
     await connection.execute(
       'DELETE FROM Swipes WHERE swiped_id = ? OR swiper_id = ?',
+      [id, id]
+    );
+    //delete from notifications that are from the matches that have user id
+    await connection.execute(
+      'DELETE FROM Notifications WHERE match_id IN (SELECT match_id FROM Matches WHERE user1_id = ? OR user2_id = ?)',
       [id, id]
     );
     await connection.execute(
@@ -115,7 +194,12 @@ const deleteUser = async (id: number): Promise<MessageResponse> => {
   }
 };
 
-export {getUsers, getUser, postUser, getUserByEmail, deleteUser};
-
-// - putUser (authenticate, user_id from token, email | fullname | phone | password | address)
-// - deleteUser (authenticate, user_id from token)
+export {
+  getUsers,
+  getUser,
+  getUserAsCandidate,
+  postUser,
+  getUserByEmail,
+  deleteUser,
+  putUser,
+};
