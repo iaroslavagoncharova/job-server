@@ -1,8 +1,10 @@
 import {ResultSetHeader, RowDataPacket} from 'mysql2';
 import CustomError from '../../classes/CustomError';
 import {promisePool} from '../../lib/db';
-import {MessageResponse} from '@sharedTypes/MessageTypes';
-import {Job, JobWithSkillsAndKeywords} from '@sharedTypes/DBTypes';
+import {JobResponse, MessageResponse} from '@sharedTypes/MessageTypes';
+import { Job, JobWithSkillsAndKeywords, User } from '@sharedTypes/DBTypes';
+import {getUserById} from '../controllers/userController';
+import {getUser} from './userModel';
 
 const getAllJobs = async (): Promise<Job[]> => {
   try {
@@ -34,7 +36,7 @@ const getJobById = async (id: number): Promise<JobWithSkillsAndKeywords | null> 
   try {
     const [result] = await promisePool.execute<RowDataPacket[] & JobWithSkillsAndKeywords[]>(
       // getting job skills and keywords for the job from jobskills and jobkeywords tables where job_id = id
-      'SELECT JobAds.*, GROUP_CONCAT(Skills.skill_name) AS skills, GROUP_CONCAT(KeyWords.keyword_name) AS keywords FROM JobAds LEFT JOIN JobSkills ON JobAds.job_id = JobSkills.job_id LEFT JOIN Skills ON JobSkills.skill_id = Skills.skill_id LEFT JOIN KeywordsJobs ON JobAds.job_id = KeywordsJobs.job_id LEFT JOIN KeyWords ON KeywordsJobs.keyword_id = KeyWords.keyword_id WHERE JobAds.job_id = ? GROUP BY JobAds.job_id;',
+      'SELECT JobAds.*, GROUP_CONCAT(DISTINCT Skills.skill_name) AS skills, GROUP_CONCAT(DISTINCT KeyWords.keyword_name) AS keywords FROM JobAds LEFT JOIN JobSkills ON JobAds.job_id = JobSkills.job_id LEFT JOIN Skills ON JobSkills.skill_id = Skills.skill_id LEFT JOIN KeywordsJobs ON JobAds.job_id = KeywordsJobs.job_id LEFT JOIN KeyWords ON KeywordsJobs.keyword_id = KeyWords.keyword_id WHERE JobAds.job_id = ? GROUP BY JobAds.job_id;',
       [id]
     );
     if (result.length === 0) {
@@ -61,4 +63,118 @@ const getJobByField = async (field: string): Promise<Job[]> => {
   }
 };
 
-export {getJobsByCompany, getJobById, getAllJobs, getJobByField};
+const postJob = async (job: JobWithSkillsAndKeywords, user_id: number): Promise<JobResponse> => {
+  try {
+    const userCheck = await getUser(user_id);
+    if (!userCheck) {
+      throw new CustomError('User not found', 404);
+    }
+    if (userCheck.user_type !== 'employer') {
+      throw new CustomError('User is not a company', 400);
+    }
+    console.log(job, userCheck);
+
+    // Insert job details
+    const sql1 = await promisePool.format(
+      'INSERT INTO JobAds (job_address, job_title, salary, user_id, job_description, deadline_date, field) VALUES (?, ?, ?, ?, ?, ?, ?);',
+      [
+        job.job_address,
+        job.job_title,
+        job.salary,
+        user_id,
+        job.job_description,
+        job.deadline_date,
+        job.field,
+      ]
+    );
+    console.log(sql1);
+    const [result] = await promisePool.execute<ResultSetHeader>(
+      'INSERT INTO JobAds (job_address, job_title, salary, user_id, job_description, deadline_date, field) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [
+        job.job_address,
+        job.job_title,
+        job.salary,
+        user_id,
+        job.job_description,
+        job.deadline_date,
+        job.field,
+      ]
+    );
+
+    console.log(result, 'result');
+
+    if (result.affectedRows === 0) {
+      throw new CustomError('Job creation failed', 500);
+    }
+
+    const insertedJobId = result.insertId;
+
+    // Insert job skills
+    const skills = job.skills.split(',').map(skill => Number(skill.trim()));
+    for (const skillId of skills) {
+      const [skillsResult] = await promisePool.execute<ResultSetHeader>(
+        'INSERT INTO JobSkills (job_id, skill_id) VALUES (?, ?)',
+        [insertedJobId, skillId]
+      );
+      console.log(skillsResult, 'skillsResult');
+      if (skillsResult.affectedRows === 0) {
+        throw new CustomError('Job skills insertion failed', 500);
+      }
+    }
+
+
+    // Insert job keywords
+    const keywords = job.keywords.split(',').map(keyword => keyword.trim());
+    console.log(keywords);
+    for (const keyword of keywords) {
+      const [keywordsResult] = await promisePool.execute<ResultSetHeader>(
+        'INSERT INTO KeywordsJobs (job_id, keyword_id) VALUES (?, ?)',
+        [insertedJobId, keyword]
+      );
+      console.log(keywordsResult, 'keywordsResult');
+      if (keywordsResult.affectedRows === 0) {
+        throw new CustomError('Job keywords insertion failed', 500);
+      }
+    };
+
+
+    // Fetch inserted job details
+    const insertedJob = await getJobById(insertedJobId);
+    console.log(insertedJob, 'insertedJob');
+    if (!insertedJob) {
+      throw new CustomError('Job not found', 404);
+    }
+
+    const response = {
+      message: 'Job created',
+      job: insertedJob,
+    };
+
+    return response;
+  } catch (err) {
+    throw new CustomError('postJob failed', 500);
+  }
+};
+
+const deleteJob = async (job_id: number, user_id: number): Promise<MessageResponse> => {
+  const connection = await promisePool.getConnection();
+  try {
+    await connection.beginTransaction();
+    await connection.execute('DELETE FROM JobSkills WHERE job_id = ?', [job_id]);
+    await connection.execute('DELETE FROM KeywordsJobs WHERE job_id = ?', [job_id]);
+    const [result] = await connection.execute<ResultSetHeader>(
+      'DELETE FROM JobAds WHERE job_id = ? AND user_id = ?',
+      [job_id, user_id]
+    );
+    if (result.affectedRows === 0) {
+      throw new CustomError('Job not found', 404);
+    }
+    await connection.commit();
+    return {message: 'Job deleted'};
+  } catch (err) {
+    throw new CustomError('deleteJob failed', 500);
+  }
+};
+
+
+export {getJobsByCompany, getJobById, getAllJobs, getJobByField, postJob, deleteJob};
