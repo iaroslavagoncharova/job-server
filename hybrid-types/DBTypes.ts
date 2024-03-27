@@ -165,3 +165,12 @@ export type UpdateJob = {
   skills?: string | undefined;
   keywords?: string | undefined;
 };
+
+export type Swipe = {
+  swipe_id: number;
+  swiper_id: number;
+  swiped_id: number;
+  swipe_direction: string;
+  swipe_type: string;
+  swiped_at: Date | string;
+};

@@ -86,19 +86,6 @@ const postJob = async (
     console.log(job, userCheck);
 
     // Insert job details
-    const sql1 = await promisePool.format(
-      'INSERT INTO JobAds (job_address, job_title, salary, user_id, job_description, deadline_date, field) VALUES (?, ?, ?, ?, ?, ?, ?);',
-      [
-        job.job_address,
-        job.job_title,
-        job.salary,
-        user_id,
-        job.job_description,
-        job.deadline_date,
-        job.field,
-      ]
-    );
-    console.log(sql1);
     const [result] = await promisePool.execute<ResultSetHeader>(
       'INSERT INTO JobAds (job_address, job_title, salary, user_id, job_description, deadline_date, field) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [

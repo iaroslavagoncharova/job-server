@@ -6,6 +6,7 @@ import authRoute from './routes/authRoute';
 import profileRoute from './routes/profileRoute';
 import chatsRoute from './routes/chatsRoute';
 import jobRoute from './routes/jobRoute';
+import swipeRoute from './routes/swipeRoute';
 
 const router = express.Router();
 
@@ -18,5 +19,6 @@ router.use('/users', userRoute);
 router.use('/profile', profileRoute);
 router.use('/chats', chatsRoute);
 router.use('/jobs', jobRoute);
+router.use('/swipes', swipeRoute);
 
 export default router;

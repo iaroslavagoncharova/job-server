@@ -1,4 +1,4 @@
-import { Job, JobWithSkillsAndKeywords, Message, UnauthorizedUser } from "./DBTypes";
+import { Job, JobWithSkillsAndKeywords, Message, Swipe, UnauthorizedUser } from "./DBTypes";
 type MessageResponse = {
   message: string;
 };
@@ -23,6 +23,9 @@ type LoginResponse = MessageResponse & {
 
 type JobResponse = MessageResponse & {
   job: JobWithSkillsAndKeywords;
-}
+};
 
-export type { MessageResponse, ErrorResponse, UserResponse, ChatResponse, LoginResponse, JobResponse };
+type SwipeResponse = MessageResponse & {
+  swipe: Swipe;
+};
+export type { MessageResponse, ErrorResponse, UserResponse, ChatResponse, LoginResponse, JobResponse, SwipeResponse };
