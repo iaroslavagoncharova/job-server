@@ -11,11 +11,7 @@ applications (candidate):
 candidates (employer):
 - getApplicationsByJob (job_id, status 'sent') (getting all sent applications by job id for sent-page)
 job ads (employer):
-- postJobAd (authenticate, user_id from token, job info) (adding job ad) + job skills! keywords! (job tests ?)
 - putJobAd (authenticate, user_id from token, job info) (updating job ad's info)
-- deleteJobAd (authenticate, user_id from token, job_id) (deleting job ad)
-job ads (candidate):
-- getJobAdById (job_id) (getting one job ad's info when it's clicked) + job skills! keywords! (job tests ?)
 swipes:
 - getSwipes (getting all swipes)
 - getRightSwipes (getting all right swipes for checking the matches later)
@@ -69,7 +65,10 @@ candidates (employer):
 job ads (employer):
 - getJobAdsByUser (authenticate, user_id from token) (getting all job ads by a company)
 - getJobAdById (job_id) (getting one job ad's info when it's clicked)
+- deleteJobAd (authenticate, user_id from token, job_id) (deleting job ad)
+- postJobAd (authenticate, user_id from token, job info) (adding job ad) + job skills! keywords! (job tests ?)
 job ads (candidate):
 - getJobAds (getting all job ads)
 - getJobAdsByField (field) (getting job ads by chosen field)
+- getJobAdById (job_id) (getting one job ad's info when it's clicked) + job skills! keywords! (job tests ?)
 

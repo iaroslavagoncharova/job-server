@@ -154,3 +154,14 @@ export type JobWithSkillsAndKeywords = Job & {
   skills: string;
   keywords: string;
 };
+
+export type UpdateJob = {
+  job_address?: string | undefined;
+  job_title?: string | undefined;
+  salary?: string | undefined;
+  job_description?: string | undefined;
+  deadline_date?: Date | string | undefined;
+  field?: string | undefined;
+  skills?: string | undefined;
+  keywords?: string | undefined;
+};

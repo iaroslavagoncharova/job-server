@@ -2,8 +2,8 @@ import {Request, Response, NextFunction} from 'express';
 import CustomError from '../../classes/CustomError';
 import {JobResponse, MessageResponse} from '@sharedTypes/MessageTypes';
 import {validationResult} from 'express-validator';
-import {Job, JobWithSkillsAndKeywords} from '@sharedTypes/DBTypes';
-import {deleteJob, getAllJobs, getJobByField, getJobById, getJobsByCompany, postJob} from '../models/jobModel';
+import {Job, JobWithSkillsAndKeywords, UpdateJob} from '@sharedTypes/DBTypes';
+import {deleteJob, getAllJobs, getJobByField, getJobById, getJobsByCompany, postJob, putJob} from '../models/jobModel';
 
 const fetchAllJobs = async (
   req: Request,
@@ -100,6 +100,27 @@ const addJob = async (
   }
 };
 
+const updateJob = async (
+  req: Request,
+  res: Response<JobResponse>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const id = req.params.id;
+    const job = req.body;
+    const tokenUser = res.locals.user;
+    console.log(job, 'job', tokenUser, 'tokenUser', id, 'id');
+    const result = await putJob(+id, job, tokenUser.user_id);
+    if (!result) {
+      next(new CustomError('Job update failed', 500));
+      return;
+    }
+    res.json(result);
+  } catch (error) {
+    next(new CustomError((error as Error).message, 500));
+  }
+}
+
 const removeJob = async (
   req: Request,
   res: Response<MessageResponse>,
@@ -124,4 +145,4 @@ const removeJob = async (
   }
 };
 
-export {fetchJobsByCompany, fetchJobById, fetchAllJobs, fetchJobsByField, addJob, removeJob};
+export {fetchJobsByCompany, fetchJobById, fetchAllJobs, fetchJobsByField, addJob, removeJob, updateJob};
