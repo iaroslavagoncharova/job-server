@@ -7,6 +7,7 @@ import profileRoute from './routes/profileRoute';
 import chatsRoute from './routes/chatsRoute';
 import jobRoute from './routes/jobRoute';
 import swipeRoute from './routes/swipeRoute';
+import matchRoute from './routes/matchRoute';
 
 const router = express.Router();
 
@@ -20,5 +21,6 @@ router.use('/profile', profileRoute);
 router.use('/chats', chatsRoute);
 router.use('/jobs', jobRoute);
 router.use('/swipes', swipeRoute);
+router.use('/matches', matchRoute);
 
 export default router;

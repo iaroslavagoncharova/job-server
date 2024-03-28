@@ -11,8 +11,6 @@ applications (candidate):
 candidates (employer):
 - getApplicationsByJob (job_id, status 'sent') (getting all sent applications by job id for sent-page)
 matches:
-- postMatch (swiper_id, swiped_id) (adding a match when both users swipe each other right)
-- getMatchesByUser (authenticate, user_id from token) (getting all user's matches to display notifications)
 - deleteMatch (match_id) (deleting the match after sending a notification)
 notifications:
 - getNotificationsByUser (authenticate, user_id from token) (getting all user's notifications)
@@ -70,3 +68,6 @@ swipes:
 - getRightSwipesByUser (authenticate, user_id from token) (getting all user's right swipes)
 - deleteSwipe (swipe_id) (deleting swipes after a match)
 - postSwipe (authenticate, user_id from token, swipe info) (adding a record on swipe)
+matches:
+- postMatch (swiper_id, swiped_id) (adding a match when both users swipe each other right)
+- getMatchesByUser (authenticate, user_id from token) (getting all user's matches to display notifications)
