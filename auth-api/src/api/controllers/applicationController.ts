@@ -4,13 +4,14 @@ import {deleteApplication, getApplicationById, getApplicationsByJob, getApplicat
 import CustomError from "../../classes/CustomError";
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 
+// toimii
 export const handleGetApplicationsByUserId = async (
   req: Request,
   res: Response,
   next: NextFunction
   ): Promise <Application[] | void> => {
     try {
-      const user_id = req.params.user_id;
+      const user_id = res.locals.user.user_id;
       const applications = await getApplicationsByUserId(parseInt(user_id));
       if (applications.length === 0) {
         next(new CustomError('No applications found', 404));
@@ -22,15 +23,18 @@ export const handleGetApplicationsByUserId = async (
     }
 };
 
+// toimii
+// getting all sent applications for sent-page
+// status = "Submitted" in database
 export const handleGetSentApplicationsByUserId = async (
   req: Request,
   res: Response,
   next: NextFunction
   ): Promise <Application[] | void> => {
     try {
-      const user_id = req.params.user_id;
+      const user_id = res.locals.user.user_id;
       const applications = await getSentApplicationsByUserId(parseInt(user_id));
-      if (applications.length === 0) {
+      if (!applications) {
         next(new CustomError('No sent applications found', 404));
         return;
       }
@@ -40,15 +44,18 @@ export const handleGetSentApplicationsByUserId = async (
     }
 };
 
+// toimii
+// getting all saved job ads aka pre-made applications for saved-page
+// status = "Pending" in database
 export const handleGetSavedApplicationsByUserId = async (
   req: Request,
   res: Response,
   next: NextFunction
   ): Promise <Application[] | void> => {
     try {
-      const user_id = req.params.user_id;
+      const user_id = res.locals.user.user_id;
       const applications = await getSavedApplicationsByUserId(parseInt(user_id));
-      if (applications.length === 0) {
+      if (!applications) {
         next(new CustomError('No saved applications found', 404));
         return;
       }
@@ -58,6 +65,8 @@ export const handleGetSavedApplicationsByUserId = async (
     }
 };
 
+// toimii
+// getting all application info after clicking it
 export const handleGetApplicationById = async (
   req: Request,
   res: Response<Application>,
@@ -76,15 +85,17 @@ export const handleGetApplicationById = async (
     }
 };
 
+// toimii
+// post application
 export const handlePostApplication = async (
-  req: Request<{}, {}, Pick<Application, 'user_id' | 'application_id'>>,
+  req: Request<{}, {}, Pick<Application, 'user_id' | 'job_id'>>,
   res: Response<Application>,
   next: NextFunction
   ): Promise <Application | void> => {
     try {
-      const user_id = res.locals.user.user_id;
-      const app_id = req.body.application_id;
-      const application = await postApplication(user_id, app_id);
+      const user_id = res.locals.user.user_id; // user_id from token
+      const job_id = req.body.job_id; // application_id from request body
+      const application = await postApplication(user_id, job_id);
       if (application === null) {
         next(new CustomError('Failed to post application', 500));
         return;
@@ -95,6 +106,7 @@ export const handlePostApplication = async (
     }
 };
 
+// toimii
 export const handlePutApplication = async (
   req: Request,
   res: Response<MessageResponse>,
@@ -107,10 +119,10 @@ export const handlePutApplication = async (
         return;
       }
 
-      const application_id = req.params.application_id;
+      const application_id = parseInt(req.params.application_id);
       const user_id = res.locals.user.user_id;
 
-      const application = await putApplication(user_id, parseInt(application_id), application_text, application_links);
+      const application = await putApplication(user_id, application_id, application_text, application_links);
       if (!application) {
         next(new CustomError('Failed to update application', 500));
         return;
@@ -122,6 +134,7 @@ export const handlePutApplication = async (
     }
 };
 
+// toimii
 export const handleDeleteApplication = async (
   req: Request<{application_id: string}>,
   res: Response<MessageResponse>,
@@ -142,6 +155,7 @@ export const handleDeleteApplication = async (
     }
 };
 
+// toimii
 export const handeSendApplication = async (
   req: Request,
   res: Response<MessageResponse>,
@@ -162,6 +176,7 @@ export const handeSendApplication = async (
     }
 };
 
+// toimii
 export const handleGetApplicationsByJob = async (
   req: Request,
   res: Response,

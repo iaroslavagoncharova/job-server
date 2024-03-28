@@ -6,19 +6,17 @@ const applicationRoute = express.Router();
 
 // routes for job applications
 
+applicationRoute.post('/', authenticate, handlePostApplication);
 applicationRoute.get('/user', authenticate, handleGetApplicationsByUserId);
 applicationRoute.get('/user/sent', authenticate, handleGetSentApplicationsByUserId);
 applicationRoute.get('/user/saved', authenticate, handleGetSavedApplicationsByUserId);
 
 applicationRoute.get('/:application_id', authenticate, handleGetApplicationById);
+applicationRoute.put('/:application_id', authenticate, handlePutApplication);
+applicationRoute.delete('/:application_id', authenticate, handleDeleteApplication);
 
 applicationRoute.get('/job/:job_id', authenticate, handleGetApplicationsByJob);
 
-applicationRoute.post('/', authenticate, handlePostApplication);
-
-applicationRoute.put('/:application_id', authenticate, handlePutApplication);
-applicationRoute.put('/application_id/send', authenticate, handeSendApplication);
-
-applicationRoute.delete('/:application_id', authenticate, handleDeleteApplication);
+applicationRoute.put('/:application_id/send', authenticate, handeSendApplication);
 
 export default applicationRoute;

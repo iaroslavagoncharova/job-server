@@ -2,8 +2,9 @@ import {Request, Response, NextFunction} from 'express';
 import {deleteChat, getChatById, getChatsByUser, getMessage, getMessagesByChatAndUser, postChat, postMessage} from '../models/chatsModel';
 import CustomError from '../../classes/CustomError';
 import {Chat, Message, TokenContent} from '@sharedTypes/DBTypes';
-import {ChatResponse} from '@sharedTypes/MessageTypes';
+import {ChatResponse, MessageResponse} from '@sharedTypes/MessageTypes';
 
+// toimii
 export const handleGetMessage = async (
   req: Request,
   res: Response<Message>,
@@ -22,6 +23,7 @@ export const handleGetMessage = async (
     }
 };
 
+// toimii
 export const handleGetChatById = async (
   req: Request<{chatId: string}>,
   res: Response<Chat>,
@@ -40,6 +42,7 @@ export const handleGetChatById = async (
   }
 };
 
+// toimii
 export const handleGetChatsByUser = async (
   req: Request,
   res: Response<Chat[]>,
@@ -47,7 +50,7 @@ export const handleGetChatsByUser = async (
 ): Promise<Chat[] | void> => {
   try {
     const userId = res.locals.user.user_id;
-    const chats = await getChatsByUser(userId);
+    const chats = await getChatsByUser(parseInt(userId));
     if (chats === null) {
       next(new CustomError('Chats not found', 404));
       return;
@@ -58,6 +61,7 @@ export const handleGetChatsByUser = async (
   }
 };
 
+// toimii
 export const handleGetMessagesByChatAndUser = async (
   req: Request<{chatId: string}>,
   res: Response,
@@ -65,8 +69,8 @@ export const handleGetMessagesByChatAndUser = async (
 ) => {
   try {
     const chatId = parseInt(req.params.chatId);
-    const tokenUser = res.locals.user;
-    const messages = await getMessagesByChatAndUser(tokenUser.user_id, chatId);
+    const user_id = res.locals.user.user_id;
+    const messages = await getMessagesByChatAndUser(chatId, user_id);
     if (messages === null) {
       next(new CustomError('Messages not found', 404));
       return;
@@ -77,6 +81,7 @@ export const handleGetMessagesByChatAndUser = async (
   }
 };
 
+// toimii
 export const handlePostMessage = async (
   req: Request<{}, {}, Pick<Message, 'user_id' | 'chat_id' | 'message_text'>>,
   res: Response<ChatResponse, {user: TokenContent}>,
@@ -96,6 +101,7 @@ export const handlePostMessage = async (
   }
 };
 
+// toimii
 export const handlePostChat = async (
   req: Request<{}, {}, {match_id: number}>,
   res: Response<Chat>,
@@ -113,21 +119,22 @@ export const handlePostChat = async (
   }
 };
 
+// toimii
 export const handleDeleteChat = async (
   req: Request<{chatId: string}>,
-  res: Response<{message: string}>,
+  res: Response<MessageResponse | null>,
   next: NextFunction
-): Promise<void> => {
+) => {
   try {
     const userId = res.locals.user.user_id;
     const chatId = parseInt(req.params.chatId);
     const chat = await getChatById(chatId);
     if (chat === null) {
       next(new CustomError('Chat not found', 404));
-      return;
+      return null;
     }
     await deleteChat(chatId, userId);
-    res.json({message: 'Chat deleted'});
+    return {message: 'Chat deleted'};
   } catch (error) {
     next(error);
   }

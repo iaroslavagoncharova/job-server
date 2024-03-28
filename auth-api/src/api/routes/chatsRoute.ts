@@ -4,13 +4,15 @@ import { authenticate } from '../../middlewares';
 
 const chatsRoute = express.Router();
 
+chatsRoute.post('/', authenticate, handlePostChat);
+
 chatsRoute.get('/messages/:messageId', authenticate, handleGetMessage);
-chatsRoute.get('/:chatId', authenticate, handleGetChatById);
 chatsRoute.get('/user', authenticate, handleGetChatsByUser);
+chatsRoute.get('/:chatId', authenticate, handleGetChatById);
 chatsRoute.get('/:chatId/messages', authenticate, handleGetMessagesByChatAndUser);
 
 chatsRoute.post('/:chatId/messages', authenticate, handlePostMessage);
-chatsRoute.post('/', authenticate, handlePostChat);
+
 
 chatsRoute.delete('/:chatId', authenticate, handleDeleteChat);
 

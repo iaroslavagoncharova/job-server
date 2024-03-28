@@ -1,5 +1,5 @@
 import {promisePool} from '../../lib/db';
-import {Message, Chat, TokenContent, Match} from '@sharedTypes/DBTypes';
+import {Message, Chat, Match} from '@sharedTypes/DBTypes';
 import {ResultSetHeader, RowDataPacket} from 'mysql2';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 import CustomError from '../../classes/CustomError';
@@ -53,6 +53,7 @@ const getChatById = async (chatId: number): Promise<Chat | null> => {
 };
 
 // getting chats for a user
+// something wrong here
 const getChatsByUser = async (userId: number): Promise<Chat[]> => {
   const [rows] = await promisePool.execute<RowDataPacket[] & Chat[]>(
     'SELECT * FROM Chats WHERE user1_id = ? OR user2_id = ?',
@@ -115,22 +116,30 @@ const postMessage = async (message: Pick<Message, 'user_id' | 'chat_id' | 'messa
 // start a chat - automatically after a match or manually after an employer approves an application
 const postChat = async (matchId: number): Promise<Chat | null> => {
   try {
+    console.log(typeof matchId);
     const [userIds] = await promisePool.execute<RowDataPacket[] & Pick<Match, 'user1_id' | 'user2_id'>>(`
     SELECT user1_id, user2_id FROM Matches WHERE match_id = ?`,
     [matchId]
     );
+    console.log(userIds);
     if (userIds.length === 0) {
+      console.log('match not found');
       return null;
     }
-    const user1_id = userIds[0];
-    const user2_id = userIds[1];
+    const user1_id = userIds[0].user1_id;
+    const user2_id = userIds[0].user2_id;
 
     const chat = await promisePool.execute<ResultSetHeader>(`INSERT INTO Chats (user1_id, user2_id) VALUES (?, ?)`, [user1_id, user2_id]);
+    if (chat[0].affectedRows === 0) {
+      console.log('insert failed');
+      return null;
+    }
     const [rows] = await promisePool.execute<RowDataPacket[] & Chat[]>(
       'SELECT * FROM Chats WHERE chat_id = ?',
       [chat[0].insertId]
     );
     if (rows.length === 0) {
+      console.log('object not found');
       return null;
     }
 
@@ -141,7 +150,8 @@ const postChat = async (matchId: number): Promise<Chat | null> => {
 };
 
 // delete a chat
-const deleteChat = async (chatId: number, user: TokenContent): Promise<MessageResponse> => {
+const deleteChat = async (chatId: number, userId: number): Promise<MessageResponse> => {
+  console.log('deleteChat entered');
   const chat = await getChatById(chatId);
 
   if (!chat) {
@@ -151,14 +161,18 @@ const deleteChat = async (chatId: number, user: TokenContent): Promise<MessageRe
   const connection = await promisePool.getConnection();
   try {
     await connection.beginTransaction();
+    console.log('transaction started');
     await promisePool.execute(`DELETE FROM Messages WHERE chat_id = ?`, [chatId]);
-    const [result] = await promisePool.execute<ResultSetHeader>(`DELETE FROM Chats WHERE chat_id = ? AND user_id = ?;`, [chatId, user.user_id]);
+    console.log('deleted messages');
+    const [result] = await promisePool.execute<ResultSetHeader>(`DELETE FROM Chats WHERE chat_id = ? AND (user1_id = ? OR user2_id = ?);`, [chatId, userId, userId]);
+    console.log('deleted chat');
 
     if (result.affectedRows === 0) {
       return {message: 'Chat not deleted'};
     }
 
     await connection.commit();
+    console.log('committed transaction');
 
     return {message: 'Chat deleted'};
   } catch (e) {
@@ -166,6 +180,7 @@ const deleteChat = async (chatId: number, user: TokenContent): Promise<MessageRe
     throw new Error((e as Error).message);
   } finally {
     connection.release();
+    console.log('connection released');
   }
 };
 
