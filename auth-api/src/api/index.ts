@@ -9,11 +9,12 @@ import applicationRoute from './routes/applicationRoute';
 import jobRoute from './routes/jobRoute';
 import swipeRoute from './routes/swipeRoute';
 import matchRoute from './routes/matchRoute';
+import notificationRoute from './routes/notificationRoute';
 
 const router = express.Router();
 
 router.get<{}, MessageResponse>('/', (req, res) => {
-  res.json({ message: 'Connected!' });
+  res.json({message: 'Connected!'});
 });
 
 router.use('/auth', authRoute);
@@ -24,5 +25,6 @@ router.use('/applications', applicationRoute);
 router.use('/jobs', jobRoute);
 router.use('/swipes', swipeRoute);
 router.use('/matches', matchRoute);
+router.use('/notifications', notificationRoute);
 
 export default router;

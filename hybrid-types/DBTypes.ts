@@ -174,3 +174,9 @@ export type Swipe = {
   swipe_type: string;
   swiped_at: Date | string;
 };
+
+export type Notification = {
+  notification_id: number;
+  match_id: number;
+  created_at: Date | string;
+};
