@@ -63,6 +63,7 @@ const login = async (
 
     const token = jwt.sign(tokenContent, process.env.JWT_SECRET);
 
+    console.log(token, 'token');
     const message: LoginResponse = {
       message: 'Logged in',
       token,
