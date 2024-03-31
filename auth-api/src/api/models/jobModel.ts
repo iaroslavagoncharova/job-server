@@ -14,7 +14,8 @@ import {getUser} from './userModel';
 const getAllJobs = async (): Promise<Job[]> => {
   try {
     const [rows] = await promisePool.execute<RowDataPacket[] & Job[]>(
-      'SELECT * FROM JobAds'
+      // select job ads, their keywords, skills and get company name aka username from user id
+      'SELECT JobAds.*, GROUP_CONCAT(DISTINCT Skills.skill_name) AS skills, GROUP_CONCAT(DISTINCT KeyWords.keyword_name) AS keywords, Users.username FROM JobAds LEFT JOIN JobSkills ON JobAds.job_id = JobSkills.job_id LEFT JOIN Skills ON JobSkills.skill_id = Skills.skill_id LEFT JOIN KeywordsJobs ON JobAds.job_id = KeywordsJobs.job_id LEFT JOIN KeyWords ON KeywordsJobs.keyword_id = KeyWords.keyword_id LEFT JOIN Users ON JobAds.user_id = Users.user_id GROUP BY JobAds.job_id; '
     );
     if (rows.length === 0) {
       throw new CustomError('No jobs found', 404);
