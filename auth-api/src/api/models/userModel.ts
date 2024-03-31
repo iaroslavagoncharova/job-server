@@ -145,6 +145,26 @@ const deleteUser = async (id: number): Promise<MessageResponse> => {
     ]);
     await connection.execute('DELETE FROM Education WHERE user_id = ?', [id]);
     await connection.execute('DELETE FROM Attachments WHERE user_id = ?', [id]);
+    // delete from JobSkills that have job id that has user id
+    await connection.execute(
+      'DELETE FROM JobSkills WHERE job_id IN (SELECT job_id FROM JobAds WHERE user_id = ?)',
+      [id]
+    );
+    // delete from keywordsjobs that have job id that has user id
+    await connection.execute(
+      'DELETE FROM KeywordsJobs WHERE job_id IN (SELECT job_id FROM JobAds WHERE user_id = ?)',
+      [id]
+    );
+    // delete from applications that have job id that has user id
+    await connection.execute(
+      'DELETE FROM Applications WHERE job_id IN (SELECT job_id FROM JobAds WHERE user_id = ?)',
+      [id]
+    );
+    // delete from job tests that have job id that has user id
+    await connection.execute(
+      'DELETE FROM JobTests WHERE job_id IN (SELECT job_id FROM JobAds WHERE user_id = ?)',
+      [id]
+    );
     await connection.execute('DELETE FROM JobAds WHERE user_id = ?', [id]);
     await connection.execute('DELETE FROM UserSkills WHERE user_id = ?', [id]);
     // delete application links that have application id that has user id
@@ -180,6 +200,7 @@ const deleteUser = async (id: number): Promise<MessageResponse> => {
       [id, id]
     );
     await connection.execute('DELETE FROM Reports WHERE user_id = ?', [id]);
+    // delete job ads with user id
     const [result] = await connection.execute<ResultSetHeader>(
       'DELETE FROM Users WHERE user_id = ?',
       [id]
