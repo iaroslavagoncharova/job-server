@@ -5,7 +5,7 @@ import {MessageResponse, SwipeResponse} from '@sharedTypes/MessageTypes';
 import {getUser} from './userModel';
 import {getSwipeById} from '../controllers/swipesController';
 
-const getSwipes = async () : Promise<Swipe[] | null> => {
+const getSwipes = async (): Promise<Swipe[] | null> => {
   try {
     const [result] = await promisePool.execute<RowDataPacket[] & Swipe[]>(
       'SELECT * FROM Swipes'
@@ -19,7 +19,7 @@ const getSwipes = async () : Promise<Swipe[] | null> => {
   }
 };
 
-const getSwipesByUser = async (id: number) : Promise<Swipe[] | null> => {
+const getSwipesByUser = async (id: number): Promise<Swipe[] | null> => {
   try {
     const [result] = await promisePool.execute<RowDataPacket[] & Swipe[]>(
       'SELECT * FROM Swipes WHERE swiper_id = ?',
@@ -34,7 +34,7 @@ const getSwipesByUser = async (id: number) : Promise<Swipe[] | null> => {
   }
 };
 
-const getRightSwipes = async () : Promise<Swipe[] | null> => {
+const getRightSwipes = async (): Promise<Swipe[] | null> => {
   try {
     const [result] = await promisePool.execute<RowDataPacket[] & Swipe[]>(
       'SELECT * FROM Swipes WHERE swipe_direction = "Right"'
@@ -48,7 +48,7 @@ const getRightSwipes = async () : Promise<Swipe[] | null> => {
   }
 };
 
-const getSwipeBySwipeId = async (id: number) : Promise<Swipe | null> => {
+const getSwipeBySwipeId = async (id: number): Promise<Swipe | null> => {
   try {
     const [result] = await promisePool.execute<RowDataPacket[] & Swipe[]>(
       'SELECT * FROM Swipes WHERE swipe_id = ?',
@@ -63,7 +63,7 @@ const getSwipeBySwipeId = async (id: number) : Promise<Swipe | null> => {
   }
 };
 
-const getRightSwipesByUser = async (id: number) : Promise<Swipe[] | null> => {
+const getRightSwipesByUser = async (id: number): Promise<Swipe[] | null> => {
   try {
     const [result] = await promisePool.execute<RowDataPacket[] & Swipe[]>(
       'SELECT * FROM Swipes WHERE swiper_id = ? AND swipe_direction = "Right"',
@@ -78,7 +78,7 @@ const getRightSwipesByUser = async (id: number) : Promise<Swipe[] | null> => {
   }
 };
 
-const getSwipeByUserId = async (id: number) : Promise<Swipe | null> => {
+const getSwipeByUserId = async (id: number): Promise<Swipe | null> => {
   try {
     const [result] = await promisePool.execute<RowDataPacket[] & Swipe[]>(
       'SELECT * FROM Swipes WHERE swiper_id = ? OR swiped_id = ?',
@@ -93,12 +93,17 @@ const getSwipeByUserId = async (id: number) : Promise<Swipe | null> => {
   }
 };
 
-const postSwipe = async (user_id: number, swipe: Omit<Swipe, 'swipe_id' | 'swiper_id' | 'created_at'>) : Promise<SwipeResponse> => {
+const postSwipe = async (
+  user_id: number,
+  swipe: Omit<Swipe, 'swipe_id' | 'swiper_id' | 'created_at'>
+): Promise<SwipeResponse> => {
   try {
+    console.log(user_id, swipe);
     const [result] = await promisePool.execute<ResultSetHeader>(
       'INSERT INTO Swipes (swiper_id, swiped_id, swipe_direction, swipe_type) VALUES (?, ?, ?, ?)',
       [user_id, swipe.swiped_id, swipe.swipe_direction, swipe.swipe_type]
     );
+    console.log();
     if (!result) {
       throw new Error('Failed to post swipe');
     }
@@ -113,7 +118,7 @@ const postSwipe = async (user_id: number, swipe: Omit<Swipe, 'swipe_id' | 'swipe
   }
 };
 
-const deleteSwipe = async (id: number) : Promise<MessageResponse | null> => {
+const deleteSwipe = async (id: number): Promise<MessageResponse | null> => {
   try {
     const [result] = await promisePool.execute<ResultSetHeader>(
       'DELETE FROM Swipes WHERE swipe_id = ?',
@@ -128,4 +133,13 @@ const deleteSwipe = async (id: number) : Promise<MessageResponse | null> => {
   }
 };
 
-export {getSwipes, getSwipesByUser, getRightSwipes, getRightSwipesByUser, getSwipeByUserId, deleteSwipe, getSwipeBySwipeId, postSwipe};
+export {
+  getSwipes,
+  getSwipesByUser,
+  getRightSwipes,
+  getRightSwipesByUser,
+  getSwipeByUserId,
+  deleteSwipe,
+  getSwipeBySwipeId,
+  postSwipe,
+};

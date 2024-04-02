@@ -11,14 +11,19 @@ import {
 import {getUserById} from '../controllers/userController';
 import {getUser} from './userModel';
 
-const getAllJobs = async (): Promise<Job[]> => {
+const getAllJobs = async (user_id: number): Promise<Job[] | null> => {
   try {
     const [rows] = await promisePool.execute<RowDataPacket[] & Job[]>(
+      // check if a user id is swiper id and job id is swiped id and swipe type is job, and if a user has swiped right or left on a job, then that job should not be shown to the user
       // select job ads, their keywords, skills and get company name aka username from user id
-      'SELECT JobAds.*, GROUP_CONCAT(DISTINCT Skills.skill_name) AS skills, GROUP_CONCAT(DISTINCT KeyWords.keyword_name) AS keywords, Users.username FROM JobAds LEFT JOIN JobSkills ON JobAds.job_id = JobSkills.job_id LEFT JOIN Skills ON JobSkills.skill_id = Skills.skill_id LEFT JOIN KeywordsJobs ON JobAds.job_id = KeywordsJobs.job_id LEFT JOIN KeyWords ON KeywordsJobs.keyword_id = KeyWords.keyword_id LEFT JOIN Users ON JobAds.user_id = Users.user_id GROUP BY JobAds.job_id; '
+      'SELECT JobAds.*, GROUP_CONCAT(DISTINCT Skills.skill_name) AS skills, GROUP_CONCAT(DISTINCT KeyWords.keyword_name) AS keywords, Users.username FROM JobAds LEFT JOIN JobSkills ON JobAds.job_id = JobSkills.job_id LEFT JOIN Skills ON JobSkills.skill_id = Skills.skill_id LEFT JOIN KeywordsJobs ON JobAds.job_id = KeywordsJobs.job_id LEFT JOIN KeyWords ON KeywordsJobs.keyword_id = KeyWords.keyword_id LEFT JOIN Users ON JobAds.user_id = Users.user_id WHERE JobAds.job_id NOT IN (SELECT Swipes.swiped_id FROM Swipes WHERE Swipes.swiper_id = ? AND Swipes.swipe_type = "job") GROUP BY JobAds.job_id;',
+      [user_id]
     );
     if (rows.length === 0) {
-      throw new CustomError('No jobs found', 404);
+      return null;
+    }
+    if (!rows) {
+      return null;
     }
     return rows;
   } catch (err) {

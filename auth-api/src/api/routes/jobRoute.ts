@@ -5,7 +5,7 @@ import {addJob, fetchAllJobs, fetchJobById, fetchJobsByCompany, fetchJobsByField
 const jobRoute = express.Router();
 
 jobRoute.route('/')
-.get(fetchAllJobs)
+.get(authenticate, fetchAllJobs)
 .post(authenticate, addJob);
 jobRoute.route('/:id')
 .get(fetchJobById)

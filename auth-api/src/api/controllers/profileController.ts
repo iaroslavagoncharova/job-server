@@ -6,6 +6,8 @@ import {
   deleteAttachment,
   deleteEducation,
   deleteExperience,
+  deleteUserSkill,
+  getAllSkills,
   getAttachments,
   getEducationByUser,
   getExperience,
@@ -92,7 +94,7 @@ const updateEducation = async (
     };
     const education_id = req.params.education_id;
     const user_id = res.locals.user.user_id;
-    const result = await putEducation(user_id, +education_id, education);
+    const result = await putEducation(+education_id, user_id, education);
     if (!result) {
       next(new CustomError('Failed to update education', 500));
       return;
@@ -132,7 +134,7 @@ const getExperienceById = async (
   try {
     const user_id = res.locals.user.user_id;
     const experience = await getExperience(user_id);
-    if (experience.length === 0) {
+    if (!experience) {
       next(new CustomError('No experience found', 404));
       return;
     }
@@ -182,9 +184,9 @@ const postExperience = async (
 
 const updateExperience = async (
   req: Request<{experience_id: string}>,
-  res: Response,
+  res: Response<MessageResponse>,
   next: NextFunction
-): Promise<void> => {
+) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const messages: string = errors
@@ -196,7 +198,18 @@ const updateExperience = async (
     return;
   }
   try {
-    const experience = req.body;
+    const {job_title, job_place, description, start_date, end_date} = req.body;
+    if (!job_title && !job_place && !description && !start_date && !end_date) {
+      next(new CustomError('No fields to update', 400));
+      return;
+    }
+    const experience = {
+      job_title: job_title || null,
+      job_place: job_place || null,
+      description: description || null,
+      start_date: start_date || null,
+      end_date: end_date || null,
+    };
     const user_id = res.locals.user.user_id;
     const experience_id = req.params.experience_id;
     if (!experience) {
@@ -234,6 +247,23 @@ const removeExperience = async (
   }
 };
 
+const getSkills = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const result = await getAllSkills();
+    if (result.length === 0) {
+      next(new CustomError('No skills found', 404));
+      return;
+    }
+    res.json(result);
+  } catch (error) {
+    next(new CustomError('Failed to get skills', 500));
+  }
+}
+
 const getSkillsByUser = async (
   req: Request<{user_id: string}>,
   res: Response<Skill[]>,
@@ -265,7 +295,7 @@ const addUserSkill = async (
     console.log(id, 'id');
     const result = await postUserSkill(id, +skill_id);
     if (!result) {
-      next(new CustomError('Failed to add skill', 500));
+      next(new CustomError('Skill not added or already exists', 500));
       return;
     }
     res.json(result);
@@ -294,6 +324,25 @@ const updateUserSkill = async (
   }
 };
 
+const removeUserSkill = async (
+  req: Request<{skill_id: string}>,
+  res: Response<MessageResponse>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const id = res.locals.user.user_id;
+    const skill_id = req.params.skill_id;
+    const result = await deleteUserSkill(id, +skill_id);
+    if (!result) {
+      next(new CustomError('Failed to remove skill', 500));
+      return;
+    }
+    res.json(result);
+  } catch (error) {
+    next(new CustomError('Failed to remove skill', 500));
+  }
+};
+
 const getUserAttachments = async (
   req: Request<{user_id: string}>,
   res: Response<Attachment[]>,
@@ -310,7 +359,7 @@ const getUserAttachments = async (
   } catch (error) {
     next(new CustomError('Failed to get attachments', 500));
   }
-}
+};
 
 const addAttachment = async (
   req: Request<{}, {}, Attachment>,
@@ -377,9 +426,11 @@ export {
   updateExperience,
   removeExperience,
   postExperience,
+  getSkills,
   getSkillsByUser,
   addUserSkill,
   updateUserSkill,
+  removeUserSkill,
   getUserAttachments,
   addAttachment,
   updateAttachment,
