@@ -34,8 +34,34 @@ const addEducation = async (
 ): Promise<MessageResponse> => {
   try {
     console.log(id, education);
-    // if education field or graduation is null, insert only into school and degree
-    if (education.field === '' || education.graduation === '') {
+    // if education field is null, insert only into school, degree, and graduation
+    if (education.field === '' && education.graduation !== '') {
+      const result = await promisePool.execute<ResultSetHeader>(
+        'INSERT INTO Education (user_id, school, degree, graduation) VALUES (?, ?, ?, ?)',
+        [id, education.school, education.degree, education.graduation]
+      );
+      console.log(result);
+      if (result[0].affectedRows === 0) {
+        throw new CustomError('Failed to add education', 500);
+      }
+      return {message: 'Education added'};
+    }
+    // if education graduation is null, insert only into school, degree, and field
+    if (education.graduation === '' && education.field !== '') {
+      console.log('inserting into school, degree, and field');
+      const result = await promisePool.execute<ResultSetHeader>(
+        'INSERT INTO Education (user_id, school, degree, field) VALUES (?, ?, ?, ?)',
+        [id, education.school, education.degree, education.field]
+      );
+      console.log(result);
+      if (result[0].affectedRows === 0) {
+        throw new CustomError('Failed to add education', 500);
+      }
+      return {message: 'Education added'};
+    }
+    // if education field and graduation is null, insert only into school and degree
+    if (education.field === '' && education.graduation === '') {
+      console.log('inserting into school and degree');
       const result = await promisePool.execute<ResultSetHeader>(
         'INSERT INTO Education (user_id, school, degree) VALUES (?, ?, ?)',
         [id, education.school, education.degree]
@@ -47,6 +73,7 @@ const addEducation = async (
       return {message: 'Education added'};
     }
     // if education field and graduation is not null, insert all fields
+    console.log('inserting into all fields');
     const result = await promisePool.execute<ResultSetHeader>(
       'INSERT INTO Education (user_id, school, degree, field, graduation) VALUES (?, ?, ?, ?, ?)',
       [
