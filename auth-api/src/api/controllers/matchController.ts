@@ -26,12 +26,13 @@ const getAllMatches = async (
 };
 
 const getUserMatches = async (
-  req: Request<{id: string}>,
+  req: Request,
   res: Response<Match[]>,
   next: NextFunction
 ): Promise<Match[] | void> => {
   try {
-    const id = req.params.id;
+    const tokenUser = res.locals.user;
+    const id = tokenUser.user_id;
     const matches = await getMatchesByUser(+id);
     if (!matches) {
       return next(new CustomError('No matches found', 404));

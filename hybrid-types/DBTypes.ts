@@ -88,6 +88,10 @@ export type Match = {
   created_at: Date | string;
 };
 
+export type MatchWithUser = Match & {
+  user: UnauthorizedUser;
+};
+
 export type Experience = {
   experience_id: number;
   user_id: number;

@@ -10,6 +10,7 @@ const getNotificationsByUser = async (
     const [result] = await promisePool.execute<
       RowDataPacket[] & Notification[]
     >(
+      // select all notifications, then select the match id from the notification and choose
       'SELECT * FROM Notifications WHERE match_id IN (SELECT match_id FROM Matches WHERE user1_id = ? OR user2_id = ?)',
       [id, id]
     );

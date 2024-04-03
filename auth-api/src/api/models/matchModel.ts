@@ -1,7 +1,10 @@
 import {ResultSetHeader, RowDataPacket} from 'mysql2';
 import {promisePool} from '../../lib/db';
-import {Match} from '@sharedTypes/DBTypes';
+import {Match, MatchWithUser} from '@sharedTypes/DBTypes';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
+import {postNotification} from './notificartionModel';
+import {getUserById} from '../controllers/userController';
+import {getUser} from './userModel';
 
 const getMatches = async (): Promise<Match[] | null> => {
   try {
@@ -19,12 +22,32 @@ const getMatches = async (): Promise<Match[] | null> => {
 
 const getMatchesByUser = async (id: number): Promise<Match[] | null> => {
   try {
+    // select all matches where user1_id or user2_id is the id, if user1 is the id, select user2, if user2 is the id, select user1
     const [result] = await promisePool.execute<RowDataPacket[] & Match[]>(
       'SELECT * FROM Matches WHERE user1_id = ? OR user2_id = ?',
       [id, id]
     );
     if (result.length === 0) {
       return null;
+    }
+    for (const match of result) {
+      if (match.user1_id === id) {
+        const user = await getUser(match.user2_id);
+        match.user = user;
+        const response = {
+          match: result,
+          user: user,
+        }
+        console.log(response);
+      } else {
+        const user = await getUser(match.user1_id);
+        match.user = user;
+        const response = {
+          match: result,
+          user: user,
+        }
+        console.log(response);
+      }
     }
     return result;
   } catch (e) {
@@ -44,6 +67,9 @@ const postMatch = async (
     if (result.affectedRows === 0) {
       throw new Error('Match not created');
     }
+    // post notification with match_id
+    const notification = await postNotification(result.insertId);
+    console.log(notification);
     return {message: 'Match created'};
   } catch (e) {
     throw new Error((e as Error).message);

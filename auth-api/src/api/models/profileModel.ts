@@ -101,6 +101,7 @@ const putEducation = async (
   education: EducationInfo
 ) => {
   const updateInfo: EducationInfo = {};
+  console.log(education);
   if (education.school !== null) {
     updateInfo.school = education.school;
   }
@@ -113,6 +114,7 @@ const putEducation = async (
   if (education.graduation !== null) {
     updateInfo.graduation = education.graduation;
   }
+  console.log(updateInfo);
   try {
     const sql = promisePool.format(
       'UPDATE Education SET ? WHERE education_id = ? AND user_id = ?',

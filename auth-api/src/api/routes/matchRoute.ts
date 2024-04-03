@@ -11,7 +11,7 @@ const matchRoute = express.Router();
 
 matchRoute.route('/').get(getAllMatches).post(authenticate, addMatch);
 matchRoute.route('/:id').delete(removeMatch);
-matchRoute.route('/user/:id').get(authenticate, getUserMatches);
+matchRoute.route('/user').get(authenticate, getUserMatches);
 
 
 export default matchRoute;
