@@ -33,14 +33,12 @@ const addEducation = async (
   education: Omit<Education, 'education_id'>
 ): Promise<MessageResponse> => {
   try {
-    console.log(id, education);
     // if education field is null, insert only into school, degree, and graduation
     if (education.field === '' && education.graduation !== '') {
       const result = await promisePool.execute<ResultSetHeader>(
         'INSERT INTO Education (user_id, school, degree, graduation) VALUES (?, ?, ?, ?)',
         [id, education.school, education.degree, education.graduation]
       );
-      console.log(result);
       if (result[0].affectedRows === 0) {
         throw new CustomError('Failed to add education', 500);
       }
@@ -48,12 +46,10 @@ const addEducation = async (
     }
     // if education graduation is null, insert only into school, degree, and field
     if (education.graduation === '' && education.field !== '') {
-      console.log('inserting into school, degree, and field');
       const result = await promisePool.execute<ResultSetHeader>(
         'INSERT INTO Education (user_id, school, degree, field) VALUES (?, ?, ?, ?)',
         [id, education.school, education.degree, education.field]
       );
-      console.log(result);
       if (result[0].affectedRows === 0) {
         throw new CustomError('Failed to add education', 500);
       }
@@ -61,19 +57,16 @@ const addEducation = async (
     }
     // if education field and graduation is null, insert only into school and degree
     if (education.field === '' && education.graduation === '') {
-      console.log('inserting into school and degree');
       const result = await promisePool.execute<ResultSetHeader>(
         'INSERT INTO Education (user_id, school, degree) VALUES (?, ?, ?)',
         [id, education.school, education.degree]
       );
-      console.log(result);
       if (result[0].affectedRows === 0) {
         throw new CustomError('Failed to add education', 500);
       }
       return {message: 'Education added'};
     }
     // if education field and graduation is not null, insert all fields
-    console.log('inserting into all fields');
     const result = await promisePool.execute<ResultSetHeader>(
       'INSERT INTO Education (user_id, school, degree, field, graduation) VALUES (?, ?, ?, ?, ?)',
       [
@@ -84,7 +77,6 @@ const addEducation = async (
         education.graduation,
       ]
     );
-    console.log(result);
     if (result[0].affectedRows === 0) {
       throw new CustomError('Failed to add education', 500);
     }
@@ -101,7 +93,6 @@ const putEducation = async (
   education: EducationInfo
 ) => {
   const updateInfo: EducationInfo = {};
-  console.log(education);
   if (education.school !== null) {
     updateInfo.school = education.school;
   }
@@ -114,14 +105,11 @@ const putEducation = async (
   if (education.graduation !== null) {
     updateInfo.graduation = education.graduation;
   }
-  console.log(updateInfo);
   try {
     const sql = promisePool.format(
       'UPDATE Education SET ? WHERE education_id = ? AND user_id = ?',
       [updateInfo, education_id, user_id]
     );
-
-    console.log(sql);
 
     const result = await promisePool.execute<ResultSetHeader>(sql);
     if (result[0].affectedRows === 0) {
@@ -158,7 +146,6 @@ const getExperience = async (id: number): Promise<Experience[] | null> => {
       'SELECT * FROM JobExperience WHERE user_id = ?',
       [id]
     );
-    console.log(result);
     if (result.length === 0) {
       return null;
     }
@@ -174,17 +161,27 @@ const addExperience = async (
   user_id: number
 ) => {
   try {
-    console.log(experience, user_id);
+    const newExperience = {
+      user_id,
+      job_title: experience.job_title,
+      job_place: experience.job_place,
+      job_city: experience.job_city,
+      description: experience.description,
+      start_date: experience.start_date,
+      end_date: experience.end_date,
+    };
+    console.log(newExperience);
+
     const result = await promisePool.execute<ResultSetHeader>(
       'INSERT INTO JobExperience (user_id, job_title, job_place, job_city, description, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [
         user_id,
-        experience.job_title,
-        experience.job_place,
-        experience.job_city,
-        experience.description,
-        experience.start_date,
-        experience.end_date,
+        newExperience.job_title,
+        newExperience.job_place,
+        newExperience.job_city,
+        newExperience.description,
+        newExperience.start_date,
+        newExperience.end_date,
       ]
     );
     console.log(result);
@@ -225,12 +222,12 @@ const putExperience = async (
     if (experience.end_date !== null && experience.end_date !== undefined) {
       experienceUpdate.end_date = experience.end_date;
     }
-    console.log(experienceUpdate);
     const sql = promisePool.format(
       'UPDATE JobExperience SET ? WHERE experience_id = ? AND user_id = ?',
       [experienceUpdate, experience_id, user_id]
     );
     console.log(sql);
+
     const result = await promisePool.execute<ResultSetHeader>(sql);
     if (result[0].affectedRows === 0) {
       return null;
@@ -278,7 +275,6 @@ const getUserSkills = async (id: number) => {
       `SELECT * FROM Skills WHERE skill_id IN (SELECT skill_id FROM UserSkills WHERE user_id = ?)`,
       [id]
     );
-    console.log(result);
     return result;
   } catch (error) {
     throw new CustomError('Failed to get user skills', 500);

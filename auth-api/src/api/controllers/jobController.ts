@@ -57,7 +57,6 @@ const fetchJobById = async (
   try {
     const id = req.params.id;
     const job = await getJobById(+id);
-    console.log(job, 'job');
     if (job === null) {
       next(new CustomError('Job not found', 404));
       return;
@@ -99,9 +98,7 @@ const addJob = async (
   }
   try {
     const job = req.body;
-    console.log(job, 'job');
     const tokenUser = res.locals.user;
-    console.log(tokenUser, 'tokenUser');
     const result = await postJob(job, tokenUser.user_id);
     if (!result) {
       next(new CustomError('Job creation failed', 500));
@@ -122,7 +119,6 @@ const updateJob = async (
     const id = req.params.id;
     const job = req.body;
     const tokenUser = res.locals.user;
-    console.log(job, 'job', tokenUser, 'tokenUser', id, 'id');
     const result = await putJob(+id, job, tokenUser.user_id);
     if (!result) {
       next(new CustomError('Job update failed', 500));

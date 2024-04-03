@@ -99,25 +99,25 @@ const postSwipe = async (
   swipe: Omit<Swipe, 'swipe_id' | 'swiper_id' | 'created_at'>
 ): Promise<SwipeResponse> => {
   try {
-    console.log(user_id, swipe);
     const [result] = await promisePool.execute<ResultSetHeader>(
       'INSERT INTO Swipes (swiper_id, swiped_id, swipe_direction, swipe_type) VALUES (?, ?, ?, ?)',
       [user_id, swipe.swiped_id, swipe.swipe_direction, swipe.swipe_type]
     );
-    console.log();
     if (!result) {
       throw new Error('Failed to post swipe');
     }
     const insertId = result.insertId;
+    console.log(insertId);
     const newSwipe = await getSwipeBySwipeId(insertId);
     if (!newSwipe) {
       throw new Error('Failed to get new swipe');
     }
+    console.log(newSwipe);
     if (
-      newSwipe.swipe_direction === 'Right' &&
+      newSwipe.swipe_direction === 'right' &&
       newSwipe.swipe_type === 'candidate'
     ) {
-      console.log('Employer has swiped right on a candidate');
+      console.log('Right swipe on candidate');
       const candidateUser = await getUser(newSwipe.swiped_id);
       if (!candidateUser) {
         throw new Error('Candidate user not found');
@@ -128,14 +128,12 @@ const postSwipe = async (
         [newSwipe.swiped_id, newSwipe.swiper_id]
       );
       if (result.length === 0) {
-        console.log('Candidate has not swiped right on employer');
         return {message: 'Swipe posted', swipe: newSwipe};
       }
-      console.log('Candidate has swiped right on employer');
       await postMatch(newSwipe.swiper_id, newSwipe.swiped_id);
     }
-    if (newSwipe.swipe_direction === 'Right' && newSwipe.swipe_type === 'job') {
-      console.log('Candidate has swiped right on a job');
+    if (newSwipe.swipe_direction === 'right' && newSwipe.swipe_type === 'job') {
+      console.log('Right swipe on job');
       const jobUser = await getUser(newSwipe.swiped_id);
       if (!jobUser) {
         throw new Error('Job user not found');
@@ -145,16 +143,15 @@ const postSwipe = async (
         sqlCheck,
         [newSwipe.swiped_id, newSwipe.swiper_id]
       );
+      console.log(result);
       if (result.length === 0) {
-        console.log('Employer has not swiped right on candidate');
         return {message: 'Swipe posted', swipe: newSwipe};
       }
-      console.log('Employer has swiped right on candidate');
       const match = await postMatch(newSwipe.swiper_id, newSwipe.swiped_id);
       if (!match) {
         throw new Error('Failed to post match');
       }
-      console.log('Match posted', match);
+      console.log(match);
     };
     return {message: 'Swipe posted', swipe: newSwipe};
   } catch (e) {

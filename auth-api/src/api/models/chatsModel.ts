@@ -3,6 +3,7 @@ import {Message, Chat, Match} from '@sharedTypes/DBTypes';
 import {ResultSetHeader, RowDataPacket} from 'mysql2';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 import CustomError from '../../classes/CustomError';
+import {deleteMatch} from './matchModel';
 
 // get a message by id
 const getMessage = async (messageId: number): Promise<Message | null> => {
@@ -53,12 +54,12 @@ const getChatById = async (chatId: number): Promise<Chat | null> => {
 };
 
 // getting chats for a user
-// something wrong here
 const getChatsByUser = async (userId: number): Promise<Chat[]> => {
   const [rows] = await promisePool.execute<RowDataPacket[] & Chat[]>(
     'SELECT * FROM Chats WHERE user1_id = ? OR user2_id = ?',
     [userId, userId]
   );
+  console.log(rows);
   if (rows.length === 0) {
     throw new CustomError('Chats not found', 404);
   }
@@ -134,6 +135,12 @@ const postChat = async (matchId: number): Promise<Chat | null> => {
       console.log('insert failed');
       return null;
     }
+    const handleDeleteMatch = await deleteMatch(matchId);
+    if (handleDeleteMatch.message !== 'Match deleted') {
+      console.log('Match not deleted');
+      return null;
+    }
+    console.log('chat created, match deleted');
     const [rows] = await promisePool.execute<RowDataPacket[] & Chat[]>(
       'SELECT * FROM Chats WHERE chat_id = ?',
       [chat[0].insertId]

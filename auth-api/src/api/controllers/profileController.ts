@@ -23,6 +23,7 @@ import {
   Attachment,
   EducationInfo,
   Experience,
+  ExperienceInfo,
   Skill,
 } from '@sharedTypes/DBTypes';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
@@ -149,23 +150,13 @@ const postExperience = async (
   res: Response<MessageResponse>,
   next: NextFunction
 ) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const messages: string = errors
-      .array()
-      .map((error) => `${error.msg}: ${error.type}`)
-      .join(', ');
-    console.log('userPost validation', messages);
-    next(new CustomError(messages, 400));
-    return;
-  }
+  console.log('postExperience', req.body);
   try {
     const experience = req.body;
     if (
       !experience.job_title ||
       !experience.job_place ||
-      !experience.start_date ||
-      !experience.end_date
+      !experience.start_date
     ) {
       next(new CustomError('Missing required fields', 400));
       return;
@@ -187,25 +178,25 @@ const updateExperience = async (
   res: Response<MessageResponse>,
   next: NextFunction
 ) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const messages: string = errors
-      .array()
-      .map((error) => `${error.msg}: ${error.type}`)
-      .join(', ');
-    console.log('userPost validation', messages);
-    next(new CustomError(messages, 400));
-    return;
-  }
   try {
-    const {job_title, job_place, description, start_date, end_date} = req.body;
-    if (!job_title && !job_place && !description && !start_date && !end_date) {
+    const {job_title, job_place, job_city, description, start_date, end_date} =
+      req.body;
+    // if all fields are empty, return error
+    if (
+      !job_title &&
+      !job_place &&
+      !job_city &&
+      !description &&
+      !start_date &&
+      !end_date
+    ) {
       next(new CustomError('No fields to update', 400));
       return;
     }
-    const experience = {
+    const experience: ExperienceInfo = {
       job_title: job_title || null,
       job_place: job_place || null,
+      job_city: job_city || null,
       description: description || null,
       start_date: start_date || null,
       end_date: end_date || null,
@@ -234,7 +225,6 @@ const removeExperience = async (
 ): Promise<void> => {
   try {
     const experience_id = req.params.experience_id;
-    console.log(experience_id, 'experience_id');
     const user_id = res.locals.user.user_id;
     const result = await deleteExperience(user_id, +experience_id);
     if (!result) {
@@ -262,7 +252,7 @@ const getSkills = async (
   } catch (error) {
     next(new CustomError('Failed to get skills', 500));
   }
-}
+};
 
 const getSkillsByUser = async (
   req: Request<{user_id: string}>,
@@ -271,7 +261,6 @@ const getSkillsByUser = async (
 ): Promise<void> => {
   try {
     const id = res.locals.user.user_id;
-    console.log(id, 'id');
     const result = await getUserSkills(id);
     if (result.length === 0) {
       next(new CustomError('No skills found', 404));
@@ -291,8 +280,6 @@ const addUserSkill = async (
   try {
     const id = res.locals.user.user_id;
     const skill_id = req.params.skill_id;
-    console.log(skill_id, 'skill_id');
-    console.log(id, 'id');
     const result = await postUserSkill(id, +skill_id);
     if (!result) {
       next(new CustomError('Skill not added or already exists', 500));

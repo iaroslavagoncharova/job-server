@@ -17,13 +17,10 @@ const getNotificationsByUser = async (
     if (result.length === 0) {
       return null;
     }
-    console.log(result);
-    console.log(result[0].match_id);
     const [match] = await promisePool.execute<RowDataPacket[] & Match>(
       'SELECT * FROM Matches WHERE match_id = ?',
       [result[0].match_id]
     );
-    console.log(match);
     if (!match) {
       throw new Error('Match not found');
     }

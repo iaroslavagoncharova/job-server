@@ -49,24 +49,12 @@ profileRoute.delete('/education/:education_id', authenticate, removeEducation);
 profileRoute.get('/experience', authenticate, getExperienceById);
 profileRoute.post(
   '/experience',
-  body('job_title').isString().notEmpty().escape().trim(),
-  body('job_place').isString().notEmpty().escape().trim(),
-  body('job_city').isString().optional().escape().trim(),
-  body('description').isString().optional().escape().trim(),
-  body('start_date').isString().notEmpty().escape().trim(),
-  body('end_date').isString().optional().escape().trim(),
   authenticate,
   postExperience
 );
 profileRoute
   .route('/experience/:experience_id')
   .put(
-    body('job_title').isString().optional().escape().trim(),
-    body('job_place').isString().optional().escape().trim(),
-    body('job_city').isString().optional().escape().trim(),
-    body('description').isString().optional().escape().trim(),
-    body('start_date').isString().optional().escape().trim(),
-    body('end_date').isString().optional().escape().trim(),
     authenticate,
     updateExperience
   )
