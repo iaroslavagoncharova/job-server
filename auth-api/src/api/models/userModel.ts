@@ -74,7 +74,44 @@ const postUser = async (
   user: Pick<User, 'password' | 'email' | 'fullname' | 'phone' | 'user_type'>
 ): Promise<UnauthorizedUser | null> => {
   try {
-    const username = 'test';
+    // for a username, get a random value from animals and adjectives tables
+    const [usernameResult] = await promisePool.execute<RowDataPacket[]>(
+      'SELECT animal_name FROM Animals ORDER BY RAND() LIMIT 1'
+    );
+    const [adjectiveResult] = await promisePool.execute<RowDataPacket[]>(
+      'SELECT adj_name FROM Adjectives ORDER BY RAND() LIMIT 1'
+    );
+
+    const username =
+    adjectiveResult[0].adj_name + '_' + usernameResult[0].animal_name;
+
+      const checkifUsernameExists = await promisePool.execute<RowDataPacket[]>(
+        'SELECT * FROM Users WHERE username = ?',
+        [username]
+      );
+
+    // if username already exists, generate a new one
+    if (checkifUsernameExists[0].length > 0) {
+      const [newUsernameResult] = await promisePool.execute<RowDataPacket[]>(
+        'SELECT animal_name FROM Animals ORDER BY RAND() LIMIT 1'
+      );
+      const [newAdjectiveResult] = await promisePool.execute<RowDataPacket[]>(
+        'SELECT adj_name FROM Adjectives ORDER BY RAND() LIMIT 1'
+      );
+
+      const newUsername =
+        newAdjectiveResult[0].adj_name + '_' + newUsernameResult[0].animal_name;
+
+      const checkifNewUsernameExists = await promisePool.execute<RowDataPacket[]>(
+        'SELECT * FROM Users WHERE username = ?',
+        [newUsername]
+      );
+
+      if (checkifNewUsernameExists[0].length > 0) {
+        throw new Error('Username generation failed');
+      }
+    }
+
     const result = await promisePool.execute<ResultSetHeader>(
       'INSERT INTO Users (username, password, email, user_level_id, fullname, phone, user_type) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [
