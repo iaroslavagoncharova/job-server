@@ -1,7 +1,7 @@
 import {Request, Response, NextFunction} from 'express';
-import {deleteChat, getChatById, getChatsByUser, getMessage, getMessagesByChatAndUser, postChat, postMessage} from '../models/chatsModel';
+import {deleteChat, getChatById, getChatsByUser, getMessage, getMessagesByChatAndUser, getOtherChatUser, postChat, postMessage} from '../models/chatsModel';
 import CustomError from '../../classes/CustomError';
-import {Chat, Message, TokenContent} from '@sharedTypes/DBTypes';
+import {Chat, Message, MessageWithUser, TokenContent, User} from '@sharedTypes/DBTypes';
 import {ChatResponse, MessageResponse} from '@sharedTypes/MessageTypes';
 
 // toimii
@@ -21,6 +21,26 @@ export const handleGetMessage = async (
     } catch (e) {
       next(e);
     }
+};
+
+export const handleGetOtherChatUser = async (
+  req: Request<{chatId: string}>,
+  res: Response,
+  next: NextFunction
+): Promise<Pick<User, 'username' | 'user_id'> | void> => {
+  try {
+    const chat_id = parseInt(req.params.chatId);
+    const user_id = parseInt(res.locals.user.user_id);
+    const otherUser = await getOtherChatUser(chat_id, user_id);
+    if (otherUser === null) {
+      next(new CustomError('Message not found', 404));
+      return;
+    }
+    console.log('handleGetOtherChatUser', otherUser);
+    res.json(otherUser);
+  } catch (e) {
+    next(e);
+  }
 };
 
 // toimii
@@ -64,7 +84,7 @@ export const handleGetChatsByUser = async (
 // toimii
 export const handleGetMessagesByChatAndUser = async (
   req: Request<{chatId: string}>,
-  res: Response,
+  res: Response<MessageWithUser[]>,
   next: NextFunction
 ) => {
   try {
