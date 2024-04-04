@@ -1,6 +1,6 @@
 import {ResultSetHeader, RowDataPacket} from 'mysql2';
 import {promisePool} from '../../lib/db';
-import {Swipe} from '@sharedTypes/DBTypes';
+import {Job, Swipe} from '@sharedTypes/DBTypes';
 import {MessageResponse, SwipeResponse} from '@sharedTypes/MessageTypes';
 import {getUser} from './userModel';
 import {getSwipeById} from '../controllers/swipesController';
@@ -134,20 +134,26 @@ const postSwipe = async (
     }
     if (newSwipe.swipe_direction === 'right' && newSwipe.swipe_type === 'job') {
       console.log('Right swipe on job');
-      const jobUser = await getUser(newSwipe.swiped_id);
-      if (!jobUser) {
+      // getting user id from the job id
+      const jobUserSql = 'SELECT user_id FROM JobAds WHERE job_id = ?';
+      const jobUserResult = await promisePool.execute<RowDataPacket[] & Job[]>(
+        jobUserSql,
+        [newSwipe.swiped_id]
+      );
+      if (!jobUserResult) {
         throw new Error('Job user not found');
       }
+      console.log(jobUserResult[0][0].user_id);
       const sqlCheck = 'SELECT * FROM Swipes WHERE swiper_id = ? AND swiped_id = ?';
       const [result] = await promisePool.execute<RowDataPacket[] & Swipe[]>(
         sqlCheck,
-        [newSwipe.swiped_id, newSwipe.swiper_id]
+        [newSwipe.swiper_id, jobUserResult[0][0].user_id]
       );
       console.log(result);
       if (result.length === 0) {
         return {message: 'Swipe posted', swipe: newSwipe};
       }
-      const match = await postMatch(newSwipe.swiper_id, newSwipe.swiped_id);
+      const match = await postMatch(newSwipe.swiper_id, jobUserResult[0][0].user_id);
       if (!match) {
         throw new Error('Failed to post match');
       }

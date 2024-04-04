@@ -135,12 +135,6 @@ const postChat = async (matchId: number): Promise<Chat | null> => {
       console.log('insert failed');
       return null;
     }
-    const handleDeleteMatch = await deleteMatch(matchId);
-    if (handleDeleteMatch.message !== 'Match deleted') {
-      console.log('Match not deleted');
-      return null;
-    }
-    console.log('chat created, match deleted');
     const [rows] = await promisePool.execute<RowDataPacket[] & Chat[]>(
       'SELECT * FROM Chats WHERE chat_id = ?',
       [chat[0].insertId]
