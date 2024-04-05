@@ -1,12 +1,13 @@
 import express from 'express';
 import { authenticate } from '../../middlewares';
-import {addJob, fetchAllJobs, fetchJobById, fetchJobsByCompany, fetchJobsByField, removeJob, updateJob} from '../controllers/jobController';
+import {addJob, fetchAllJobs, fetchFields, fetchJobById, fetchJobsByCompany, fetchJobsByField, removeJob, updateJob} from '../controllers/jobController';
 
 const jobRoute = express.Router();
 
 jobRoute.route('/')
 .get(authenticate, fetchAllJobs)
 .post(authenticate, addJob);
+jobRoute.get('/fields', fetchFields);
 jobRoute.route('/:id')
 .get(fetchJobById)
 .put(authenticate, updateJob)

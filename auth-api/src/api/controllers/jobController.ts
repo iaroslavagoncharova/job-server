@@ -6,6 +6,7 @@ import {Job, JobWithSkillsAndKeywords, UpdateJob} from '@sharedTypes/DBTypes';
 import {
   deleteJob,
   getAllJobs,
+  getFields,
   getJobByField,
   getJobById,
   getJobsByCompany,
@@ -46,6 +47,19 @@ const fetchJobsByCompany = async (
     res.json(jobs);
   } catch (error) {
     return next(error);
+  }
+};
+
+const fetchFields = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const fields = await getFields();
+    res.json(fields);
+  } catch (error) {
+    next(new CustomError((error as Error).message, 500));
   }
 };
 
@@ -156,6 +170,7 @@ const removeJob = async (
 
 export {
   fetchJobsByCompany,
+  fetchFields,
   fetchJobById,
   fetchAllJobs,
   fetchJobsByField,
