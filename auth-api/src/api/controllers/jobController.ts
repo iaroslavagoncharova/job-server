@@ -57,6 +57,10 @@ const fetchFields = async (
 ): Promise<void> => {
   try {
     const fields = await getFields();
+    if (fields.length === 0) {
+      next(new CustomError('No fields found', 404));
+      return;
+    }
     res.json(fields);
   } catch (error) {
     next(new CustomError((error as Error).message, 500));
