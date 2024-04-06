@@ -7,6 +7,7 @@ import {
   JobWithSkillsAndKeywords,
   User,
   UpdateJob,
+  JobWithUser,
 } from '@sharedTypes/DBTypes';
 import {getUserById} from '../controllers/userController';
 import {getUser} from './userModel';
@@ -51,6 +52,24 @@ const getFields = async (): Promise<string[]> => {
     return rows.map((row) => row.field);
   } catch (err) {
     throw new CustomError('getFields failed', 500);
+  }
+};
+
+const getJobForApplication = async (job_id: number): Promise<JobWithUser | null> => {
+  try {
+    console.log(job_id, 'job_id');
+    const [result] = await promisePool.execute<
+      RowDataPacket[] & JobWithUser[]
+    >(
+      'SELECT JobAds.*, Users.username FROM JobAds LEFT JOIN Users ON JobAds.user_id = Users.user_id WHERE JobAds.job_id = ?;',
+      [job_id]
+    );
+    if (result.length === 0) {
+      return null;
+    }
+    return result[0];
+  } catch (err) {
+    throw new Error((err as Error).message);
   }
 };
 
@@ -292,6 +311,7 @@ export {
   getJobsByCompany,
   getFields,
   getJobById,
+  getJobForApplication,
   getAllJobs,
   getJobByField,
   postJob,

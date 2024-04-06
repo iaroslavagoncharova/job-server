@@ -2,13 +2,14 @@ import {Request, Response, NextFunction} from 'express';
 import CustomError from '../../classes/CustomError';
 import {JobResponse, MessageResponse} from '@sharedTypes/MessageTypes';
 import {validationResult} from 'express-validator';
-import {Job, JobWithSkillsAndKeywords, UpdateJob} from '@sharedTypes/DBTypes';
+import {Job, JobWithSkillsAndKeywords, JobWithUser, UpdateJob} from '@sharedTypes/DBTypes';
 import {
   deleteJob,
   getAllJobs,
   getFields,
   getJobByField,
   getJobById,
+  getJobForApplication,
   getJobsByCompany,
   postJob,
   putJob,
@@ -99,6 +100,25 @@ const fetchJobsByField = async (
   }
 };
 
+const fetchJobForApplication = async (
+  req: Request,
+  res: Response<JobWithUser>,
+  next: NextFunction
+): Promise<JobWithUser[] | void> => {
+  try {
+    const id = req.params.job_id;
+    console.log('id', id);
+    const job = await getJobForApplication(+id);
+    if (job === null) {
+      next(new CustomError('Job not found', 404));
+      return;
+    }
+    res.json(job);
+  } catch (error) {
+    next(new CustomError((error as Error).message, 500));
+  }
+}
+
 const addJob = async (
   req: Request,
   res: Response<JobResponse>,
@@ -178,6 +198,7 @@ export {
   fetchJobById,
   fetchAllJobs,
   fetchJobsByField,
+  fetchJobForApplication,
   addJob,
   removeJob,
   updateJob,

@@ -87,7 +87,7 @@ export type PostMessage = {
   message_text: string;
 };
 
-export type MessageWithUser = Message & Pick<User, 'username'>;
+export type MessageWithUser = Message & Pick<User, "username">;
 
 export type Match = {
   match_id: number;
@@ -165,6 +165,10 @@ export type Job = {
 export type JobWithSkillsAndKeywords = Job & {
   skills: string;
   keywords: string;
+};
+
+export type JobWithUser = Job & {
+  username: string;
 };
 
 export type UpdateJob = {
