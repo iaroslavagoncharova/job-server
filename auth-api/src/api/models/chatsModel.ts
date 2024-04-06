@@ -1,5 +1,5 @@
 import {promisePool} from '../../lib/db';
-import {Message, Chat, Match, MessageWithUser, User} from '@sharedTypes/DBTypes';
+import {Message, Chat, Match, MessageWithUser, User, PostMessage} from '@sharedTypes/DBTypes';
 import {ResultSetHeader, RowDataPacket} from 'mysql2';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 import CustomError from '../../classes/CustomError';
@@ -144,7 +144,7 @@ const getMessagesByChatAndUser = async (
 };
 
 // sending a message to a chat
-const postMessage = async (message: Pick<Message, 'user_id' | 'chat_id' | 'message_text'>): Promise<Message | null> => {
+const postMessage = async (message: PostMessage): Promise<Message | null> => {
   try {
     const result = await promisePool.execute<ResultSetHeader>(`
       INSERT INTO Messages (user_id, chat_id, message_text)

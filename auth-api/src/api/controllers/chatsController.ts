@@ -1,7 +1,7 @@
 import {Request, Response, NextFunction} from 'express';
 import {deleteChat, getChatById, getChatsByUser, getMessage, getMessagesByChatAndUser, getOtherChatUser, postChat, postMessage} from '../models/chatsModel';
 import CustomError from '../../classes/CustomError';
-import {Chat, Message, MessageWithUser, TokenContent, User} from '@sharedTypes/DBTypes';
+import {Chat, Message, MessageWithUser, PostMessage, TokenContent, User} from '@sharedTypes/DBTypes';
 import {ChatResponse, MessageResponse} from '@sharedTypes/MessageTypes';
 
 // toimii
@@ -103,13 +103,14 @@ export const handleGetMessagesByChatAndUser = async (
 
 // toimii
 export const handlePostMessage = async (
-  req: Request<{}, {}, Pick<Message, 'user_id' | 'chat_id' | 'message_text'>>,
+  req: Request<{}, {}, Pick<Message, 'chat_id' | 'message_text'>>,
   res: Response<ChatResponse, {user: TokenContent}>,
   next: NextFunction
 ): Promise<Message | void> => {
   try {
-    req.body.user_id = res.locals.user.user_id;
-    const message = req.body;
+    const userId = res.locals.user.user_id;
+    const message: PostMessage = {...req.body, user_id: userId};
+    console.log(message);
     const newMessage = await postMessage(message);
     if (newMessage === null) {
       next(new CustomError('Message not created', 404));
