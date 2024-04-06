@@ -81,6 +81,14 @@ export type Message = {
   sent_at: Date | string;
 };
 
+export type PostMessage = {
+  user_id: number;
+  chat_id: number;
+  message_text: string;
+};
+
+export type MessageWithUser = Message & Pick<User, 'username'>;
+
 export type Match = {
   match_id: number;
   user1_id: number;
