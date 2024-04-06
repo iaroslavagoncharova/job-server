@@ -5,6 +5,7 @@ import {MessageResponse} from '@sharedTypes/MessageTypes';
 import {postNotification} from './notificartionModel';
 import {getUserById} from '../controllers/userController';
 import {getUser} from './userModel';
+import {postChat} from './chatsModel';
 
 const getMatches = async (): Promise<Match[] | null> => {
   try {
@@ -38,7 +39,6 @@ const getMatchesByUser = async (id: number): Promise<Match[] | null> => {
           match: result,
           user: user,
         }
-        console.log(response);
       } else {
         const user = await getUser(match.user1_id);
         match.user = user;
@@ -46,7 +46,6 @@ const getMatchesByUser = async (id: number): Promise<Match[] | null> => {
           match: result,
           user: user,
         }
-        console.log(response);
       }
     }
     return result;
@@ -67,9 +66,9 @@ const postMatch = async (
     if (result.affectedRows === 0) {
       throw new Error('Match not created');
     }
-    // post notification with match_id
-    const notification = await postNotification(result.insertId);
-    console.log(notification);
+    // create a new chat for both users
+    const createChat = await postChat(result.insertId);
+    console.log(createChat);
     return {message: 'Match created'};
   } catch (e) {
     throw new Error((e as Error).message);

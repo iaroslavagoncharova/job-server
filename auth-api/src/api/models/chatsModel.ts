@@ -3,6 +3,7 @@ import {Message, Chat, Match, MessageWithUser, User} from '@sharedTypes/DBTypes'
 import {ResultSetHeader, RowDataPacket} from 'mysql2';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 import CustomError from '../../classes/CustomError';
+import {deleteMatch} from './matchModel';
 
 // get a message by id
 const getMessage = async (messageId: number): Promise<Message | null> => {
@@ -65,12 +66,12 @@ const getChatById = async (chatId: number): Promise<Chat | null> => {
 };
 
 // getting chats for a user
-// something wrong here
 const getChatsByUser = async (userId: number): Promise<Chat[]> => {
   const [rows] = await promisePool.execute<RowDataPacket[] & Chat[]>(
     'SELECT * FROM Chats WHERE user1_id = ? OR user2_id = ?',
     [userId, userId]
   );
+  console.log(rows);
   if (rows.length === 0) {
     throw new CustomError('Chats not found', 404);
   }

@@ -24,7 +24,6 @@ const login = async (
   }
   try {
     const {email, password} = req.body;
-    console.log(req.body, 'req.body');
     const user = await getUserByEmail(email);
     if (!user) {
       next(new CustomError("Invalid email or the user doesn't exist", 401));
@@ -62,8 +61,6 @@ const login = async (
     };
 
     const token = jwt.sign(tokenContent, process.env.JWT_SECRET);
-
-    console.log(token, 'token');
     const message: LoginResponse = {
       message: 'Logged in',
       token,

@@ -49,7 +49,7 @@ const getUserById = async (
       .array()
       .map((error) => `${error.msg}: ${error.type}`)
       .join(', ');
-    console.log('userGet validation', messages);
+    console.log('getUserById validation', messages);
     next(new CustomError(messages, 400));
     return;
   }
@@ -115,17 +115,14 @@ const addUser = async (
       .array()
       .map((error) => `${error.msg}: ${error.type}`)
       .join(', ');
-    console.log('userPost validation', messages);
+    console.log('addUser validation', messages);
     next(new CustomError(messages, 400));
     return;
   }
   try {
     const user = req.body;
-    console.log(user);
     user.password = bcrypt.hashSync(user.password, salt);
-    console.log(user.password, 'hashed');
     const createdUser = await postUser(user);
-    console.log(createdUser);
     if (!createdUser) {
       next(new CustomError('User not created', 500));
       return;

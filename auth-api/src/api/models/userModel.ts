@@ -124,7 +124,6 @@ const postUser = async (
         user.user_type,
       ]
     );
-    console.log(result);
     const createdUser = await getUser(result[0].insertId);
     return createdUser;
   } catch (e) {
@@ -156,12 +155,10 @@ const putUser = async (
     if (user.about_me !== undefined) {
       updateInfo.about_me = user.about_me;
     }
-    console.log(updateInfo);
     const sql = promisePool.format('UPDATE Users SET ? WHERE user_id = ?', [
       updateInfo,
       id,
     ]);
-    console.log(sql);
     const result = await promisePool.execute<ResultSetHeader>(sql);
     if (result[0].affectedRows === 0) {
       return null;

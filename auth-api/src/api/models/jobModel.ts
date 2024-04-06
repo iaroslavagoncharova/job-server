@@ -43,6 +43,17 @@ const getJobsByCompany = async (id: number): Promise<Job[]> => {
   }
 };
 
+const getFields = async (): Promise<string[]> => {
+  try {
+    const [rows] = await promisePool.execute<RowDataPacket[] & {field: string}[]>(
+      'SELECT DISTINCT field FROM JobAds'
+    );
+    return rows.map((row) => row.field);
+  } catch (err) {
+    throw new CustomError('getFields failed', 500);
+  }
+};
+
 const getJobById = async (
   id: number
 ): Promise<JobWithSkillsAndKeywords | null> => {
@@ -279,6 +290,7 @@ const deleteJob = async (
 
 export {
   getJobsByCompany,
+  getFields,
   getJobById,
   getAllJobs,
   getJobByField,

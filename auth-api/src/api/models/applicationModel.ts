@@ -76,7 +76,6 @@ const postApplicationLinks = async (links: string[], applicationId: number): Pro
       if (result.affectedRows === 0) {
         return {message: 'Failed to add application link'};
       }
-      console.log(result);
     }
     return {message: 'Application link(s) added to database'};
   } catch (e) {
