@@ -1,6 +1,6 @@
 import {ResultSetHeader, RowDataPacket} from 'mysql2';
 import {promisePool} from '../../lib/db';
-import {Match, MatchWithUser} from '@sharedTypes/DBTypes';
+import {Chat, Match, MatchWithUser} from '@sharedTypes/DBTypes';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 import {postNotification} from './notificartionModel';
 import {getUserById} from '../controllers/userController';
@@ -66,7 +66,15 @@ const postMatch = async (
     if (result.affectedRows === 0) {
       throw new Error('Match not created');
     }
-    // create a new chat for both users
+    // check if a chat aready exists between the two users
+    const checkChat = await promisePool.execute<RowDataPacket[] & Chat[]>(
+      'SELECT * FROM Chats WHERE user1_id = ? AND user2_id = ? OR user1_id = ? AND user2_id = ?',
+      [user1_id, user2_id, user2_id, user1_id]
+    );
+    if (checkChat[0].length > 0) {
+      return {message: 'Match created'};
+    }
+    // if no chat exists, create a chat
     const createChat = await postChat(result.insertId);
     console.log(createChat);
     return {message: 'Match created'};
