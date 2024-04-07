@@ -5,6 +5,7 @@ import {MessageResponse, SwipeResponse} from '@sharedTypes/MessageTypes';
 import {getUser} from './userModel';
 import {getSwipeById} from '../controllers/swipesController';
 import {postMatch} from './matchModel';
+import {postApplication} from './applicationModel';
 
 const getSwipes = async (): Promise<Swipe[] | null> => {
   try {
@@ -133,7 +134,11 @@ const postSwipe = async (
       await postMatch(newSwipe.swiper_id, newSwipe.swiped_id);
     }
     if (newSwipe.swipe_direction === 'right' && newSwipe.swipe_type === 'job') {
-      console.log('Right swipe on job');
+      // create an application for the job
+      const createApplication = await postApplication(newSwipe.swiper_id, newSwipe.swiped_id);
+      if (!createApplication) {
+        throw new Error('Failed to create application');
+      }
       // getting user id from the job id
       const jobUserSql = 'SELECT user_id FROM JobAds WHERE job_id = ?';
       const jobUserResult = await promisePool.execute<RowDataPacket[] & Job[]>(
