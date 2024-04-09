@@ -55,6 +55,66 @@ const getUserAsCandidate = async (
   }
 };
 
+const getAllCandidates = async (): Promise<CandidateProfile[] | null> => {
+  try {
+    // get basic user info
+    const [userResult] = await promisePool.execute<
+      RowDataPacket[] & CandidateProfile[]
+    >(
+      "SELECT Users.user_id, Users.username, Users.about_me, Users.link, Users.field FROM Users WHERE user_type = 'candidate'"
+    );
+    if (userResult.length === 0) {
+      return null;
+    }
+    // get user skills for each user
+    const skillResult = await Promise.all(
+      userResult.map(async (user) => {
+        console.log(user);
+        const [skills] = await promisePool.execute<
+          RowDataPacket[] & CandidateProfile[]
+        >(
+          'SELECT Skills.skill_name FROM UserSkills JOIN Skills ON UserSkills.skill_id = Skills.skill_id WHERE user_id = ?',
+          [user.user_id]
+        );
+        return [skills];
+      })
+    );
+    // get user education and experience for each user
+    const eduResult = await Promise.all(
+      userResult.map(async (user) => {
+        const [edu] = await promisePool.execute<
+          RowDataPacket[] & CandidateProfile[]
+        >(
+          'SELECT Education.degree, Education.school, Education.field, Education.graduation FROM Education WHERE user_id = ?',
+          [user.user_id]
+        );
+        return [edu];
+      })
+    );
+    const expResult = await Promise.all(
+      userResult.map(async (user) => {
+        const [exp] = await promisePool.execute<
+          RowDataPacket[] & CandidateProfile[]
+        >(
+          'SELECT JobExperience.job_title, JobExperience.job_place, JobExperience.job_city, JobExperience.description, JobExperience.start_date, JobExperience.end_date FROM JobExperience WHERE user_id = ?',
+          [user.user_id]
+        );
+        return [exp];
+      })
+    );
+    const finalResult = {
+      ...userResult[0],
+      skills: skillResult,
+      education: eduResult,
+      experience: expResult,
+    };
+    console.log(finalResult);
+    return [finalResult];
+  } catch (e) {
+    throw new Error((e as Error).message);
+  }
+};
+
 const getUserByEmail = async (email: string): Promise<User | null> => {
   try {
     const [result] = await promisePool.execute<RowDataPacket[] & User[]>(
@@ -83,12 +143,12 @@ const postUser = async (
     );
 
     const username =
-    adjectiveResult[0].adj_name + '_' + usernameResult[0].animal_name;
+      adjectiveResult[0].adj_name + '_' + usernameResult[0].animal_name;
 
-      const checkifUsernameExists = await promisePool.execute<RowDataPacket[]>(
-        'SELECT * FROM Users WHERE username = ?',
-        [username]
-      );
+    const checkifUsernameExists = await promisePool.execute<RowDataPacket[]>(
+      'SELECT * FROM Users WHERE username = ?',
+      [username]
+    );
 
     // if username already exists, generate a new one
     if (checkifUsernameExists[0].length > 0) {
@@ -102,10 +162,9 @@ const postUser = async (
       const newUsername =
         newAdjectiveResult[0].adj_name + '_' + newUsernameResult[0].animal_name;
 
-      const checkifNewUsernameExists = await promisePool.execute<RowDataPacket[]>(
-        'SELECT * FROM Users WHERE username = ?',
-        [newUsername]
-      );
+      const checkifNewUsernameExists = await promisePool.execute<
+        RowDataPacket[]
+      >('SELECT * FROM Users WHERE username = ?', [newUsername]);
 
       if (checkifNewUsernameExists[0].length > 0) {
         throw new Error('Username generation failed');
@@ -253,6 +312,7 @@ export {
   getUsers,
   getUser,
   getUserAsCandidate,
+  getAllCandidates,
   postUser,
   getUserByEmail,
   deleteUser,

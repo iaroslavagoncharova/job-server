@@ -13,6 +13,7 @@ import {
   deleteUser,
   putUser,
   getUserAsCandidate,
+  getAllCandidates,
 } from '../models/userModel';
 import CustomError from '../../classes/CustomError';
 import {validationResult} from 'express-validator';
@@ -81,6 +82,24 @@ const getCandidateUser = async (
     next(new CustomError((e as Error).message, 500));
   }
 };
+
+const getCandidates = async (
+  req: Request,
+  res: Response<CandidateProfile[]>,
+  next: NextFunction
+) => {
+  console.log('getCandidates');
+  try {
+    const users = await getAllCandidates();
+    if (users === null) {
+      next(new CustomError('Users not found', 404));
+      return;
+    }
+    res.json(users);
+  } catch (e) {
+    next(new CustomError((e as Error).message, 500));
+  }
+}
 
 const getUserByToken = async (
   req: Request,
@@ -178,6 +197,7 @@ export {
   getAllUsers,
   getUserById,
   getCandidateUser,
+  getCandidates,
   addUser,
   getUserByToken,
   removeUser,

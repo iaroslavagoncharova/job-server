@@ -1,11 +1,12 @@
 import express from 'express';
-import {addUser, getAllUsers, getCandidateUser, getUserById, getUserByToken, removeUser, updateUser} from '../controllers/userController';
+import {addUser, getAllUsers, getCandidateUser, getCandidates, getUserById, getUserByToken, removeUser, updateUser} from '../controllers/userController';
 import {body} from 'express-validator';
 import {authenticate} from '../../middlewares';
 
 const userRoute = express.Router();
 
 userRoute.get('/', getAllUsers);
+userRoute.get('/candidates', getCandidates);
 userRoute.get('/candidate/:id', getCandidateUser);
 
 userRoute.get('/token', authenticate, getUserByToken);
