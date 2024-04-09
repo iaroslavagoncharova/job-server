@@ -1,7 +1,11 @@
 import {ResultSetHeader, RowDataPacket} from 'mysql2';
 import {promisePool} from '../../lib/db';
 import {
+  Attachment,
   CandidateProfile,
+  Education,
+  Experience,
+  SkillName,
   UnauthorizedUser,
   UpdateUser,
   User,
@@ -55,61 +59,66 @@ const getUserAsCandidate = async (
   }
 };
 
-const getAllCandidates = async (): Promise<CandidateProfile[] | null> => {
+const getAllCandidates = async (user_id: number): Promise<CandidateProfile[] | null> => {
   try {
     // get basic user info
     const [userResult] = await promisePool.execute<
       RowDataPacket[] & CandidateProfile[]
     >(
-      "SELECT Users.user_id, Users.username, Users.about_me, Users.link, Users.field FROM Users WHERE user_type = 'candidate'"
+      "SELECT Users.user_id, Users.username, Users.about_me, Users.link, Users.field FROM Users WHERE Users.user_id NOT IN (SELECT Swipes.swiped_id from Swipes WHERE Swipes.swiper_id = ? AND Swipes.swipe_type = 'candidate') AND Users.user_type = 'candidate'",
+      [user_id]
     );
     if (userResult.length === 0) {
       return null;
     }
-    // get user skills for each user
-    const skillResult = await Promise.all(
+
+    const candidates = await Promise.all(
       userResult.map(async (user) => {
-        console.log(user);
-        const [skills] = await promisePool.execute<
-          RowDataPacket[] & CandidateProfile[]
-        >(
+        // get user skills
+        const [skillsResult] = await promisePool.execute<RowDataPacket[] & SkillName[]>(
           'SELECT Skills.skill_name FROM UserSkills JOIN Skills ON UserSkills.skill_id = Skills.skill_id WHERE user_id = ?',
           [user.user_id]
         );
-        return [skills];
-      })
-    );
-    // get user education and experience for each user
-    const eduResult = await Promise.all(
-      userResult.map(async (user) => {
-        const [edu] = await promisePool.execute<
-          RowDataPacket[] & CandidateProfile[]
-        >(
+
+        const skills: SkillName[] = skillsResult.map((skill) => skill.skill_name);
+
+        // get user education
+        const [eduResult] = await promisePool.execute<RowDataPacket[] & Education[]>(
           'SELECT Education.degree, Education.school, Education.field, Education.graduation FROM Education WHERE user_id = ?',
           [user.user_id]
         );
-        return [edu];
-      })
-    );
-    const expResult = await Promise.all(
-      userResult.map(async (user) => {
-        const [exp] = await promisePool.execute<
-          RowDataPacket[] & CandidateProfile[]
-        >(
+
+        // get user experience
+        const [expResult] = await promisePool.execute<RowDataPacket[] & Experience[]>(
           'SELECT JobExperience.job_title, JobExperience.job_place, JobExperience.job_city, JobExperience.description, JobExperience.start_date, JobExperience.end_date FROM JobExperience WHERE user_id = ?',
           [user.user_id]
         );
-        return [exp];
+
+        // get user attachments
+        const [attachResult] = await promisePool.execute<RowDataPacket[] & Attachment[]>(
+          'SELECT * FROM Attachments WHERE user_id = ?',
+          [user.user_id]
+        );
+
+        return {
+          user_id: user.user_id,
+          username: user.username,
+          about_me: user.about_me,
+          link: user.link,
+          field: user.field,
+          skills: skills,
+          education: eduResult,
+          experience: expResult,
+          attachments: attachResult,
+        };
       })
     );
-    const finalResult = {
-      ...userResult[0],
-      skills: skillResult,
-      education: eduResult,
-      experience: expResult,
-    };
-    console.log(finalResult);
-    return [finalResult];
+    console.log(candidates);
+    const response = candidates.map((candidate) => {
+      return candidate;
+    });
+    console.log(response);
+    return response;
   } catch (e) {
     throw new Error((e as Error).message);
   }

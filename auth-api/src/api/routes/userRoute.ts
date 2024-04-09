@@ -6,7 +6,7 @@ import {authenticate} from '../../middlewares';
 const userRoute = express.Router();
 
 userRoute.get('/', getAllUsers);
-userRoute.get('/candidates', getCandidates);
+userRoute.get('/candidates', authenticate, getCandidates);
 userRoute.get('/candidate/:id', getCandidateUser);
 
 userRoute.get('/token', authenticate, getUserByToken);

@@ -31,15 +31,21 @@ export type UpdateUser = {
 
 export type UnauthorizedUser = Omit<User, "password">;
 
+export type SkillName = {
+  skill_name: string;
+};
+
 export type CandidateProfile = {
+  user_id: number;
   username: string;
-  email: string;
-  fullname: string;
-  phone: string;
   about_me: string;
   link: string;
   field: string;
-} & UserSkill & Education & Experience;
+  skills: SkillName[];
+  education: Education[];
+  experience: Experience[];
+  attachments: Attachment[];
+};
 
 export type TokenUser = {
   user_id: number;

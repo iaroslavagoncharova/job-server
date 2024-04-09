@@ -90,7 +90,8 @@ const getCandidates = async (
 ) => {
   console.log('getCandidates');
   try {
-    const users = await getAllCandidates();
+    const user = res.locals.user;
+    const users = await getAllCandidates(user.user_id);
     if (users === null) {
       next(new CustomError('Users not found', 404));
       return;
@@ -99,7 +100,7 @@ const getCandidates = async (
   } catch (e) {
     next(new CustomError((e as Error).message, 500));
   }
-}
+};
 
 const getUserByToken = async (
   req: Request,

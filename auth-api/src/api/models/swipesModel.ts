@@ -123,19 +123,31 @@ const postSwipe = async (
       if (!candidateUser) {
         throw new Error('Candidate user not found');
       }
-      const sqlCheck = 'SELECT * FROM Swipes WHERE swiper_id = ? AND swiped_id = ?';
+      const sqlCheck =
+        'SELECT * FROM Swipes WHERE swiper_id = ? AND swiped_id = ?';
       const [result] = await promisePool.execute<RowDataPacket[] & Swipe[]>(
         sqlCheck,
-        [newSwipe.swiped_id, newSwipe.swiper_id]
+        [newSwipe.swiper_id, newSwipe.swiped_id]
       );
+      console.log(result);
       if (result.length === 0) {
         return {message: 'Swipe posted', swipe: newSwipe};
       }
-      await postMatch(newSwipe.swiper_id, newSwipe.swiped_id);
+      const match = await postMatch(
+        newSwipe.swiper_id,
+        newSwipe.swiped_id
+      );
+      if (!match) {
+        throw new Error('Failed to post match');
+      }
+      console.log(match);
     }
     if (newSwipe.swipe_direction === 'right' && newSwipe.swipe_type === 'job') {
       // create an application for the job
-      const createApplication = await postApplication(newSwipe.swiper_id, newSwipe.swiped_id);
+      const createApplication = await postApplication(
+        newSwipe.swiper_id,
+        newSwipe.swiped_id
+      );
       if (!createApplication) {
         throw new Error('Failed to create application');
       }
@@ -149,7 +161,8 @@ const postSwipe = async (
         throw new Error('Job user not found');
       }
       console.log(jobUserResult[0][0].user_id);
-      const sqlCheck = 'SELECT * FROM Swipes WHERE swiper_id = ? AND swiped_id = ?';
+      const sqlCheck =
+        'SELECT * FROM Swipes WHERE swiper_id = ? AND swiped_id = ?';
       const [result] = await promisePool.execute<RowDataPacket[] & Swipe[]>(
         sqlCheck,
         [newSwipe.swiper_id, jobUserResult[0][0].user_id]
@@ -158,12 +171,15 @@ const postSwipe = async (
       if (result.length === 0) {
         return {message: 'Swipe posted', swipe: newSwipe};
       }
-      const match = await postMatch(newSwipe.swiper_id, jobUserResult[0][0].user_id);
+      const match = await postMatch(
+        newSwipe.swiper_id,
+        jobUserResult[0][0].user_id
+      );
       if (!match) {
         throw new Error('Failed to post match');
       }
       console.log(match);
-    };
+    }
     return {message: 'Swipe posted', swipe: newSwipe};
   } catch (e) {
     throw new Error((e as Error).message);
