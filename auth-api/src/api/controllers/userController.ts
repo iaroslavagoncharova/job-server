@@ -164,6 +164,7 @@ const updateUser = async (
 ) => {
   try {
     const tokenUser = res.locals.user;
+    console.log('updateUser', req.body);
     const result = await putUser(tokenUser.user_id, req.body);
     if (!result) {
       next(new CustomError('User not updated', 500));

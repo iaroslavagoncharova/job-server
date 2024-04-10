@@ -223,6 +223,12 @@ const putUser = async (
     if (user.about_me !== undefined) {
       updateInfo.about_me = user.about_me;
     }
+    if (user.username !== undefined) {
+      updateInfo.username = user.username;
+    }
+    if (user.field !== undefined) {
+      updateInfo.field = user.field;
+    }
     const sql = promisePool.format('UPDATE Users SET ? WHERE user_id = ?', [
       updateInfo,
       id,

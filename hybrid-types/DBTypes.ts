@@ -23,6 +23,8 @@ export type User = {
 export type UpdateUser = {
   email?: string | undefined;
   fullname?: string | undefined;
+  username?: string | undefined;
+  field?: string | undefined;
   phone?: string | undefined;
   password?: string | undefined;
   address?: string | undefined;
