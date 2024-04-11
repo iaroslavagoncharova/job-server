@@ -16,7 +16,9 @@ const getUsers = async (): Promise<UnauthorizedUser[] | null> => {
   try {
     const [result] = await promisePool.execute<
       RowDataPacket[] & UnauthorizedUser[]
-    >('SELECT * FROM Users');
+    >(
+      'SELECT Users.user_id, Users.username, Users.email, Users.user_level_id, Users.fullname, Users.phone, Users.about_me, Users.status, Users.user_type, Users.link, Users.field, Users.created_at, Users.address FROM Users'
+    );
     if (result.length === 0) {
       return null;
     }
@@ -59,7 +61,9 @@ const getUserAsCandidate = async (
   }
 };
 
-const getAllCandidates = async (user_id: number): Promise<CandidateProfile[] | null> => {
+const getAllCandidates = async (
+  user_id: number
+): Promise<CandidateProfile[] | null> => {
   try {
     // get basic user info
     const [userResult] = await promisePool.execute<
@@ -75,30 +79,37 @@ const getAllCandidates = async (user_id: number): Promise<CandidateProfile[] | n
     const candidates = await Promise.all(
       userResult.map(async (user) => {
         // get user skills
-        const [skillsResult] = await promisePool.execute<RowDataPacket[] & SkillName[]>(
+        const [skillsResult] = await promisePool.execute<
+          RowDataPacket[] & SkillName[]
+        >(
           'SELECT Skills.skill_name FROM UserSkills JOIN Skills ON UserSkills.skill_id = Skills.skill_id WHERE user_id = ?',
           [user.user_id]
         );
 
-        const skills: SkillName[] = skillsResult.map((skill) => skill.skill_name);
+        const skills: SkillName[] = skillsResult.map(
+          (skill) => skill.skill_name
+        );
 
         // get user education
-        const [eduResult] = await promisePool.execute<RowDataPacket[] & Education[]>(
+        const [eduResult] = await promisePool.execute<
+          RowDataPacket[] & Education[]
+        >(
           'SELECT Education.degree, Education.school, Education.field, Education.graduation FROM Education WHERE user_id = ?',
           [user.user_id]
         );
 
         // get user experience
-        const [expResult] = await promisePool.execute<RowDataPacket[] & Experience[]>(
+        const [expResult] = await promisePool.execute<
+          RowDataPacket[] & Experience[]
+        >(
           'SELECT JobExperience.job_title, JobExperience.job_place, JobExperience.job_city, JobExperience.description, JobExperience.start_date, JobExperience.end_date FROM JobExperience WHERE user_id = ?',
           [user.user_id]
         );
 
         // get user attachments
-        const [attachResult] = await promisePool.execute<RowDataPacket[] & Attachment[]>(
-          'SELECT * FROM Attachments WHERE user_id = ?',
-          [user.user_id]
-        );
+        const [attachResult] = await promisePool.execute<
+          RowDataPacket[] & Attachment[]
+        >('SELECT * FROM Attachments WHERE user_id = ?', [user.user_id]);
 
         return {
           user_id: user.user_id,

@@ -6,6 +6,15 @@ describe('UserModel', () => {
       expect(Array.isArray(users)).toBe(true);
       expect(users).not.toBeNull();
 
+
+      // email?: string | undefined;
+      // fullname?: string | undefined;
+      // username?: string | undefined;
+      // field?: string | undefined;
+      // phone?: string | undefined;
+      // password?: string | undefined;
+      // address?: string | undefined;
+      // about_me?: string | undefined;
       if (users) {
         users.forEach(user => {
           expect(user).toHaveProperty('user_id');
