@@ -40,4 +40,9 @@ jobs:
         run: npm ci --prefix auth-api
 
       - name: Test auth-server
+        env:
+          DB_HOST: localhost
+          DB_USER: jobuser
+          DB_PASS: MeOllaanRyhma3!
+          DB_NAME: JobMeIn
         run: npm run test --prefix auth-api
