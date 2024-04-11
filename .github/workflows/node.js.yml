@@ -31,13 +31,5 @@ jobs:
     - name: Install dependencies for auth-server
       run: npm ci --prefix auth-api
 
-    - name: Set up environment variables
-      run: |
-        echo "PORT=3001" >> $GITHUB_ENV
-        echo "DB_HOST=localhost" >> $GITHUB_ENV
-        echo "DB_USER=jobuser" >> $GITHUB_ENV
-        echo "DB_PASS=MeOllaanRyhma3!" >> $GITHUB_ENV
-        echo "DB_NAME=JobMeIn" >> $GITHUB_ENV
-
     - name: Test auth-server
       run: npm run test --prefix auth-api
