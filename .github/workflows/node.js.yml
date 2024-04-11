@@ -31,12 +31,5 @@ jobs:
     - name: Install dependencies for auth-server
       run: npm ci --prefix auth-api
 
-    - name: Set up environment variables
-      env:
-         DB_HOST: 192.168.176.210
-         DB_USER: jobuser
-         DB_PASS: MeOllaanRyhma3!
-         DB_NAME: JobMeIn
-
     - name: Test auth-server
       run: npm run test --prefix auth-api
