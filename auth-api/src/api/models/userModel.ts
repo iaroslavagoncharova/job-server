@@ -24,6 +24,9 @@ const getUsers = async (): Promise<UnauthorizedUser[] | null> => {
     if (result.length === 0) {
       return null;
     }
+    if (!result) {
+      throw new Error('Users not found');
+    }
     return result;
   } catch (e) {
     throw new Error((e as Error).message);
