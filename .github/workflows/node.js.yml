@@ -26,4 +26,4 @@ jobs:
       run: npm ci --prefix auth-api
 
     - name: Test auth-server
-      run: npm run test:unit --prefix auth-api
+      run: npm run test --prefix auth-api
