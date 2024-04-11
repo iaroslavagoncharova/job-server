@@ -16,9 +16,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Debug
-      run: ls -la auth-api
-
     - name: Use Node.js 20.x
       uses: actions/setup-node@v4
       with:
@@ -27,12 +24,6 @@ jobs:
 
     - name: Install dependencies for auth-server
       run: npm ci --prefix auth-api
-
-    - name: Debug
-      run: cat auth-api/package-lock.json
-
-    - name: Build auth-server
-      run: npm run build --prefix auth-api
 
     - name: Test auth-server
       run: npm run test:unit --prefix auth-api
