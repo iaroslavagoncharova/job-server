@@ -2,6 +2,10 @@ DROP DATABASE IF EXISTS JobMeIn;
 CREATE DATABASE JobMeIn;
 USE JobMeIn;
 
+CREATE user 'jobuser'@'localhost' identified by 'MeOllaanRyhma3!';  
+GRANT ALL PRIVILEGES on JobMeIn.* to 'jobuser'@'localhost'; 
+FLUSH PRIVILEGES; 
+
 CREATE TABLE UserLevels (
   level_id int(11) AUTO_INCREMENT PRIMARY KEY,
   level_name varchar(255) NOT NULL
