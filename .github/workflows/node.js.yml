@@ -24,12 +24,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Debug
-        run: printenv
-
-      - name: Debug
-        run: echo "$NODE_ENV"
-
       - name: Use Node.js 20.x
         uses: actions/setup-node@v4
         with:
@@ -41,7 +35,6 @@ jobs:
 
       - name: Run Database Script
         run: |
-          sudo service mysql start
           mysql -h localhost -P 3001 -u root -p root -D JobMeIn < ./database.sql
 
       - name: Test auth-server
