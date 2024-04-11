@@ -31,11 +31,5 @@ jobs:
     - name: Install dependencies for auth-server
       run: npm ci --prefix auth-api
 
-    - name: Debug
-      run: cat auth-api/package-lock.json
-
-    - name: Build auth-server
-      run: npm run build --prefix auth-api
-
     - name: Test auth-server
       run: npm run test --prefix auth-api
