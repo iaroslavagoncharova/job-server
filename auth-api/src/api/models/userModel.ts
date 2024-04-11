@@ -29,6 +29,7 @@ const getUsers = async (): Promise<UnauthorizedUser[] | null> => {
     }
     return result;
   } catch (e) {
+    console.log(e, 'error');
     throw new Error((e as Error).message);
   }
 };
