@@ -40,7 +40,9 @@ jobs:
           mysql -h localhost -P 3306 -u root -proot -e "CREATE DATABASE IF NOT EXISTS JobMeIn;"
           mysql -h localhost -P 3306 -u root -proot JobMeIn < database.sql
           echo "Database script execution completed."
-          echo database.sql
+
+      - name: View Script Output
+        run: cat script_output.log
 
       - name: Test auth-server
         env:
