@@ -36,8 +36,11 @@ jobs:
       - name: Run Database Script
         run: |
           sudo service mysql start 
+          echo "Executing database script..."
           mysql -h localhost -P 3306 -u root -proot -e "CREATE DATABASE IF NOT EXISTS JobMeIn;"
           mysql -h localhost -P 3306 -u root -proot JobMeIn < database.sql
+          echo "Database script execution completed."
+          echo database.sql
 
       - name: Test auth-server
         env:
