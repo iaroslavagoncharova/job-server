@@ -15,7 +15,7 @@ import {MessageResponse} from '@sharedTypes/MessageTypes';
 const getUsers = async (): Promise<UnauthorizedUser[] | null> => {
   try {
     console.log('getUsers');
-    const sql = 'DESC SKills';
+    const sql = 'DESC Skills';
     const runsql = await promisePool.execute(sql);
     console.log(runsql, 'runsql');
     const [result] = await promisePool.execute<
