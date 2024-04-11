@@ -41,7 +41,7 @@ jobs:
 
       - name: Run Database Script
         run: |
-         mysql -h localhost -u jobuser -p MeOllaanRyhma3! -D JobMeIn < job-server/database.sql
+         mysql -h localhost -u jobuser -p MeOllaanRyhma3! -D JobMeIn < ./database.sql
 
       - name: Test auth-server
         env:
