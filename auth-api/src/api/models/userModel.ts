@@ -15,13 +15,13 @@ import {MessageResponse} from '@sharedTypes/MessageTypes';
 const getUsers = async (): Promise<UnauthorizedUser[] | null> => {
   try {
     console.log('getUsers');
-    const sql = 'SHOW CREATE TABLE Users';
+    const sql = 'DESC Users';
     const runsql = await promisePool.execute(sql);
     console.log(runsql, 'runsql');
     const [result] = await promisePool.execute<
       RowDataPacket[] & UnauthorizedUser[]
     >(
-      'SELECT Users.user_id, Users.username, Users.email, Users.user_level_id, Users.fullname, Users.phone, Users.about_me, Users.status, Users.user_type, Users.link, Users.field, Users.created_at, Users.address FROM Users'
+      'SELECT user_id, username, email, user_level_id, fullname, phone, about_me, status, user_type, link, field, created_at, address FROM Users'
     );
     console.log(result, 'result');
     if (result.length === 0) {
