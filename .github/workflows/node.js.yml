@@ -39,6 +39,10 @@ jobs:
       - name: Install dependencies for auth-server
         run: npm ci --prefix auth-api
 
+      - name: Run Database Script
+        run: |
+          mysql -h localhost -u jobuser -p MeOllaanRyhma3! JobMeIn < database.sql
+
       - name: Test auth-server
         env:
           DB_HOST: localhost
