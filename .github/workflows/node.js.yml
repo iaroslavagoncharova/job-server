@@ -13,7 +13,7 @@ jobs:
       mysql:
         image: mysql:latest
         env:
-          MYSQL_ROOT_PASSWORD: root
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
           MYSQL_DATABASE: JobMeIn
           MYSQL_USER: jobuser
           MYSQL_PASSWORD: MeOllaanRyhma3!
@@ -36,10 +36,8 @@ jobs:
       - name: Run Database Script
         run: |
           sudo service mysql start 
-          echo "Executing database script..."
-          mysql -h localhost -P 3001 -u root -proot -e "CREATE DATABASE IF NOT EXISTS JobMeIn;"
-          echo "Created a database"
-          mysql -h localhost -P 3001 -u root -proot JobMeIn < database.sql
+          mysql -h localhost -P 3001 -u root -p"${{ secrets.MYSQL_ROOT_PASSWORD }}" -e "CREATE DATABASE IF NOT EXISTS JobMeIn;"
+          mysql -h localhost -P 3001 -u root -p"${{ secrets.MYSQL_ROOT_PASSWORD }}" JobMeIn < database.sql
           echo "Database script execution completed."
           
       - name: Test auth-server
