@@ -2,13 +2,7 @@ const { getUsers } = require('../src/api/models/userModel');
 
 describe('UserModel', () => {
     it('should return an array of users', async () => {
-      console.log('test getUsers');
       const users = await getUsers();
-      if (users) {
-        console.log('users:', users);
-      } else {
-        console.log('error');
-      }
       expect(Array.isArray(users)).toBe(true);
       if (users) {
         users.forEach(user => {
@@ -29,6 +23,5 @@ describe('UserModel', () => {
       } else {
         expect(users).toBe(null);
       }
-      console.log('test getUsers done');
     })
   });

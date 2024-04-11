@@ -14,16 +14,11 @@ import {MessageResponse} from '@sharedTypes/MessageTypes';
 
 const getUsers = async (): Promise<UnauthorizedUser[] | null> => {
   try {
-    console.log('getUsers');
-    const sql = 'DESC Skills';
-    const runsql = await promisePool.execute(sql);
-    console.log(runsql, 'runsql');
     const [result] = await promisePool.execute<
       RowDataPacket[] & UnauthorizedUser[]
     >(
       'SELECT user_id, username, email, user_level_id, fullname, phone, about_me, status, user_type, link, field, created_at, address FROM Users'
     );
-    console.log(result, 'result');
     if (result.length === 0) {
       return null;
     }
