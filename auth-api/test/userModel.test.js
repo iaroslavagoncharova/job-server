@@ -4,7 +4,11 @@ describe('UserModel', () => {
     it('should return an array of users', async () => {
       console.log('test getUsers');
       const users = await getUsers();
-      console.log(users, 'users');
+      if (users) {
+        console.log('users:', users);
+      } else {
+        console.log('error');
+      }
       expect(Array.isArray(users)).toBe(true);
       if (users) {
         users.forEach(user => {
