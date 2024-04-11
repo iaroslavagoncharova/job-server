@@ -36,7 +36,7 @@ jobs:
       - name: Run Database Script
         run: |
           sudo service mysql start 
-          mysql -h localhost -P 3001 -u root -proot -D JobMeIn < ./database.sql
+          mysql -h localhost -P 3001 -u root -proot < ./database.sql
 
       - name: Test auth-server
         env:
