@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Debug
       run: printenv
@@ -30,6 +30,17 @@ jobs:
 
     - name: Install dependencies for auth-server
       run: npm ci --prefix auth-api
+
+    - name: Set up environment variables
+      run: |
+        echo "NODE_ENV=development" >> $GITHUB_ENV
+        echo "PORT=3001" >> $GITHUB_ENV
+        echo "HTTPS_PORT=8001" >> $GITHUB_ENV
+        echo "DB_HOST=localhost" >> $GITHUB_ENV
+        echo "DB_USER=jobuser" >> $GITHUB_ENV
+        echo "DB_PASS=MeOllaanRyhma3!" >> $GITHUB_ENV
+        echo "DB_NAME=JobMeIn" >> $GITHUB_ENV
+        echo "JWT_SECRET=5728289726" >> $GITHUB_ENV
 
     - name: Test auth-server
       run: npm run test --prefix auth-api
