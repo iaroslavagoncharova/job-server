@@ -32,12 +32,11 @@ jobs:
       run: npm ci --prefix auth-api
 
     - name: Set up environment variables
-      run: |
-        echo "PORT=3001" >> $GITHUB_ENV
-        echo "DB_HOST=localhost" >> $GITHUB_ENV
-        echo "DB_USER=jobuser" >> $GITHUB_ENV
-        echo "DB_PASS=MeOllaanRyhma3!" >> $GITHUB_ENV
-        echo "DB_NAME=JobMeIn" >> $GITHUB_ENV
+      env:
+         DB_HOST: 192.168.176.210
+         DB_USER: jobuser
+         DB_PASS: MeOllaanRyhma3!
+         DB_NAME: JobMeIn
 
     - name: Test auth-server
       run: npm run test --prefix auth-api
