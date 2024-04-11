@@ -16,7 +16,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Debug: List contents of auth-api directory
+    - name: Debug
       run: ls -la auth-api
 
     - name: Use Node.js 20.x
@@ -28,7 +28,7 @@ jobs:
     - name: Install dependencies for auth-server
       run: npm ci --prefix auth-api
 
-    - name: Debug: Print contents of package-lock.json
+    - name: Debug
       run: cat auth-api/package-lock.json
 
     - name: Build auth-server
