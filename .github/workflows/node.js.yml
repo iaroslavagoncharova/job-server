@@ -18,7 +18,7 @@ jobs:
           MYSQL_USER: jobuser
           MYSQL_PASSWORD: MeOllaanRyhma3!
         ports:
-          - 3306:3306
+          - 3001:3001
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
       - name: Checkout code
@@ -37,9 +37,9 @@ jobs:
         run: |
           sudo service mysql start 
           echo "Executing database script..."
-          mysql -h localhost -P 3306 -u root -proot -e "CREATE DATABASE IF NOT EXISTS JobMeIn;"
+          mysql -h localhost -P 3001 -u root -proot -e "CREATE DATABASE IF NOT EXISTS JobMeIn;"
           echo "Created a database"
-          mysql -h localhost -P 3306 -u root -proot JobMeIn < database.sql
+          mysql -h localhost -P 3001 -u root -proot JobMeIn < database.sql
           echo "Database script execution completed."
           
       - name: Test auth-server
