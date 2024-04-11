@@ -2,19 +2,9 @@ const { getUsers } = require('../src/api/models/userModel');
 
 describe('UserModel', () => {
     it('should return an array of users', async () => {
+      console.log('test getUsers');
       const users = await getUsers();
       expect(Array.isArray(users)).toBe(true);
-      expect(users).not.toBeNull();
-
-
-      // email?: string | undefined;
-      // fullname?: string | undefined;
-      // username?: string | undefined;
-      // field?: string | undefined;
-      // phone?: string | undefined;
-      // password?: string | undefined;
-      // address?: string | undefined;
-      // about_me?: string | undefined;
       if (users) {
         users.forEach(user => {
           expect(user).toHaveProperty('user_id');
@@ -31,6 +21,9 @@ describe('UserModel', () => {
           expect(user).toHaveProperty('created_at');
           expect(user).toHaveProperty('address');
         });
+      } else {
+        expect(users).toBe(null);
       }
+      console.log('test getUsers done');
     })
   });
