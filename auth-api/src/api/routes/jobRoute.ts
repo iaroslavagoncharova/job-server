@@ -8,11 +8,11 @@ jobRoute.route('/')
 .get(authenticate, fetchAllJobs)
 .post(authenticate, addJob);
 jobRoute.get('/fields', fetchFields);
+jobRoute.get('/company', authenticate, fetchJobsByCompany);
 jobRoute.route('/:id')
 .get(fetchJobById)
 .put(authenticate, updateJob)
 .delete(authenticate, removeJob);
-jobRoute.get('/company', authenticate, fetchJobsByCompany);
 jobRoute.get('/application/:job_id', authenticate, fetchJobForApplication);
 jobRoute.get('/:field', fetchJobsByField);
 

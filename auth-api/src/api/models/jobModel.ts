@@ -195,22 +195,22 @@ const putJob = async (
 ): Promise<JobResponse> => {
   try {
     const updateJob: UpdateJob = {};
-    if (job.job_address !== undefined) {
+    if (job.job_address !== undefined && job.job_address !== null && job.job_address !== '') {
       updateJob.job_address = job.job_address;
     }
-    if (job.job_title !== undefined) {
+    if (job.job_title !== undefined && job.job_title !== null && job.job_title !== '') {
       updateJob.job_title = job.job_title;
     }
-    if (job.salary !== undefined) {
+    if (job.salary !== undefined && job.salary !== null && job.salary !== '') {
       updateJob.salary = job.salary;
     }
-    if (job.job_description !== undefined) {
+    if (job.job_description !== undefined && job.job_description !== null && job.job_description !== '') {
       updateJob.job_description = job.job_description;
     }
-    if (job.deadline_date !== undefined) {
+    if (job.deadline_date !== undefined && job.deadline_date !== null && job.deadline_date !== '') {
       updateJob.deadline_date = job.deadline_date;
     }
-    if (job.field !== undefined) {
+    if (job.field !== undefined && job.field !== null && job.field !== '') {
       updateJob.field = job.field;
     }
     console.log(updateJob);
