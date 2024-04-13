@@ -177,6 +177,7 @@ const removeJob = async (
     const id = req.params.id;
     const tokenUser = res.locals.user;
     const job = await getJobById(+id);
+    console.log('job', job, id, tokenUser.user_id);
     if (job === null) {
       next(new CustomError('Job not found or already deleted', 404));
       return;

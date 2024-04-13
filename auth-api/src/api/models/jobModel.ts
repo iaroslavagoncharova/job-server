@@ -285,6 +285,7 @@ const deleteJob = async (
   user_id: number
 ): Promise<MessageResponse> => {
   const connection = await promisePool.getConnection();
+  console.log(job_id, user_id);
   try {
     await connection.beginTransaction();
     await connection.execute('DELETE FROM JobSkills WHERE job_id = ?', [
@@ -293,10 +294,22 @@ const deleteJob = async (
     await connection.execute('DELETE FROM KeywordsJobs WHERE job_id = ?', [
       job_id,
     ]);
+    // delete application links where the application_id is in the applications that have the job_id
+    await connection.execute(
+      'DELETE FROM ApplicationLinks WHERE application_id IN (SELECT application_id FROM Applications WHERE job_id = ?)',
+      [job_id]
+    );
+    // delete applications where the job_id is the job_id
+    await connection.execute('DELETE FROM Applications WHERE job_id = ?', [
+      job_id,
+    ]);
+    // delete job tests where the job_id is the job_id
+    await connection.execute('DELETE FROM JobTests WHERE job_id = ?', [job_id]);
     const [result] = await connection.execute<ResultSetHeader>(
       'DELETE FROM JobAds WHERE job_id = ? AND user_id = ?',
       [job_id, user_id]
     );
+    console.log(result);
     if (result.affectedRows === 0) {
       throw new CustomError('Job not found', 404);
     }
