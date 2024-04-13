@@ -170,6 +170,24 @@ const deleteApplication = async (
     }
 };
 
+// dismissing application as an employer
+const dismissApplication = async (
+  applicationId: number): Promise<MessageResponse> => {
+    try {
+      const sql = promisePool.format(
+        'UPDATE Applications SET status = "Dismissed" WHERE application_id = ?',
+        [applicationId]
+      );
+      const result = await promisePool.execute<ResultSetHeader>(sql);
+      if (result[0].affectedRows === 0) {
+        return {message: 'An error occurred while dismissing application'};
+      }
+      return {message: 'Application dismissed'};
+    } catch (e) {
+      throw new Error((e as Error).message);
+    }
+};
+
 // sending application by changing its status to "Submitted"
 const sendApplication = async (
   userId: number,
@@ -211,5 +229,7 @@ export {
   putApplication,
   deleteApplication,
   sendApplication,
-  getApplicationsByJob
+  getApplicationsByJob,
+  postApplicationLinks,
+  dismissApplication
 };

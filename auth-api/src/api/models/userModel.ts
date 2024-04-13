@@ -139,6 +139,70 @@ const getAllCandidates = async (
   }
 };
 
+const getOneCandidate = async (
+  user_id: number
+): Promise<CandidateProfile | null> => {
+  try {
+    // get basic user info
+    const [userResult] = await promisePool.execute<
+      RowDataPacket[] & CandidateProfile[]
+    >(
+      'SELECT Users.username, Users.about_me, Users.link, Users.field FROM Users WHERE Users.user_id = ?',
+      [user_id]
+    );
+    if (userResult.length === 0) {
+      return null;
+    }
+
+    const user = userResult[0];
+
+    // get user skills
+    const [skillsResult] = await promisePool.execute<
+      RowDataPacket[] & SkillName[]
+    >(
+      'SELECT Skills.skill_name FROM UserSkills JOIN Skills ON UserSkills.skill_id = Skills.skill_id WHERE user_id = ?',
+      [user_id]
+    );
+
+    const skills: SkillName[] = skillsResult.map((skill) => skill.skill_name);
+
+    // get user education
+    const [eduResult] = await promisePool.execute<
+      RowDataPacket[] & Education[]
+    >(
+      'SELECT Education.degree, Education.school, Education.field, Education.graduation FROM Education WHERE user_id = ?',
+      [user_id]
+    );
+
+    // get user experience
+    const [expResult] = await promisePool.execute<
+      RowDataPacket[] & Experience[]
+    >(
+      'SELECT JobExperience.job_title, JobExperience.job_place, JobExperience.job_city, JobExperience.description, JobExperience.start_date, JobExperience.end_date FROM JobExperience WHERE user_id = ?',
+      [user_id]
+    );
+
+    // get user attachments
+    const [attachResult] = await promisePool.execute<
+      RowDataPacket[] & Attachment[]
+    >('SELECT * FROM Attachments WHERE user_id = ?', [user_id]);
+
+    return {
+      user_id: user_id,
+      username: user.username,
+      about_me: user.about_me,
+      link: user.link,
+      field: user.field,
+      skills: skills,
+      education: eduResult,
+      experience: expResult,
+      attachments: attachResult,
+    };
+  } catch (e) {
+    throw new Error((e as Error).message);
+  }
+};
+
 const getUserByEmail = async (email: string): Promise<User | null> => {
   try {
     const [result] = await promisePool.execute<RowDataPacket[] & User[]>(
@@ -361,6 +425,7 @@ export {
   getUser,
   getUserAsCandidate,
   getAllCandidates,
+  getOneCandidate,
   postUser,
   getUserByEmail,
   deleteUser,

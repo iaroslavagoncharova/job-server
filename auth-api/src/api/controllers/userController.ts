@@ -14,6 +14,7 @@ import {
   putUser,
   getUserAsCandidate,
   getAllCandidates,
+  getOneCandidate,
 } from '../models/userModel';
 import CustomError from '../../classes/CustomError';
 import {validationResult} from 'express-validator';
@@ -72,7 +73,7 @@ const getCandidateUser = async (
   next: NextFunction
 ) => {
   try {
-    const user = await getUserAsCandidate(req.params.id);
+    const user = await getOneCandidate(req.params.id);
     if (user === null) {
       next(new CustomError('User not found', 404));
       return;

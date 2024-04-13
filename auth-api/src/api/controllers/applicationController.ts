@@ -1,6 +1,6 @@
 import {Request, Response, NextFunction} from 'express';
 import {Application, Message} from "@sharedTypes/DBTypes";
-import {deleteApplication, getApplicationById, getApplicationsByJob, getApplicationsByUserId, getSavedApplicationsByUserId, getSentApplicationsByUserId, postApplication, putApplication, sendApplication} from "../models/applicationModel";
+import {deleteApplication, dismissApplication, getApplicationById, getApplicationsByJob, getApplicationsByUserId, getSavedApplicationsByUserId, getSentApplicationsByUserId, postApplication, putApplication, sendApplication} from "../models/applicationModel";
 import CustomError from "../../classes/CustomError";
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 
@@ -152,6 +152,25 @@ export const handleDeleteApplication = async (
       res.json(response);
     } catch (e) {
       next(new CustomError('Failed to delete application', 500));
+    }
+};
+
+export const handleDismissApplication = async (
+  req: Request,
+  res: Response<MessageResponse>,
+  next: NextFunction
+  ) => {
+    try {
+      const application_id = req.params.application_id;
+      const application = await dismissApplication(parseInt(application_id));
+      if (!application) {
+        next(new CustomError('Failed to dismiss application', 500));
+        return;
+      }
+      const response: MessageResponse = {message: 'Application dismissed'};
+      res.json(response);
+    } catch (e) {
+      next(new CustomError('Failed to dismiss application', 500));
     }
 };
 
