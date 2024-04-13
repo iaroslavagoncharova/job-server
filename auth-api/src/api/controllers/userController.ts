@@ -124,7 +124,17 @@ const addUser = async (
   req: Request<
     {},
     {},
-    Pick<User, 'password' | 'email' | 'fullname' | 'phone' | 'user_type'>
+    Pick<
+      User,
+      | 'username'
+      | 'password'
+      | 'email'
+      | 'fullname'
+      | 'phone'
+      | 'user_type'
+      | 'address'
+      | 'user_level_id'
+    >
   >,
   res: Response<UserResponse>,
   next: NextFunction
