@@ -1,6 +1,6 @@
 import {Request, Response, NextFunction} from 'express';
 import {Application, Message} from "@sharedTypes/DBTypes";
-import {deleteApplication, dismissApplication, getApplicationById, getApplicationsByJob, getApplicationsByUserId, getSavedApplicationsByUserId, getSentApplicationsByUserId, postApplication, putApplication, sendApplication} from "../models/applicationModel";
+import {acceptApplication, deleteApplication, dismissApplication, getApplicationById, getApplicationsByJob, getApplicationsByUserId, getSavedApplicationsByUserId, getSentApplicationsByUserId, postApplication, putApplication, sendApplication} from "../models/applicationModel";
 import CustomError from "../../classes/CustomError";
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 
@@ -192,6 +192,26 @@ export const handeSendApplication = async (
       res.json(response);
     } catch (e) {
       next(new CustomError('Failed to send application', 500));
+    }
+};
+
+export const handleAcceptApplication = async (
+  req: Request,
+  res: Response<MessageResponse>,
+  next: NextFunction
+  ) => {
+    try {
+      const application_id = req.params.application_id;
+      console.log(application_id);
+      const application = await acceptApplication(parseInt(application_id));
+      if (!application) {
+        next(new CustomError('Failed to accept application', 500));
+        return;
+      }
+      const response: MessageResponse = {message: 'Application accepted'};
+      res.json(response);
+    } catch (e) {
+      next(new CustomError('Failed to accept application', 500));
     }
 };
 
