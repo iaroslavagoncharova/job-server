@@ -33,13 +33,17 @@ const getAllJobs = async (user_id: number): Promise<Job[] | null> => {
   }
 };
 
-const getJobsByCompany = async (id: number): Promise<Job[]> => {
+const getJobsByCompany = async (id: number): Promise<JobWithSkillsAndKeywords[]> => {
   try {
-    const [rows] = await promisePool.execute<RowDataPacket[] & Job[]>(
-      'SELECT * FROM JobAds WHERE user_id = ?',
+    // select job ads, their keywords, skills and get company name aka username from user id
+    const [jobs] = await promisePool.execute<RowDataPacket[] & JobWithSkillsAndKeywords[]>(
+      'SELECT JobAds.*, GROUP_CONCAT(DISTINCT Skills.skill_name) AS skills, GROUP_CONCAT(DISTINCT KeyWords.keyword_name) AS keywords FROM JobAds LEFT JOIN JobSkills ON JobAds.job_id = JobSkills.job_id LEFT JOIN Skills ON JobSkills.skill_id = Skills.skill_id LEFT JOIN KeywordsJobs ON JobAds.job_id = KeywordsJobs.job_id LEFT JOIN KeyWords ON KeywordsJobs.keyword_id = KeyWords.keyword_id WHERE JobAds.user_id = ? GROUP BY JobAds.job_id;',
       [id]
     );
-    return rows;
+    if (jobs[0].length === 0) {
+      throw new CustomError('No jobs found', 404);
+    }
+    return jobs;
   } catch (err) {
     throw new CustomError('getJobsByCompany failed', 500);
   }
