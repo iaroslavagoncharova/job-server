@@ -107,6 +107,11 @@ export type MatchWithUser = Match & {
   user: UnauthorizedUser;
 };
 
+export type Keyword = {
+  keyword_id: number;
+  keyword_name: string;
+};
+
 export type Experience = {
   experience_id: number;
   user_id: number;

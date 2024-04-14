@@ -8,6 +8,7 @@ import {
   User,
   UpdateJob,
   JobWithUser,
+  Keyword,
 } from '@sharedTypes/DBTypes';
 import {getUserById} from '../controllers/userController';
 import {getUser} from './userModel';
@@ -46,21 +47,21 @@ const getJobsByCompany = async (id: number): Promise<Job[]> => {
 
 const getFields = async (): Promise<string[]> => {
   try {
-    const [rows] = await promisePool.execute<RowDataPacket[] & {field: string}[]>(
-      'SELECT DISTINCT field FROM JobAds'
-    );
+    const [rows] = await promisePool.execute<
+      RowDataPacket[] & {field: string}[]
+    >('SELECT DISTINCT field FROM JobAds');
     return rows.map((row) => row.field);
   } catch (err) {
     throw new CustomError('getFields failed', 500);
   }
 };
 
-const getJobForApplication = async (job_id: number): Promise<JobWithUser | null> => {
+const getJobForApplication = async (
+  job_id: number
+): Promise<JobWithUser | null> => {
   try {
     console.log(job_id, 'job_id');
-    const [result] = await promisePool.execute<
-      RowDataPacket[] & JobWithUser[]
-    >(
+    const [result] = await promisePool.execute<RowDataPacket[] & JobWithUser[]>(
       'SELECT JobAds.*, Users.username FROM JobAds LEFT JOIN Users ON JobAds.user_id = Users.user_id WHERE JobAds.job_id = ?;',
       [job_id]
     );
@@ -144,7 +145,9 @@ const postJob = async (
     const insertedJobId = result.insertId;
 
     // Insert job skills
+    console.log(job.skills, 'job.skills');
     const skills = job.skills.split(',').map((skill) => Number(skill.trim()));
+    console.log(skills, 'skills');
     for (const skillId of skills) {
       const [skillsResult] = await promisePool.execute<ResultSetHeader>(
         'INSERT INTO JobSkills (job_id, skill_id) VALUES (?, ?)',
@@ -188,6 +191,17 @@ const postJob = async (
   }
 };
 
+const getKeywords = async (): Promise<Keyword[]> => {
+  try {
+    const [rows] = await promisePool.execute<RowDataPacket[] & Keyword[]>(
+      'SELECT * FROM KeyWords'
+    );
+    return rows;
+  } catch (err) {
+    throw new CustomError('getKeywords failed', 500);
+  }
+};
+
 const putJob = async (
   job_id: number,
   job: UpdateJob,
@@ -195,19 +209,35 @@ const putJob = async (
 ): Promise<JobResponse> => {
   try {
     const updateJob: UpdateJob = {};
-    if (job.job_address !== undefined && job.job_address !== null && job.job_address !== '') {
+    if (
+      job.job_address !== undefined &&
+      job.job_address !== null &&
+      job.job_address !== ''
+    ) {
       updateJob.job_address = job.job_address;
     }
-    if (job.job_title !== undefined && job.job_title !== null && job.job_title !== '') {
+    if (
+      job.job_title !== undefined &&
+      job.job_title !== null &&
+      job.job_title !== ''
+    ) {
       updateJob.job_title = job.job_title;
     }
     if (job.salary !== undefined && job.salary !== null && job.salary !== '') {
       updateJob.salary = job.salary;
     }
-    if (job.job_description !== undefined && job.job_description !== null && job.job_description !== '') {
+    if (
+      job.job_description !== undefined &&
+      job.job_description !== null &&
+      job.job_description !== ''
+    ) {
       updateJob.job_description = job.job_description;
     }
-    if (job.deadline_date !== undefined && job.deadline_date !== null && job.deadline_date !== '') {
+    if (
+      job.deadline_date !== undefined &&
+      job.deadline_date !== null &&
+      job.deadline_date !== ''
+    ) {
       updateJob.deadline_date = job.deadline_date;
     }
     if (job.field !== undefined && job.field !== null && job.field !== '') {
@@ -325,6 +355,7 @@ export {
   getFields,
   getJobById,
   getJobForApplication,
+  getKeywords,
   getAllJobs,
   getJobByField,
   postJob,

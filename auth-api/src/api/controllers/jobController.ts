@@ -11,6 +11,7 @@ import {
   getJobById,
   getJobForApplication,
   getJobsByCompany,
+  getKeywords,
   postJob,
   putJob,
 } from '../models/jobModel';
@@ -48,6 +49,23 @@ const fetchJobsByCompany = async (
     res.json(jobs);
   } catch (error) {
     return next(error);
+  }
+};
+
+const fetchKeywords = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const keywords = await getKeywords();
+    if (keywords.length === 0) {
+      next(new CustomError('No keywords found', 404));
+      return;
+    }
+    res.json(keywords);
+  } catch (error) {
+    next(new CustomError((error as Error).message, 500));
   }
 };
 
@@ -136,6 +154,7 @@ const addJob = async (
   }
   try {
     const job = req.body;
+    console.log('job', job);
     const tokenUser = res.locals.user;
     const result = await postJob(job, tokenUser.user_id);
     if (!result) {
@@ -200,6 +219,7 @@ export {
   fetchAllJobs,
   fetchJobsByField,
   fetchJobForApplication,
+  fetchKeywords,
   addJob,
   removeJob,
   updateJob,

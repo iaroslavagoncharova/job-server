@@ -1,6 +1,6 @@
 import express from 'express';
 import { authenticate } from '../../middlewares';
-import {addJob, fetchAllJobs, fetchFields, fetchJobById, fetchJobForApplication, fetchJobsByCompany, fetchJobsByField, removeJob, updateJob} from '../controllers/jobController';
+import {addJob, fetchAllJobs, fetchFields, fetchJobById, fetchJobForApplication, fetchJobsByCompany, fetchJobsByField, fetchKeywords, removeJob, updateJob} from '../controllers/jobController';
 
 const jobRoute = express.Router();
 
@@ -8,6 +8,7 @@ jobRoute.route('/')
 .get(authenticate, fetchAllJobs)
 .post(authenticate, addJob);
 jobRoute.get('/fields', fetchFields);
+jobRoute.get('/keywords', fetchKeywords);
 jobRoute.get('/company', authenticate, fetchJobsByCompany);
 jobRoute.route('/:id')
 .get(fetchJobById)
