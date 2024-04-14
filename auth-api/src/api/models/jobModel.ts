@@ -261,7 +261,7 @@ const putJob = async (
       throw new CustomError('Job update failed', 500);
     }
 
-    if (job.skills !== null && job.skills !== undefined) {
+    if (job.skills !== null && job.skills !== undefined && job.skills !== '') {
       // Delete job skills
       await promisePool.execute('DELETE FROM JobSkills WHERE job_id = ?', [
         job_id,
@@ -280,7 +280,7 @@ const putJob = async (
         }
       }
     }
-    if (job.keywords !== null && job.keywords !== undefined) {
+    if (job.keywords !== null && job.keywords !== undefined && job.keywords !== '') {
       // Delete job keywords
       await promisePool.execute('DELETE FROM KeywordsJobs WHERE job_id = ?', [
         job_id,
