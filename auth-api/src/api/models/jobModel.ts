@@ -33,10 +33,14 @@ const getAllJobs = async (user_id: number): Promise<Job[] | null> => {
   }
 };
 
-const getJobsByCompany = async (id: number): Promise<JobWithSkillsAndKeywords[]> => {
+const getJobsByCompany = async (
+  id: number
+): Promise<JobWithSkillsAndKeywords[]> => {
   try {
     // select job ads, their keywords, skills and get company name aka username from user id
-    const [jobs] = await promisePool.execute<RowDataPacket[] & JobWithSkillsAndKeywords[]>(
+    const [jobs] = await promisePool.execute<
+      RowDataPacket[] & JobWithSkillsAndKeywords[]
+    >(
       'SELECT JobAds.*, GROUP_CONCAT(DISTINCT Skills.skill_name) AS skills, GROUP_CONCAT(DISTINCT KeyWords.keyword_name) AS keywords FROM JobAds LEFT JOIN JobSkills ON JobAds.job_id = JobSkills.job_id LEFT JOIN Skills ON JobSkills.skill_id = Skills.skill_id LEFT JOIN KeywordsJobs ON JobAds.job_id = KeywordsJobs.job_id LEFT JOIN KeyWords ON KeywordsJobs.keyword_id = KeyWords.keyword_id WHERE JobAds.user_id = ? GROUP BY JobAds.job_id;',
       [id]
     );
@@ -212,6 +216,7 @@ const putJob = async (
   user_id: number
 ): Promise<JobResponse> => {
   try {
+    console.log(job);
     const updateJob: UpdateJob = {};
     if (
       job.job_address !== undefined &&
@@ -247,19 +252,6 @@ const putJob = async (
     if (job.field !== undefined && job.field !== null && job.field !== '') {
       updateJob.field = job.field;
     }
-    console.log(updateJob);
-    const sql = promisePool.format(
-      'UPDATE JobAds SET ? WHERE job_id = ? AND user_id = ?',
-      [updateJob, job_id, user_id]
-    );
-    console.log(sql);
-    const [result] = await promisePool.execute<ResultSetHeader>(sql);
-
-    console.log(result, 'result');
-
-    if (result.affectedRows === 0) {
-      throw new CustomError('Job update failed', 500);
-    }
 
     if (job.skills !== null && job.skills !== undefined && job.skills !== '') {
       // Delete job skills
@@ -280,7 +272,11 @@ const putJob = async (
         }
       }
     }
-    if (job.keywords !== null && job.keywords !== undefined && job.keywords !== '') {
+    if (
+      job.keywords !== null &&
+      job.keywords !== undefined &&
+      job.keywords !== ''
+    ) {
       // Delete job keywords
       await promisePool.execute('DELETE FROM KeywordsJobs WHERE job_id = ?', [
         job_id,
@@ -300,6 +296,32 @@ const putJob = async (
         }
       }
     }
+    console.log(updateJob);
+    // if there is nothing to update after keywords and skills, update the job details
+    if (Object.keys(updateJob).length === 0) {
+      const updatedJob = await getJobById(job_id);
+      if (!updatedJob) {
+        throw new CustomError('Job not found', 404);
+      }
+      const response = {
+        message: 'Job updated',
+        job: updatedJob,
+      };
+      return response;
+    }
+    const sql = promisePool.format(
+      'UPDATE JobAds SET ? WHERE job_id = ? AND user_id = ?',
+      [updateJob, job_id, user_id]
+    );
+    console.log(sql);
+    const [result] = await promisePool.execute<ResultSetHeader>(sql);
+
+    console.log(result, 'result');
+
+    if (result.affectedRows === 0) {
+      throw new CustomError('Job update failed', 500);
+    }
+
     const updatedJob = await getJobById(job_id);
     if (!updatedJob) {
       throw new CustomError('Job not found', 404);
