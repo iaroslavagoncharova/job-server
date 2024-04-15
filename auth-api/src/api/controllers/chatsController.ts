@@ -36,7 +36,6 @@ export const handleGetOtherChatUser = async (
       next(new CustomError('Message not found', 404));
       return;
     }
-    console.log('handleGetOtherChatUser', otherUser);
     res.json(otherUser);
   } catch (e) {
     next(e);
@@ -110,7 +109,6 @@ export const handlePostMessage = async (
   try {
     const userId = res.locals.user.user_id;
     const message: PostMessage = {...req.body, user_id: userId};
-    console.log(message);
     const newMessage = await postMessage(message);
     if (newMessage === null) {
       next(new CustomError('Message not created', 404));

@@ -26,7 +26,6 @@ const getOtherChatUser = async (chatId: number, userId: number): Promise<Pick<Us
   try {
     const [chat] = await promisePool.execute<RowDataPacket[] & Chat[]>('SELECT * FROM Chats WHERE chat_id = ?', [chatId]);
     if (chat.length === 0) {
-      console.log('chat not found');
       return null;
     }
     if (chat[0].user1_id === userId) {
@@ -34,7 +33,6 @@ const getOtherChatUser = async (chatId: number, userId: number): Promise<Pick<Us
         'SELECT user_id, username FROM Users WHERE user_id = ?',
         [chat[0].user2_id]
       );
-      console.log(otherUser[0], typeof otherUser[0]);
       return otherUser[0];
     }
     if (chat[0].user2_id === userId) {
@@ -42,7 +40,6 @@ const getOtherChatUser = async (chatId: number, userId: number): Promise<Pick<Us
         'SELECT user_id, username FROM Users WHERE user_id = ?',
         [chat[0].user1_id]
       );
-      console.log(otherUser[0], typeof otherUser[0]);
       return otherUser[0];
     } else {
       return null;
@@ -71,7 +68,6 @@ const getChatsByUser = async (userId: number): Promise<Chat[]> => {
     'SELECT * FROM Chats WHERE user1_id = ? OR user2_id = ?',
     [userId, userId]
   );
-  console.log(rows);
   if (rows.length === 0) {
     throw new CustomError('Chats not found', 404);
   }
@@ -89,19 +85,16 @@ const getMessagesByChatAndUser = async (
   }
 
   const otherUserId = otherUser.user_id;
-  console.log(otherUserId);
 
   // MY MESSAGES FROM CHAT
   const [myMessages] = await promisePool.execute<RowDataPacket[] & Message[]>(
     `SELECT * FROM Messages WHERE chat_id = ? AND user_id = ? ORDER BY sent_at;`,
     [chatId, userId]
   );
-  console.log(myMessages);
   const [me] = await promisePool.execute<RowDataPacket[] & Pick<User, 'username'>>(
     'SELECT username FROM Users WHERE user_id = ?',
     [userId]
   );
-  console.log(me[0]);
   let meAndMyMessages: MessageWithUser[] | null = [];
 
   // THEIR MESSAGES FROM CHAT
@@ -134,8 +127,6 @@ const getMessagesByChatAndUser = async (
       themAndTheirMessages.push(themAndMessage);
     }
   }
-  console.log('me and my messages', meAndMyMessages);
-  console.log('them and their messages', themAndTheirMessages);
 
   // returns an array of two arrays, first array is messages of the user, second array is messages of the other user
   return [(meAndMyMessages), (themAndTheirMessages)].flat().sort((a, b) => {
@@ -151,7 +142,6 @@ const postMessage = async (message: PostMessage): Promise<Message | null> => {
       VALUES (?, ?, ?);`,
       [message.user_id, message.chat_id, message.message_text]
     );
-    console.log(result);
     const [rows] = await promisePool.execute<RowDataPacket[] & Message[]>(
       'SELECT * FROM Messages WHERE message_id = ?',
       [result[0].insertId]
@@ -169,14 +159,11 @@ const postMessage = async (message: PostMessage): Promise<Message | null> => {
 // start a chat - automatically after a match or manually after an employer approves an application
 const postChat = async (matchId: number): Promise<Chat | null> => {
   try {
-    console.log(typeof matchId);
     const [userIds] = await promisePool.execute<RowDataPacket[] & Pick<Match, 'user1_id' | 'user2_id'>>(`
     SELECT user1_id, user2_id FROM Matches WHERE match_id = ?`,
     [matchId]
     );
-    console.log(userIds);
     if (userIds.length === 0) {
-      console.log('match not found');
       return null;
     }
     const user1_id = userIds[0].user1_id;
@@ -184,7 +171,6 @@ const postChat = async (matchId: number): Promise<Chat | null> => {
 
     const chat = await promisePool.execute<ResultSetHeader>(`INSERT INTO Chats (user1_id, user2_id) VALUES (?, ?)`, [user1_id, user2_id]);
     if (chat[0].affectedRows === 0) {
-      console.log('insert failed');
       return null;
     }
     const [rows] = await promisePool.execute<RowDataPacket[] & Chat[]>(
@@ -192,7 +178,6 @@ const postChat = async (matchId: number): Promise<Chat | null> => {
       [chat[0].insertId]
     );
     if (rows.length === 0) {
-      console.log('object not found');
       return null;
     }
 

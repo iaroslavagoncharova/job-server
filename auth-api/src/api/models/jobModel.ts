@@ -8,6 +8,7 @@ import {
   User,
   UpdateJob,
   JobWithUser,
+  Keyword,
 } from '@sharedTypes/DBTypes';
 import {getUserById} from '../controllers/userController';
 import {getUser} from './userModel';
@@ -32,13 +33,21 @@ const getAllJobs = async (user_id: number): Promise<Job[] | null> => {
   }
 };
 
-const getJobsByCompany = async (id: number): Promise<Job[]> => {
+const getJobsByCompany = async (
+  id: number
+): Promise<JobWithSkillsAndKeywords[]> => {
   try {
-    const [rows] = await promisePool.execute<RowDataPacket[] & Job[]>(
-      'SELECT * FROM JobAds WHERE user_id = ?',
+    // select job ads, their keywords, skills and get company name aka username from user id
+    const [jobs] = await promisePool.execute<
+      RowDataPacket[] & JobWithSkillsAndKeywords[]
+    >(
+      'SELECT JobAds.*, GROUP_CONCAT(DISTINCT Skills.skill_name) AS skills, GROUP_CONCAT(DISTINCT KeyWords.keyword_name) AS keywords FROM JobAds LEFT JOIN JobSkills ON JobAds.job_id = JobSkills.job_id LEFT JOIN Skills ON JobSkills.skill_id = Skills.skill_id LEFT JOIN KeywordsJobs ON JobAds.job_id = KeywordsJobs.job_id LEFT JOIN KeyWords ON KeywordsJobs.keyword_id = KeyWords.keyword_id WHERE JobAds.user_id = ? GROUP BY JobAds.job_id;',
       [id]
     );
-    return rows;
+    if (jobs[0].length === 0) {
+      throw new CustomError('No jobs found', 404);
+    }
+    return jobs;
   } catch (err) {
     throw new CustomError('getJobsByCompany failed', 500);
   }
@@ -46,21 +55,21 @@ const getJobsByCompany = async (id: number): Promise<Job[]> => {
 
 const getFields = async (): Promise<string[]> => {
   try {
-    const [rows] = await promisePool.execute<RowDataPacket[] & {field: string}[]>(
-      'SELECT DISTINCT field FROM JobAds'
-    );
+    const [rows] = await promisePool.execute<
+      RowDataPacket[] & {field: string}[]
+    >('SELECT DISTINCT field FROM JobAds');
     return rows.map((row) => row.field);
   } catch (err) {
     throw new CustomError('getFields failed', 500);
   }
 };
 
-const getJobForApplication = async (job_id: number): Promise<JobWithUser | null> => {
+const getJobForApplication = async (
+  job_id: number
+): Promise<JobWithUser | null> => {
   try {
     console.log(job_id, 'job_id');
-    const [result] = await promisePool.execute<
-      RowDataPacket[] & JobWithUser[]
-    >(
+    const [result] = await promisePool.execute<RowDataPacket[] & JobWithUser[]>(
       'SELECT JobAds.*, Users.username FROM JobAds LEFT JOIN Users ON JobAds.user_id = Users.user_id WHERE JobAds.job_id = ?;',
       [job_id]
     );
@@ -144,7 +153,9 @@ const postJob = async (
     const insertedJobId = result.insertId;
 
     // Insert job skills
+    console.log(job.skills, 'job.skills');
     const skills = job.skills.split(',').map((skill) => Number(skill.trim()));
+    console.log(skills, 'skills');
     for (const skillId of skills) {
       const [skillsResult] = await promisePool.execute<ResultSetHeader>(
         'INSERT INTO JobSkills (job_id, skill_id) VALUES (?, ?)',
@@ -188,46 +199,61 @@ const postJob = async (
   }
 };
 
+const getKeywords = async (): Promise<Keyword[]> => {
+  try {
+    const [rows] = await promisePool.execute<RowDataPacket[] & Keyword[]>(
+      'SELECT * FROM KeyWords'
+    );
+    return rows;
+  } catch (err) {
+    throw new CustomError('getKeywords failed', 500);
+  }
+};
+
 const putJob = async (
   job_id: number,
   job: UpdateJob,
   user_id: number
 ): Promise<JobResponse> => {
   try {
+    console.log(job);
     const updateJob: UpdateJob = {};
-    if (job.job_address !== undefined && job.job_address !== null && job.job_address !== '') {
+    if (
+      job.job_address !== undefined &&
+      job.job_address !== null &&
+      job.job_address !== ''
+    ) {
       updateJob.job_address = job.job_address;
     }
-    if (job.job_title !== undefined && job.job_title !== null && job.job_title !== '') {
+    if (
+      job.job_title !== undefined &&
+      job.job_title !== null &&
+      job.job_title !== ''
+    ) {
       updateJob.job_title = job.job_title;
     }
     if (job.salary !== undefined && job.salary !== null && job.salary !== '') {
       updateJob.salary = job.salary;
     }
-    if (job.job_description !== undefined && job.job_description !== null && job.job_description !== '') {
+    if (
+      job.job_description !== undefined &&
+      job.job_description !== null &&
+      job.job_description !== ''
+    ) {
       updateJob.job_description = job.job_description;
     }
-    if (job.deadline_date !== undefined && job.deadline_date !== null && job.deadline_date !== '') {
+    if (
+      job.deadline_date !== undefined &&
+      job.deadline_date !== null &&
+      job.deadline_date !== ''
+    ) {
       updateJob.deadline_date = job.deadline_date;
     }
     if (job.field !== undefined && job.field !== null && job.field !== '') {
       updateJob.field = job.field;
     }
-    console.log(updateJob);
-    const sql = promisePool.format(
-      'UPDATE JobAds SET ? WHERE job_id = ? AND user_id = ?',
-      [updateJob, job_id, user_id]
-    );
-    console.log(sql);
-    const [result] = await promisePool.execute<ResultSetHeader>(sql);
 
-    console.log(result, 'result');
-
-    if (result.affectedRows === 0) {
-      throw new CustomError('Job update failed', 500);
-    }
-
-    if (job.skills !== null && job.skills !== undefined) {
+    if (job.skills !== null && job.skills !== undefined && job.skills !== '') {
       // Delete job skills
       await promisePool.execute('DELETE FROM JobSkills WHERE job_id = ?', [
         job_id,
@@ -246,7 +272,11 @@ const putJob = async (
         }
       }
     }
-    if (job.keywords !== null && job.keywords !== undefined) {
+    if (
+      job.keywords !== null &&
+      job.keywords !== undefined &&
+      job.keywords !== ''
+    ) {
       // Delete job keywords
       await promisePool.execute('DELETE FROM KeywordsJobs WHERE job_id = ?', [
         job_id,
@@ -266,6 +296,32 @@ const putJob = async (
         }
       }
     }
+    console.log(updateJob);
+    // if there is nothing to update after keywords and skills, update the job details
+    if (Object.keys(updateJob).length === 0) {
+      const updatedJob = await getJobById(job_id);
+      if (!updatedJob) {
+        throw new CustomError('Job not found', 404);
+      }
+      const response = {
+        message: 'Job updated',
+        job: updatedJob,
+      };
+      return response;
+    }
+    const sql = promisePool.format(
+      'UPDATE JobAds SET ? WHERE job_id = ? AND user_id = ?',
+      [updateJob, job_id, user_id]
+    );
+    console.log(sql);
+    const [result] = await promisePool.execute<ResultSetHeader>(sql);
+
+    console.log(result, 'result');
+
+    if (result.affectedRows === 0) {
+      throw new CustomError('Job update failed', 500);
+    }
+
     const updatedJob = await getJobById(job_id);
     if (!updatedJob) {
       throw new CustomError('Job not found', 404);
@@ -325,6 +381,7 @@ export {
   getFields,
   getJobById,
   getJobForApplication,
+  getKeywords,
   getAllJobs,
   getJobByField,
   postJob,

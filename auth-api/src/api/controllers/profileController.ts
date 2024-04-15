@@ -256,6 +256,25 @@ const getSkills = async (
   }
 };
 
+const getSkillsByUserId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const id = req.params.user_id;
+    const result = await getUserSkills(+id);
+    console.log('result', result);
+    if (result.length === 0) {
+      next(new CustomError('No skills found', 404));
+      return;
+    }
+    res.json(result);
+  } catch (error) {
+    next(new CustomError('Failed to get skills', 500));
+  }
+};
+
 const getSkillsByUser = async (
   req: Request<{user_id: string}>,
   res: Response<Skill[]>,
@@ -419,6 +438,7 @@ export {
   postExperience,
   getSkills,
   getSkillsByUser,
+  getSkillsByUserId,
   addUserSkill,
   updateUserSkill,
   removeUserSkill,

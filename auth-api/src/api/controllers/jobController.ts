@@ -11,6 +11,7 @@ import {
   getJobById,
   getJobForApplication,
   getJobsByCompany,
+  getKeywords,
   postJob,
   putJob,
 } from '../models/jobModel';
@@ -48,6 +49,23 @@ const fetchJobsByCompany = async (
     res.json(jobs);
   } catch (error) {
     return next(error);
+  }
+};
+
+const fetchKeywords = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const keywords = await getKeywords();
+    if (keywords.length === 0) {
+      next(new CustomError('No keywords found', 404));
+      return;
+    }
+    res.json(keywords);
+  } catch (error) {
+    next(new CustomError((error as Error).message, 500));
   }
 };
 
@@ -107,7 +125,6 @@ const fetchJobForApplication = async (
 ): Promise<JobWithUser[] | void> => {
   try {
     const id = req.params.job_id;
-    console.log('id', id);
     const job = await getJobForApplication(+id);
     if (job === null) {
       next(new CustomError('Job not found', 404));
@@ -177,7 +194,6 @@ const removeJob = async (
     const id = req.params.id;
     const tokenUser = res.locals.user;
     const job = await getJobById(+id);
-    console.log('job', job, id, tokenUser.user_id);
     if (job === null) {
       next(new CustomError('Job not found or already deleted', 404));
       return;
@@ -200,6 +216,7 @@ export {
   fetchAllJobs,
   fetchJobsByField,
   fetchJobForApplication,
+  fetchKeywords,
   addJob,
   removeJob,
   updateJob,

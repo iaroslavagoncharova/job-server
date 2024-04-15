@@ -6,6 +6,7 @@ import {
   getExperienceById,
   getSkills,
   getSkillsByUser,
+  getSkillsByUserId,
   getUserAttachments,
   postEducation,
   postExperience,
@@ -63,6 +64,7 @@ profileRoute
 // routes for skills
 profileRoute.get('/skills', getSkills);
 profileRoute.get('/skills/user', authenticate, getSkillsByUser);
+profileRoute.get('/skills/user/:user_id', getSkillsByUserId);
 profileRoute.post('/skills/:skill_id', authenticate, addUserSkill);
 profileRoute
   .route('/skills/:skill_id')

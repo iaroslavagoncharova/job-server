@@ -36,7 +36,11 @@ const getUser = async (id: number): Promise<UnauthorizedUser | null> => {
   try {
     const [result] = await promisePool.execute<
       RowDataPacket[] & UnauthorizedUser[]
-    >('SELECT * FROM Users WHERE user_id = ?', [id]);
+      // select all except password
+    >(
+      'SELECT user_id, username, email, user_level_id, fullname, phone, about_me, status, user_type, link, field, created_at, address FROM Users WHERE user_id = ?',
+      [id]
+    );
     if (result.length === 0) {
       return null;
     }
@@ -139,6 +143,70 @@ const getAllCandidates = async (
   }
 };
 
+const getOneCandidate = async (
+  user_id: number
+): Promise<CandidateProfile | null> => {
+  try {
+    // get basic user info
+    const [userResult] = await promisePool.execute<
+      RowDataPacket[] & CandidateProfile[]
+    >(
+      'SELECT Users.username, Users.about_me, Users.link, Users.field FROM Users WHERE Users.user_id = ?',
+      [user_id]
+    );
+    if (userResult.length === 0) {
+      return null;
+    }
+
+    const user = userResult[0];
+
+    // get user skills
+    const [skillsResult] = await promisePool.execute<
+      RowDataPacket[] & SkillName[]
+    >(
+      'SELECT Skills.skill_name FROM UserSkills JOIN Skills ON UserSkills.skill_id = Skills.skill_id WHERE user_id = ?',
+      [user_id]
+    );
+
+    const skills: SkillName[] = skillsResult.map((skill) => skill.skill_name);
+
+    // get user education
+    const [eduResult] = await promisePool.execute<
+      RowDataPacket[] & Education[]
+    >(
+      'SELECT Education.degree, Education.school, Education.field, Education.graduation FROM Education WHERE user_id = ?',
+      [user_id]
+    );
+
+    // get user experience
+    const [expResult] = await promisePool.execute<
+      RowDataPacket[] & Experience[]
+    >(
+      'SELECT JobExperience.job_title, JobExperience.job_place, JobExperience.job_city, JobExperience.description, JobExperience.start_date, JobExperience.end_date FROM JobExperience WHERE user_id = ?',
+      [user_id]
+    );
+
+    // get user attachments
+    const [attachResult] = await promisePool.execute<
+      RowDataPacket[] & Attachment[]
+    >('SELECT * FROM Attachments WHERE user_id = ?', [user_id]);
+
+    return {
+      user_id: user_id,
+      username: user.username,
+      about_me: user.about_me,
+      link: user.link,
+      field: user.field,
+      skills: skills,
+      education: eduResult,
+      experience: expResult,
+      attachments: attachResult,
+    };
+  } catch (e) {
+    throw new Error((e as Error).message);
+  }
+};
+
 const getUserByEmail = async (email: string): Promise<User | null> => {
   try {
     const [result] = await promisePool.execute<RowDataPacket[] & User[]>(
@@ -176,13 +244,13 @@ const postUser = async (
       const [adjectiveResult] = await promisePool.execute<RowDataPacket[]>(
         'SELECT adj_name FROM Adjectives ORDER BY RAND() LIMIT 1'
       );
-
-      const username =
+      let newUsername;
+      newUsername =
         adjectiveResult[0].adj_name + '_' + usernameResult[0].animal_name;
 
       const checkifUsernameExists = await promisePool.execute<RowDataPacket[]>(
         'SELECT * FROM Users WHERE username = ?',
-        [username]
+        [newUsername]
       );
 
       // if username already exists, generate a new one
@@ -207,26 +275,45 @@ const postUser = async (
           throw new Error('Username generation failed');
         }
         user.username = newUsername;
-        user.user_level_id = 1;
       }
+      user.username = newUsername;
+      user.user_level_id = 1;
     } else {
       user.user_level_id = 2;
     }
-    const result = await promisePool.execute<ResultSetHeader>(
-      'INSERT INTO Users (username, password, email, user_level_id, fullname, phone, address, user_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [
-        user.username,
-        user.password,
-        user.email,
-        user.user_level_id,
-        user.fullname,
-        user.phone,
-        user.address,
-        user.user_type,
-      ]
-    );
-    const createdUser = await getUser(result[0].insertId);
-    return createdUser;
+    console.log(user);
+    if (user.user_type === 'employer') {
+      const result = await promisePool.execute<ResultSetHeader>(
+        'INSERT INTO Users (username, password, email, user_level_id, fullname, phone, address, user_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [
+          user.username,
+          user.password,
+          user.email,
+          user.user_level_id,
+          user.fullname,
+          user.phone,
+          user.address,
+          user.user_type,
+        ]
+      );
+      const createdUser = await getUser(result[0].insertId);
+      return createdUser;
+    } else {
+      const result = await promisePool.execute<ResultSetHeader>(
+        'INSERT INTO Users (username, password, email, user_level_id, fullname, phone, user_type) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [
+          user.username,
+          user.password,
+          user.email,
+          user.user_level_id,
+          user.fullname,
+          user.phone,
+          user.user_type,
+        ]
+      );
+      const createdUser = await getUser(result[0].insertId);
+      return createdUser;
+    }
   } catch (e) {
     throw new Error((e as Error).message);
   }
@@ -361,6 +448,7 @@ export {
   getUser,
   getUserAsCandidate,
   getAllCandidates,
+  getOneCandidate,
   postUser,
   getUserByEmail,
   deleteUser,
