@@ -76,7 +76,6 @@ const postMatch = async (
     }
     // if no chat exists, create a chat
     const createChat = await postChat(result.insertId);
-    console.log(createChat);
     return {message: 'Match created'};
   } catch (e) {
     throw new Error((e as Error).message);

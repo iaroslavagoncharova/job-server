@@ -150,7 +150,6 @@ const postExperience = async (
   res: Response<MessageResponse>,
   next: NextFunction
 ) => {
-  console.log('postExperience', req.body);
   try {
     const experience = req.body;
     if (
@@ -262,7 +261,6 @@ const getSkillsByUserId = async (
   try {
     const id = req.params.user_id;
     const result = await getUserSkills(+id);
-    console.log('result', result);
     if (result.length === 0) {
       next(new CustomError('No skills found', 404));
       return;

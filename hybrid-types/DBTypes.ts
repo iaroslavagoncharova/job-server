@@ -77,6 +77,7 @@ export type Chat = {
   chat_id: number;
   user1_id: number;
   user2_id: number;
+  interview_status: string;
   created_at: Date | string;
 };
 

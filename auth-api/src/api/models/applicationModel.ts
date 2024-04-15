@@ -106,7 +106,6 @@ const postApplication = async (
       [user_id, job_id]
     );
     if (result[0].affectedRows === 0) {
-      console.log('Insert failed');
       return null;
     }
     const [rows] = await promisePool.execute<ResultSetHeader & Application[]>(
@@ -212,12 +211,10 @@ const acceptApplication = async (
   applicationId: number
 ): Promise<MessageResponse> => {
   try {
-    console.log(applicationId, 'applicationId');
     const [result] = await promisePool.execute<ResultSetHeader & Application[]>(
       'UPDATE Applications SET status = "Accepted" WHERE application_id = ?',
       [applicationId]
     );
-    console.log(result);
     if (result.affectedRows === 0) {
       return {message: 'An error occurred while accepting application'};
     }
@@ -228,7 +225,6 @@ const acceptApplication = async (
     if (application.length === 0) {
       return {message: 'Application not found'};
     }
-    console.log(application[0].user_id, application[0].job_id);
     // get user_id from job_id
     const [job] = await promisePool.execute<ResultSetHeader & Application[]>(
       'SELECT * FROM JobAds WHERE job_id = ?',
@@ -237,9 +233,7 @@ const acceptApplication = async (
     if (job.length === 0) {
       return {message: 'Job not found'};
     }
-    console.log(job[0].user_id, application[0].user_id);
     const match = await postMatch(job[0].user_id, application[0].user_id);
-    console.log(match);
     if (!match) {
       return {message: 'Failed to create match'};
     }
@@ -291,7 +285,6 @@ const getApplicationsForChat = async (
       'SELECT * FROM Applications WHERE user_id = ? AND status = "Accepted"',
       [userId]
     );
-    console.log(result);
     return result;
   } catch (e) {
     throw new Error((e as Error).message);
