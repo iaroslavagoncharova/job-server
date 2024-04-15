@@ -148,9 +148,22 @@ export type UserSkill = {
 
 export type Attachment = {
   attachment_id: number;
-  user_id: number;
   attachment_name: string;
-  link: string;
+  filename: string;
+  filesize: number;
+  user_id: number;
+};
+
+export type UploadAttachment = {
+  attachment_name: string;
+  file: File;
+};
+
+export type AttachmentInfo = {
+  attachment_name: string;
+  filename: string;
+  filesize: number;
+  media_type: string;
 };
 
 export type UpdateAttachment = {

@@ -8,12 +8,13 @@ const fileFilter = (
   file: Express.Multer.File,
   cb: FileFilterCallback
 ) => {
-  if (file.mimetype.includes('image') || file.mimetype.includes('video')) {
+  if (file.mimetype === 'application/msword' || file.mimetype === 'application/pdf') {
     cb(null, true);
   } else {
     cb(null, false);
   }
 };
+
 const upload = multer({dest: './uploads/', fileFilter});
 const router = express.Router();
 
