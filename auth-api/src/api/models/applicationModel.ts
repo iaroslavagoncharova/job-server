@@ -282,10 +282,27 @@ const getApplicationsByJob = async (jobId: number): Promise<Application[]> => {
   }
 };
 
+// getting accepted applications for chat
+const getApplicationsForChat = async (
+  userId: number
+): Promise<Application[]> => {
+  try {
+    const [result] = await promisePool.execute<ResultSetHeader & Application[]>(
+      'SELECT * FROM Applications WHERE user_id = ? AND status = "Accepted"',
+      [userId]
+    );
+    console.log(result);
+    return result;
+  } catch (e) {
+    throw new Error((e as Error).message);
+  }
+};
+
 export {
   getApplicationsByUserId,
   getSentApplicationsByUserId,
   getSavedApplicationsByUserId,
+  getApplicationsForChat,
   getApplicationById,
   postApplication,
   putApplication,

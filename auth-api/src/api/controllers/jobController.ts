@@ -125,7 +125,6 @@ const fetchJobForApplication = async (
 ): Promise<JobWithUser[] | void> => {
   try {
     const id = req.params.job_id;
-    console.log('id', id);
     const job = await getJobForApplication(+id);
     if (job === null) {
       next(new CustomError('Job not found', 404));
@@ -154,7 +153,6 @@ const addJob = async (
   }
   try {
     const job = req.body;
-    console.log('job', job);
     const tokenUser = res.locals.user;
     const result = await postJob(job, tokenUser.user_id);
     if (!result) {
@@ -196,7 +194,6 @@ const removeJob = async (
     const id = req.params.id;
     const tokenUser = res.locals.user;
     const job = await getJobById(+id);
-    console.log('job', job, id, tokenUser.user_id);
     if (job === null) {
       next(new CustomError('Job not found or already deleted', 404));
       return;
