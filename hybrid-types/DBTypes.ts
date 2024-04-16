@@ -214,3 +214,10 @@ export type FileInfo = {
   filename: string;
   user_id: number;
 };
+
+export type Test = {
+  test_id: number;
+  test_type: string;
+  user_id: number;
+  test_link: string;
+};
