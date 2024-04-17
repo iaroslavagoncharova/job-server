@@ -77,7 +77,7 @@ const getAllCandidates = async (
     const [userResult] = await promisePool.execute<
       RowDataPacket[] & CandidateProfile[]
     >(
-      "SELECT Users.user_id, Users.username, Users.about_me, Users.link, Users.field FROM Users WHERE Users.user_id NOT IN (SELECT Swipes.swiped_id from Swipes WHERE Swipes.swiper_id = ? AND Swipes.swipe_type = 'candidate') AND Users.user_type = 'candidate'",
+      "SELECT Users.user_id, Users.username, Users.about_me, Users.link, Users.field FROM Users WHERE Users.user_id NOT IN (SELECT Swipes.swiped_id from Swipes WHERE Swipes.swiper_id = ? AND Swipes.swipe_type = 'candidate') AND Users.user_type = 'candidate' AND Users.status = 'Active'",
       [user_id]
     );
     if (userResult.length === 0) {
@@ -346,6 +346,9 @@ const putUser = async (
     if (user.field !== undefined) {
       updateInfo.field = user.field;
     }
+    if (user.status !== undefined) {
+      updateInfo.status = user.status;
+    }
     const sql = promisePool.format('UPDATE Users SET ? WHERE user_id = ?', [
       updateInfo,
       id,
@@ -439,7 +442,6 @@ const deleteUser = async (id: number): Promise<MessageResponse> => {
     throw new Error((e as Error).message);
   }
 };
-
 export {
   getUsers,
   getUser,

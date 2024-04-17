@@ -29,6 +29,7 @@ export type UpdateUser = {
   password?: string | undefined;
   address?: string | undefined;
   about_me?: string | undefined;
+  status?: string | undefined;
 };
 
 export type UnauthorizedUser = Omit<User, "password">;
