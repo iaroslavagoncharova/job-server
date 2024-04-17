@@ -59,34 +59,4 @@ const authenticate = async (
   }
 };
 
-const makeThumbnail = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    if (!req.file) {
-      next(new CustomError('File not uploaded', 500));
-      return;
-    }
-
-    const src = path.join(__dirname, '..', 'uploads', req.file.filename);
-    console.log(src);
-
-    if (!req.file.mimetype.includes('video')) {
-      await sharp(src)
-        .resize(320, 240)
-        .png()
-        .toFile(src + '-thumb.png');
-      next();
-      return;
-    }
-
-    await getVideoThumbnail(src);
-    next();
-  } catch (error) {
-    next(new CustomError('Thumbnail not created', 500));
-  }
-};
-
-export {notFound, errorHandler, authenticate, makeThumbnail};
+export {notFound, errorHandler, authenticate};

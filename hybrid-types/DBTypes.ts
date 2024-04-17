@@ -157,6 +157,7 @@ export type Attachment = {
   attachment_name: string;
   filename: string;
   filesize: number;
+  media_type: string;
   user_id: number;
 };
 

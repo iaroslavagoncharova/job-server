@@ -11,6 +11,7 @@ const uploadFile = async (
   next: NextFunction
 ) => {
   try {
+    console.log('uploadFile entered');
     if (!req.file) {
       const err = new CustomError('file not valid', 400);
       next(err);

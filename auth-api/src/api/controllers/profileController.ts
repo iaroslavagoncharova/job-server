@@ -350,7 +350,7 @@ const removeUserSkill = async (
 };
 
 const getUserAttachments = async (
-  req: Request<{user_id: string}>,
+  req: Request,
   res: Response<Attachment[]>,
   next: NextFunction
 ): Promise<Attachment[] | void> => {

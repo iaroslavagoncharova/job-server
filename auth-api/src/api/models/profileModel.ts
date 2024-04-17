@@ -359,13 +359,16 @@ const postAttachment = async (
   user_id: number
 ): Promise<Attachment | null> => {
   try {
+    console.log('postAttachment entered');
     const {attachment_name, filename, filesize, media_type} = attachment;
+    console.log('attachment', attachment);
     const result = await promisePool.execute<ResultSetHeader>(
-      'INSERT INTO Attachments (attachment_name, filename, filesize, media_type, user_id) VALUES (?, ?, ?, ?)',
+      'INSERT INTO Attachments (attachment_name, filename, filesize, media_type, user_id) VALUES (?, ?, ?, ?, ?)',
       [attachment_name, filename, filesize, media_type, user_id]
     );
 
     if (result[0].affectedRows === 0) {
+      console.log('insert error');
       return null;
     }
     const [rows] = await promisePool.execute<RowDataPacket[] & Attachment[]>(
@@ -374,6 +377,7 @@ const postAttachment = async (
     );
 
     if (rows.length === 0) {
+      console.log('select error');
       return null;
     }
     return rows[0];
