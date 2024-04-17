@@ -151,6 +151,7 @@ CREATE TABLE Chats (
   chat_id int(11) PRIMARY KEY AUTO_INCREMENT NOT NULL,
   user1_id int(11) NOT NULL,
   user2_id int(11) NOT NULL,
+  interview_status varchar(255),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -68,7 +68,6 @@ const getJobForApplication = async (
   job_id: number
 ): Promise<JobWithUser | null> => {
   try {
-    console.log(job_id, 'job_id');
     const [result] = await promisePool.execute<RowDataPacket[] & JobWithUser[]>(
       'SELECT JobAds.*, Users.username FROM JobAds LEFT JOIN Users ON JobAds.user_id = Users.user_id WHERE JobAds.job_id = ?;',
       [job_id]
@@ -128,7 +127,6 @@ const postJob = async (
     if (userCheck.user_type !== 'employer') {
       throw new CustomError('User is not a company', 400);
     }
-    console.log(job, userCheck);
 
     // Insert job details
     const [result] = await promisePool.execute<ResultSetHeader>(
@@ -144,8 +142,6 @@ const postJob = async (
       ]
     );
 
-    console.log(result, 'result');
-
     if (result.affectedRows === 0) {
       throw new CustomError('Job creation failed', 500);
     }
@@ -153,15 +149,12 @@ const postJob = async (
     const insertedJobId = result.insertId;
 
     // Insert job skills
-    console.log(job.skills, 'job.skills');
     const skills = job.skills.split(',').map((skill) => Number(skill.trim()));
-    console.log(skills, 'skills');
     for (const skillId of skills) {
       const [skillsResult] = await promisePool.execute<ResultSetHeader>(
         'INSERT INTO JobSkills (job_id, skill_id) VALUES (?, ?)',
         [insertedJobId, skillId]
       );
-      console.log(skillsResult, 'skillsResult');
       if (skillsResult.affectedRows === 0) {
         throw new CustomError('Job skills insertion failed', 500);
       }
@@ -169,13 +162,11 @@ const postJob = async (
 
     // Insert job keywords
     const keywords = job.keywords.split(',').map((keyword) => keyword.trim());
-    console.log(keywords);
     for (const keyword of keywords) {
       const [keywordsResult] = await promisePool.execute<ResultSetHeader>(
         'INSERT INTO KeywordsJobs (job_id, keyword_id) VALUES (?, ?)',
         [insertedJobId, keyword]
       );
-      console.log(keywordsResult, 'keywordsResult');
       if (keywordsResult.affectedRows === 0) {
         throw new CustomError('Job keywords insertion failed', 500);
       }
@@ -183,7 +174,6 @@ const postJob = async (
 
     // Fetch inserted job details
     const insertedJob = await getJobById(insertedJobId);
-    console.log(insertedJob, 'insertedJob');
     if (!insertedJob) {
       throw new CustomError('Job not found', 404);
     }
@@ -216,7 +206,6 @@ const putJob = async (
   user_id: number
 ): Promise<JobResponse> => {
   try {
-    console.log(job);
     const updateJob: UpdateJob = {};
     if (
       job.job_address !== undefined &&
@@ -266,7 +255,6 @@ const putJob = async (
           'INSERT INTO JobSkills (job_id, skill_id) VALUES (?, ?)',
           [job_id, skillId]
         );
-        console.log(skillsResult, 'skillsResult');
         if (skillsResult.affectedRows === 0) {
           throw new CustomError('Job skills insertion failed', 500);
         }
@@ -284,19 +272,16 @@ const putJob = async (
 
       // Insert job keywords
       const keywords = job.keywords.split(',').map((keyword) => keyword.trim());
-      console.log(keywords);
       for (const keyword of keywords) {
         const [keywordsResult] = await promisePool.execute<ResultSetHeader>(
           'INSERT INTO KeywordsJobs (job_id, keyword_id) VALUES (?, ?)',
           [job_id, keyword]
         );
-        console.log(keywordsResult, 'keywordsResult');
         if (keywordsResult.affectedRows === 0) {
           throw new CustomError('Job keywords insertion failed', 500);
         }
       }
     }
-    console.log(updateJob);
     // if there is nothing to update after keywords and skills, update the job details
     if (Object.keys(updateJob).length === 0) {
       const updatedJob = await getJobById(job_id);
@@ -313,10 +298,8 @@ const putJob = async (
       'UPDATE JobAds SET ? WHERE job_id = ? AND user_id = ?',
       [updateJob, job_id, user_id]
     );
-    console.log(sql);
     const [result] = await promisePool.execute<ResultSetHeader>(sql);
 
-    console.log(result, 'result');
 
     if (result.affectedRows === 0) {
       throw new CustomError('Job update failed', 500);
@@ -341,7 +324,6 @@ const deleteJob = async (
   user_id: number
 ): Promise<MessageResponse> => {
   const connection = await promisePool.getConnection();
-  console.log(job_id, user_id);
   try {
     await connection.beginTransaction();
     await connection.execute('DELETE FROM JobSkills WHERE job_id = ?', [
@@ -365,7 +347,6 @@ const deleteJob = async (
       'DELETE FROM JobAds WHERE job_id = ? AND user_id = ?',
       [job_id, user_id]
     );
-    console.log(result);
     if (result.affectedRows === 0) {
       throw new CustomError('Job not found', 404);
     }

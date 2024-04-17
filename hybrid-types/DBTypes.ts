@@ -77,6 +77,7 @@ export type Chat = {
   chat_id: number;
   user1_id: number;
   user2_id: number;
+  interview_status: string;
   created_at: Date | string;
 };
 
@@ -225,4 +226,11 @@ export type Notification = {
 export type FileInfo = {
   filename: string;
   user_id: number;
+};
+
+export type Test = {
+  test_id: number;
+  test_type: string;
+  user_id: number;
+  test_link: string;
 };

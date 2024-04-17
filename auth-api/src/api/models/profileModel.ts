@@ -185,7 +185,6 @@ const addExperience = async (
         newExperience.end_date,
       ]
     );
-    console.log(result);
     if (result[0].affectedRows === 0) {
       return null;
     }
@@ -227,7 +226,6 @@ const putExperience = async (
       'UPDATE JobExperience SET ? WHERE experience_id = ? AND user_id = ?',
       [experienceUpdate, experience_id, user_id]
     );
-    console.log(sql);
 
     const result = await promisePool.execute<ResultSetHeader>(sql);
     if (result[0].affectedRows === 0) {
@@ -271,13 +269,11 @@ const getAllSkills = async () => {
 };
 
 const getUserSkills = async (id: number) => {
-  console.log('getUserSkills', id);
   try {
     const [result] = await promisePool.execute<RowDataPacket[] & Skill[]>(
       `SELECT * FROM Skills WHERE skill_id IN (SELECT skill_id FROM UserSkills WHERE user_id = ?)`,
       [id]
     );
-    console.log(result);
     return result;
   } catch (error) {
     throw new CustomError('Failed to get user skills', 500);

@@ -132,11 +132,9 @@ const getAllCandidates = async (
         };
       })
     );
-    console.log(candidates);
     const response = candidates.map((candidate) => {
       return candidate;
     });
-    console.log(response);
     return response;
   } catch (e) {
     throw new Error((e as Error).message);
@@ -281,7 +279,6 @@ const postUser = async (
     } else {
       user.user_level_id = 2;
     }
-    console.log(user);
     if (user.user_type === 'employer') {
       const result = await promisePool.execute<ResultSetHeader>(
         'INSERT INTO Users (username, password, email, user_level_id, fullname, phone, address, user_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',

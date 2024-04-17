@@ -1,7 +1,26 @@
 import {Request, Response, NextFunction} from 'express';
-import {deleteChat, getChatById, getChatsByUser, getMessage, getMessagesByChatAndUser, getOtherChatUser, postChat, postMessage} from '../models/chatsModel';
+import {
+  acceptInterviewInvitation,
+  declineInterviewInvitation,
+  deleteChat,
+  getChatById,
+  getChatsByUser,
+  getMessage,
+  getMessagesByChatAndUser,
+  getOtherChatUser,
+  postChat,
+  postMessage,
+  sendInterviewInvitation,
+} from '../models/chatsModel';
 import CustomError from '../../classes/CustomError';
-import {Chat, Message, MessageWithUser, PostMessage, TokenContent, User} from '@sharedTypes/DBTypes';
+import {
+  Chat,
+  Message,
+  MessageWithUser,
+  PostMessage,
+  TokenContent,
+  User,
+} from '@sharedTypes/DBTypes';
 import {ChatResponse, MessageResponse} from '@sharedTypes/MessageTypes';
 
 // toimii
@@ -9,18 +28,18 @@ export const handleGetMessage = async (
   req: Request,
   res: Response<Message>,
   next: NextFunction
-  ): Promise<Message | void>  => {
-    try {
-      const messageId = parseInt(req.params.messageId);
-      const message = await getMessage(messageId);
-      if (message === null) {
-        next(new CustomError('Message not found', 404));
-        return;
-      }
-      res.json(message);
-    } catch (e) {
-      next(e);
+): Promise<Message | void> => {
+  try {
+    const messageId = parseInt(req.params.messageId);
+    const message = await getMessage(messageId);
+    if (message === null) {
+      next(new CustomError('Message not found', 404));
+      return;
     }
+    res.json(message);
+  } catch (e) {
+    next(e);
+  }
 };
 
 export const handleGetOtherChatUser = async (
@@ -154,6 +173,66 @@ export const handleDeleteChat = async (
     }
     await deleteChat(chatId, userId);
     return {message: 'Chat deleted'};
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handleSendInterviewInvitation = async (
+  req: Request<{chatId: string}>,
+  res: Response<MessageResponse>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const chatId = parseInt(req.params.chatId);
+    const userId = res.locals.user.user_id;
+    console.log(userId);
+    const chat = await sendInterviewInvitation(chatId, userId);
+    if (!chat) {
+      next(new CustomError('Failed to send interview invitation', 500));
+      return;
+    }
+    res.json({message: 'Interview invitation sent'});
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handleAcceptInterviewInvitation = async (
+  req: Request<{chatId: string}>,
+  res: Response<MessageResponse>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const chatId = parseInt(req.params.chatId);
+    const userId = res.locals.user.user_id;
+    console.log(userId);
+    const chat = await acceptInterviewInvitation(chatId, userId);
+    if (!chat) {
+      next(new CustomError('Failed to accept interview invitation', 500));
+      return;
+    }
+    res.json({message: 'Interview invitation accepted'});
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handleDeclineInterviewInvitation = async (
+  req: Request<{chatId: string}>,
+  res: Response<MessageResponse>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const chatId = parseInt(req.params.chatId);
+    const userId = res.locals.user.user_id;
+    console.log(userId);
+    const chat = await declineInterviewInvitation(chatId, userId);
+    if (!chat) {
+      next(new CustomError('Failed to decline interview invitation', 500));
+      return;
+    }
+    res.json({message: 'Interview invitation declined'});
   } catch (error) {
     next(error);
   }
