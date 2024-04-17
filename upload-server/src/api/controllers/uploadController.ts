@@ -11,6 +11,7 @@ const uploadFile = async (
   next: NextFunction
 ) => {
   try {
+    console.log('uploadFile entered');
     if (!req.file) {
       const err = new CustomError('file not valid', 400);
       next(err);
@@ -30,13 +31,6 @@ const uploadFile = async (
 
     // change file name of req.file.path to filename
     fs.renameSync(req.file.path, `${req.file.destination}/${filename}`);
-    // if thumbnail exists, change thumbnail name of req.file.path + '_thumb' to filename + '_thumb'
-    if (fs.existsSync(`${req.file.path}-thumb.png`)) {
-      fs.renameSync(
-        `${req.file.path}-thumb.png`,
-        `${req.file.destination}/${filename}-thumb.png`
-      );
-    }
 
     const fileData = {
       filename: filename,

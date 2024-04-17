@@ -21,12 +21,14 @@ import {
 } from '../models/profileModel';
 import {
   Attachment,
+  AttachmentInfo,
   EducationInfo,
   Experience,
   ExperienceInfo,
   Skill,
+  TokenContent,
 } from '@sharedTypes/DBTypes';
-import {MessageResponse} from '@sharedTypes/MessageTypes';
+import { MessageResponse, MediaResponse } from '@sharedTypes/MessageTypes';
 import {validationResult} from 'express-validator';
 
 const getEducation = async (
@@ -348,7 +350,7 @@ const removeUserSkill = async (
 };
 
 const getUserAttachments = async (
-  req: Request<{user_id: string}>,
+  req: Request,
   res: Response<Attachment[]>,
   next: NextFunction
 ): Promise<Attachment[] | void> => {
@@ -366,17 +368,19 @@ const getUserAttachments = async (
 };
 
 const addAttachment = async (
-  req: Request<{}, {}, Attachment>,
-  res: Response,
+  req: Request<{}, {}, AttachmentInfo>,
+  res: Response<MediaResponse, {user: TokenContent}>,
   next: NextFunction
 ): Promise<MessageResponse | void> => {
   try {
-    const result = await postAttachment(res.locals.user.user_id, req.body);
-    if (!result) {
-      next(new CustomError('Failed to add attachment', 500));
+    const userId = res.locals.user.user_id;
+    const result = await postAttachment(req.body, userId);
+    if (result) {
+      res.json({message: 'Media created', media: result});
       return;
     }
-    res.json({message: 'Attachment added'});
+    const error = new CustomError('Attachment not created', 500);
+    next(error);
   } catch (error) {
     next(new CustomError('Failed to add attachment', 500));
   }

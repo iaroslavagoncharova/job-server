@@ -1,4 +1,4 @@
-import { Job, JobWithSkillsAndKeywords, Message, Notification, Swipe, UnauthorizedUser } from "./DBTypes";
+import { Attachment, Job, JobWithSkillsAndKeywords, Message, Notification, Swipe, UnauthorizedUser } from "./DBTypes";
 type MessageResponse = {
   message: string;
 };
@@ -33,4 +33,9 @@ type NotificationResponse = MessageResponse & {
   notification: Notification[];
   user: UnauthorizedUser;
 };
+
+export type MediaResponse = MessageResponse & {
+  media: Attachment | Attachment[];
+};
+
 export type { MessageResponse, ErrorResponse, UserResponse, ChatResponse, LoginResponse, JobResponse, SwipeResponse, NotificationResponse };
