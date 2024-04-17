@@ -275,22 +275,26 @@ const deleteJobFromTest = async (
   }
 };
 
-// function calculateCompatibility(candidateSkills, requiredSkills, testsTaken, totalTests) {
-//   // Calculate skill match percentage
-//   const skillMatchPercentage = (candidateSkills.filter(skill => requiredSkills.includes(skill)).length / requiredSkills.length) * 100;
+const takeTest = async (
+  test_id: number,
+  user_id: number
+): Promise<MessageResponse> => {
+  try {
+    const [result] = await promisePool.execute<ResultSetHeader>(
+      'INSERT INTO UserTests (test_id, user_id) VALUES (?, ?)',
+      [test_id, user_id]
+    );
+    if (result) {
+      return {message: 'Test taken'};
+    } else {
+      throw new Error('Error taking test');
+    }
+  } catch (error) {
+    console.log(error);
+    throw new Error('Error taking test');
+  }
+};
 
-//   // Calculate test participation percentage
-//   const testParticipationPercentage = (testsTaken / totalTests) * 100;
-
-//   // Define weights for each percentage
-//   const skillMatchWeight = 0.7;
-//   const testParticipationWeight = 0.3;
-
-//   // Combine percentages
-//   const compatibilityPercentage = (skillMatchPercentage * skillMatchWeight) + (testParticipationPercentage * testParticipationWeight);
-
-//   return compatibilityPercentage;
-// }
 export {
   getTests,
   getTestsByUser,
@@ -302,4 +306,6 @@ export {
   addTestToJob,
   getJobsByTest,
   deleteJobFromTest,
+  getCandidateTests,
+  takeTest,
 };

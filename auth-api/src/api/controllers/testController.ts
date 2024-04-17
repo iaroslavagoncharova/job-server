@@ -10,12 +10,14 @@ import {
   deleteJobFromTest,
   deleteTest,
   getAllTests,
+  getCandidateTests,
   getJobsByTest,
   getTests,
   getTestsByUser,
   getTestsForJobs,
   postTest,
   putTest,
+  takeTest,
 } from '../models/testModel';
 
 const handleGetAllTests = async (
@@ -205,6 +207,43 @@ const handleDeleteJobFromTest = async (
   }
 };
 
+const handleGetCandidatesTests = async (
+  req: Request,
+  res: Response<Test[]>,
+  next: NextFunction
+) => {
+  try {
+    const user = res.locals.user;
+    const tests = await getCandidateTests(user.user_id);
+    if (tests === null) {
+      next(new CustomError('Tests not found', 404));
+      return;
+    }
+    res.json(tests);
+  } catch (e) {
+    next(new CustomError((e as Error).message, 500));
+  }
+};
+
+const handleTakeTest = async (
+  req: Request<{id: string}>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user = res.locals.user;
+    const test_id = parseInt(req.params.id);
+    const result = await takeTest(test_id, user.user_id);
+    if (result.message === 'Test taken') {
+      res.json(result);
+      return;
+    }
+    next(new CustomError('Error taking test', 500));
+  } catch (e) {
+    next(new CustomError((e as Error).message, 500));
+  }
+};
+
 export {
   handleGetAllTests,
   handleGetTests,
@@ -216,4 +255,6 @@ export {
   handleAddTestToJob,
   handleGetJobsByTest,
   handleDeleteJobFromTest,
+  handleGetCandidatesTests,
+  handleTakeTest,
 };
