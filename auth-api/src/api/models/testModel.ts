@@ -1,7 +1,7 @@
 import {ResultSetHeader, RowDataPacket} from 'mysql2';
 import {promisePool} from '../../lib/db';
 import {Job, Test} from '../../../../hybrid-types/DBTypes';
-import {MessageResponse} from '@sharedTypes/MessageTypes';
+import {MessageResponse, TestResponse} from '@sharedTypes/MessageTypes';
 
 // get all tests
 const getTests = async (): Promise<Test[] | null> => {
@@ -75,36 +75,40 @@ const putTest = async (
   test: Omit<Test, 'user_id'>,
   user_id: number,
   test_id: number
-): Promise<MessageResponse> => {
-  const testUpdate: Pick<Test, 'test_type' | 'test_link'> = {
-    test_type: '',
-    test_link: '',
-  };
-  if (test.test_type) {
+): Promise<TestResponse> => {
+  const testUpdate: Partial<Test> = {};
+
+  if (test.test_type !== '') {
     testUpdate.test_type = test.test_type;
   }
-  if (test.test_link) {
+  if (test.test_link !== '') {
     testUpdate.test_link = test.test_link;
   }
-  if (testUpdate.test_type === '' && testUpdate.test_link === '') {
+
+  if (Object.keys(testUpdate).length === 0) {
     throw new Error('No fields to update');
   }
+
   try {
     const sql = promisePool.format(
       'UPDATE Tests SET ? WHERE test_id = ? AND user_id = ?',
       [testUpdate, test_id, user_id]
     );
-    console.log(test);
     const [result] = await promisePool.execute<ResultSetHeader>(sql);
     if (result.affectedRows === 0) {
       throw new Error('Test not updated');
     }
-    return {message: 'Test updated'};
+    const [newTest] = await promisePool.execute<RowDataPacket[] & Test[]>(
+      'SELECT * FROM Tests WHERE test_id = ?',
+      [test_id]
+    );
+    return {message: 'Test updated', test: newTest[0]};
   } catch (error) {
     console.log(error);
     throw new Error('Error updating test');
   }
 };
+
 // delete test
 const deleteTest = async (
   test_id: number,
@@ -114,13 +118,15 @@ const deleteTest = async (
   try {
     // deleting from jobtests first
     await connection.beginTransaction();
-    const [jobresult] = await connection.execute('DELETE FROM JobTests WHERE test_id = ?', [
-      test_id,
-    ]);
+    const [jobresult] = await connection.execute(
+      'DELETE FROM JobTests WHERE test_id = ?',
+      [test_id]
+    );
     console.log(jobresult);
-    const [userresult] = await connection.execute('DELETE FROM UserTests WHERE test_id = ?', [
-      test_id,
-    ]);
+    const [userresult] = await connection.execute(
+      'DELETE FROM UserTests WHERE test_id = ?',
+      [test_id]
+    );
     console.log(userresult);
     console.log(user_id);
     const [result] = await connection.execute<ResultSetHeader>(
