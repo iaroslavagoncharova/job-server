@@ -3,7 +3,26 @@ import {promisePool} from '../../lib/db';
 import {Job, Test} from '../../../../hybrid-types/DBTypes';
 import {MessageResponse, TestResponse} from '@sharedTypes/MessageTypes';
 
-// get all tests
+// get all existing tests
+const getAllTests = async (): Promise<Test[] | null> => {
+  try {
+    const [result] = await promisePool.execute<RowDataPacket[] & Test[]>(
+      'SELECT * FROM Tests'
+    );
+    if (result.length === 0) {
+      return null;
+    }
+    if (!result) {
+      throw new Error('Error getting tests');
+    }
+    return result;
+  } catch (error) {
+    console.log(error);
+    throw new Error('Error getting tests');
+  }
+};
+
+// get tests by jobmein
 const getTests = async (): Promise<Test[] | null> => {
   try {
     const [result] = await promisePool.execute<RowDataPacket[] & Test[]>(
@@ -42,6 +61,25 @@ const getTestsByUser = async (userId: number): Promise<Test[] | null> => {
   }
 };
 
+// get candidate tests
+const getCandidateTests = async (userId: number): Promise<Test[] | null> => {
+  try {
+    const [result] = await promisePool.execute<RowDataPacket[] & Test[]>(
+      'SELECT * FROM UserTests WHERE user_id = ?',
+      [userId]
+    );
+    if (result.length === 0) {
+      return null;
+    }
+    if (!result) {
+      throw new Error('Error getting tests');
+    }
+    return result;
+  } catch (error) {
+    console.log(error);
+    throw new Error('Error getting tests');
+  }
+};
 // post test
 const postTest = async (test: Test): Promise<MessageResponse> => {
   try {
@@ -237,9 +275,26 @@ const deleteJobFromTest = async (
   }
 };
 
+// function calculateCompatibility(candidateSkills, requiredSkills, testsTaken, totalTests) {
+//   // Calculate skill match percentage
+//   const skillMatchPercentage = (candidateSkills.filter(skill => requiredSkills.includes(skill)).length / requiredSkills.length) * 100;
+
+//   // Calculate test participation percentage
+//   const testParticipationPercentage = (testsTaken / totalTests) * 100;
+
+//   // Define weights for each percentage
+//   const skillMatchWeight = 0.7;
+//   const testParticipationWeight = 0.3;
+
+//   // Combine percentages
+//   const compatibilityPercentage = (skillMatchPercentage * skillMatchWeight) + (testParticipationPercentage * testParticipationWeight);
+
+//   return compatibilityPercentage;
+// }
 export {
   getTests,
   getTestsByUser,
+  getAllTests,
   postTest,
   putTest,
   deleteTest,

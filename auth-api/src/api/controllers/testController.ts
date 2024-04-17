@@ -9,6 +9,7 @@ import {
   addTestToJob,
   deleteJobFromTest,
   deleteTest,
+  getAllTests,
   getJobsByTest,
   getTests,
   getTestsByUser,
@@ -16,6 +17,23 @@ import {
   postTest,
   putTest,
 } from '../models/testModel';
+
+const handleGetAllTests = async (
+  req: Request,
+  res: Response<Test[]>,
+  next: NextFunction
+) => {
+  try {
+    const tests = await getAllTests();
+    if (tests === null) {
+      next(new CustomError('Tests not found', 404));
+      return;
+    }
+    res.json(tests);
+  } catch (e) {
+    next(new CustomError((e as Error).message, 500));
+  }
+};
 
 const handleGetTests = async (
   req: Request,
@@ -186,7 +204,9 @@ const handleDeleteJobFromTest = async (
     next(new CustomError((e as Error).message, 500));
   }
 };
+
 export {
+  handleGetAllTests,
   handleGetTests,
   handleGetTestsByUser,
   handlePostTest,

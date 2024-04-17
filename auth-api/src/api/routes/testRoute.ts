@@ -4,6 +4,7 @@ import {
   handleAddTestToJob,
   handleDeleteJobFromTest,
   handleDeleteTest,
+  handleGetAllTests,
   handleGetJobsByTest,
   handleGetTests,
   handleGetTestsByUser,
@@ -13,7 +14,7 @@ import {
 } from '../controllers/testController';
 
 const testRoute = express.Router();
-
+testRoute.get('/all', handleGetAllTests)
 testRoute.route('/').get(handleGetTests).post(authenticate, handlePostTest)
 testRoute.get('/byuser', authenticate, handleGetTestsByUser);
 testRoute.route('/:id')

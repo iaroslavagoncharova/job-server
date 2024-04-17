@@ -236,3 +236,18 @@ export type Test = {
   user_id: number;
   test_link: string;
 };
+
+export type JobSkill = {
+  job_id: number;
+  skill_id: number;
+};
+
+export type UserTest = {
+  user_id: number;
+  test_id: number;
+};
+
+export type JobTest = {
+  job_id: number;
+  test_id: number;
+};
