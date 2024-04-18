@@ -354,6 +354,18 @@ const getAttachments = async (id: number): Promise<Attachment[]> => {
   }
 };
 
+const getAttachment = async (attachmentId: number, userId: number): Promise<Attachment> => {
+  try {
+    const [result] = await promisePool.execute<RowDataPacket[] & Attachment[]>(
+      'SELECT * FROM Attachments WHERE attachment_id = ? AND user_id = ?',
+      [attachmentId, userId]
+    );
+    return result[0];
+  } catch (e) {
+    throw new CustomError('Failed to get attachments', 500);
+  }
+};
+
 const postAttachment = async (
   attachment: AttachmentInfo,
   user_id: number
@@ -396,8 +408,11 @@ const putAttachment = async (
     if (attachment.attachment_name !== undefined) {
       updateAttachment.attachment_name = attachment.attachment_name;
     }
-    if (attachment.link !== undefined) {
-      updateAttachment.link = attachment.link;
+    // jos filename on olemassa, on myös filesize ja media_type
+    if (attachment.filename !== undefined) {
+      updateAttachment.filename = attachment.filename;
+      updateAttachment.filesize = attachment.filesize;
+      updateAttachment.media_type = attachment.media_type;
     }
     const sql = promisePool.format(
       'UPDATE Attachments SET ? WHERE attachment_id = ? AND user_id = ?',
@@ -447,6 +462,7 @@ export {
   putUserSkill,
   deleteUserSkill,
   getAttachments,
+  getAttachment,
   postAttachment,
   putAttachment,
   deleteAttachment,
