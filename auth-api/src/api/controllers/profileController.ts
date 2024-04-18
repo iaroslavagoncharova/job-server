@@ -416,9 +416,10 @@ const updateAttachment = async (
     console.log('updating attachment');
     const attachment_id = req.params.attachment_id;
     const user_id = res.locals.user.user_id;
-    const attachment: UpdateAttachment = req.body;
+    const attachment = req.body;
+    console.log(attachment);
     const result = await putAttachment(user_id, +attachment_id, attachment);
-    if (!result) {
+    if (!result || result.message === 'Nothing to update') {
       next(new CustomError('Failed to update attachment', 500));
       return;
     }

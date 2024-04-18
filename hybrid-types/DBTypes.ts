@@ -176,6 +176,7 @@ export type AttachmentInfo = {
 
 export type UpdateAttachment = {
   attachment_name?: string | undefined;
+  preferred_filename?: string | undefined;
   filename?: string;
   filesize?: number;
   media_type?: string;

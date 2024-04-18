@@ -405,19 +405,32 @@ const putAttachment = async (
 ): Promise<MessageResponse> => {
   try {
     const updateAttachment: UpdateAttachment = {};
-    if (attachment.attachment_name !== undefined) {
+    let changeSql = [];
+    if (attachment.attachment_name === undefined && attachment.filename === undefined) {
+      return {message: 'Nothing to update'};
+    }
+    if (attachment.attachment_name !== undefined && attachment.attachment_name !== '') {
       updateAttachment.attachment_name = attachment.attachment_name;
+      changeSql.push(`attachment_name = '${attachment.attachment_name}'`);
     }
     // jos filename on olemassa, on myös filesize ja media_type
-    if (attachment.filename !== undefined) {
+    if (attachment.filename !== undefined && attachment.filename !== null) {
       updateAttachment.filename = attachment.filename;
+      updateAttachment.preferred_filename = attachment.preferred_filename;
+      changeSql.push(`filename = '${attachment.preferred_filename}'`);
       updateAttachment.filesize = attachment.filesize;
+      changeSql.push(`filesize = ${attachment.filesize}`);
       updateAttachment.media_type = attachment.media_type;
+      changeSql.push(`media_type = '${attachment.media_type}'`);
     }
+
+    const changeString = changeSql.join(', ');
+
     const sql = promisePool.format(
-      'UPDATE Attachments SET ? WHERE attachment_id = ? AND user_id = ?',
-      [updateAttachment, attachment_id, user_id]
+      `UPDATE Attachments SET ` + changeString + ` WHERE attachment_id = ? AND user_id = ?`,
+      [attachment_id, user_id]
     );
+    console.log(sql);
     const result = await promisePool.execute<ResultSetHeader>(sql);
 
     if (result[0].affectedRows === 0) {
