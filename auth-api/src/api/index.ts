@@ -3,6 +3,7 @@ import userRoute from './routes/userRoute';
 import {MessageResponse} from '../../../hybrid-types/MessageTypes';
 import authRoute from './routes/authRoute';
 import testRoute from './routes/testRoute';
+import reportRoute from './routes/reportRoute';
 
 import profileRoute from './routes/profileRoute';
 import chatsRoute from './routes/chatsRoute';
@@ -28,5 +29,6 @@ router.use('/swipes', swipeRoute);
 router.use('/matches', matchRoute);
 router.use('/notifications', notificationRoute);
 router.use('/tests', testRoute);
+router.use('/reports', reportRoute);
 
 export default router;
