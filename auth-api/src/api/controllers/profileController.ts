@@ -8,6 +8,7 @@ import {
   deleteExperience,
   deleteUserSkill,
   getAllSkills,
+  getAttachment,
   getAttachments,
   getEducationByUser,
   getExperience,
@@ -27,6 +28,7 @@ import {
   ExperienceInfo,
   Skill,
   TokenContent,
+  UpdateAttachment,
 } from '@sharedTypes/DBTypes';
 import { MessageResponse, MediaResponse } from '@sharedTypes/MessageTypes';
 import {validationResult} from 'express-validator';
@@ -367,6 +369,25 @@ const getUserAttachments = async (
   }
 };
 
+const getAttachmentById = async (
+  req: Request<{attachment_id: string}>,
+  res: Response<Attachment>,
+  next: NextFunction
+): Promise<Attachment | void> => {
+  try {
+    const userId = res.locals.user.user_id;
+    const attachmentId = parseInt(req.params.attachment_id);
+    const result = await getAttachment(attachmentId, userId);
+    if (!result) {
+      next(new CustomError('No attachments found', 404));
+      return;
+    }
+    res.json(result);
+  } catch (e) {
+    next(new CustomError('Failed to get attachment', 500));
+  }
+};
+
 const addAttachment = async (
   req: Request<{}, {}, AttachmentInfo>,
   res: Response<MediaResponse, {user: TokenContent}>,
@@ -392,11 +413,13 @@ const updateAttachment = async (
   next: NextFunction
 ): Promise<MessageResponse | void> => {
   try {
+    console.log('updating attachment');
     const attachment_id = req.params.attachment_id;
     const user_id = res.locals.user.user_id;
     const attachment = req.body;
+    console.log(attachment);
     const result = await putAttachment(user_id, +attachment_id, attachment);
-    if (!result) {
+    if (!result || result.message === 'Nothing to update') {
       next(new CustomError('Failed to update attachment', 500));
       return;
     }
@@ -441,6 +464,7 @@ export {
   updateUserSkill,
   removeUserSkill,
   getUserAttachments,
+  getAttachmentById,
   addAttachment,
   updateAttachment,
   removeAttachment,

@@ -2,6 +2,7 @@ import express from 'express';
 import {
   addAttachment,
   addUserSkill,
+  getAttachmentById,
   getEducation,
   getExperienceById,
   getSkills,
@@ -74,6 +75,7 @@ profileRoute
 //routes for attachments
 profileRoute.get('/attachments', authenticate, getUserAttachments);
 profileRoute.post('/attachments', authenticate, addAttachment);
+profileRoute.get('/attachments/:attachment_id', authenticate, getAttachmentById);
 profileRoute.put('/attachments/:attachment_id', authenticate, updateAttachment);
 profileRoute.delete(
   '/attachments/:attachment_id',
