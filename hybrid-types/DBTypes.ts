@@ -175,7 +175,9 @@ export type AttachmentInfo = {
 
 export type UpdateAttachment = {
   attachment_name?: string | undefined;
-  link?: string | undefined;
+  filename?: string;
+  filesize?: number;
+  media_type?: string;
 };
 
 export type Job = {
