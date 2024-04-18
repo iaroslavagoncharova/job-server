@@ -29,6 +29,7 @@ export type UpdateUser = {
   password?: string | undefined;
   address?: string | undefined;
   about_me?: string | undefined;
+  status?: string | undefined;
 };
 
 export type UnauthorizedUser = Omit<User, "password">;
@@ -236,4 +237,19 @@ export type Test = {
   test_type: string;
   user_id: number;
   test_link: string;
+};
+
+export type JobSkill = {
+  job_id: number;
+  skill_id: number;
+};
+
+export type UserTest = {
+  user_id: number;
+  test_id: number;
+};
+
+export type JobTest = {
+  job_id: number;
+  test_id: number;
 };

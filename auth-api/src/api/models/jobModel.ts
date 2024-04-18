@@ -9,9 +9,16 @@ import {
   UpdateJob,
   JobWithUser,
   Keyword,
+  Test,
+  UserTest,
+  JobSkill,
+  UserSkill,
 } from '@sharedTypes/DBTypes';
 import {getUserById} from '../controllers/userController';
 import {getUser} from './userModel';
+import {getTestsForJobs} from './testModel';
+import {getSkillsByUserId} from '../controllers/profileController';
+import {getUserSkills} from './profileModel';
 
 const getAllJobs = async (user_id: number): Promise<Job[] | null> => {
   try {
@@ -300,7 +307,6 @@ const putJob = async (
     );
     const [result] = await promisePool.execute<ResultSetHeader>(sql);
 
-
     if (result.affectedRows === 0) {
       throw new CustomError('Job update failed', 500);
     }
@@ -357,6 +363,52 @@ const deleteJob = async (
   }
 };
 
+// calculate a compatibility percentage based on the skills required for a job, skills that a candidate has, the amount of tests needed and the amount the candidate has taken
+const calculatePercentage = async (user_id: number, job_id: number) => {
+  // Get all tests for job
+  const totalTests = await getTestsForJobs(job_id);
+  if (!totalTests) {
+    throw new CustomError('No tests found', 404);
+  }
+  const totalTestIds = totalTests.map((test) => test.test_id);
+  const totalTestIdPlaceholders = totalTestIds.map((id) => id).join(', ');
+  // select a count of all tests that a user has taken that are in the tests required for the job
+  const testsTaken = await promisePool.execute<RowDataPacket[] & UserTest[]>(
+    `SELECT * FROM UserTests WHERE user_id = ? AND test_id IN (?)`,
+    [user_id, totalTestIdPlaceholders]
+  );
+  const takenTestsLength = testsTaken[0].length;
+  // Get all required skills for job
+  const [jobSkills] = await promisePool.execute<RowDataPacket[] & JobSkill[]>(
+    'SELECT * FROM JobSkills WHERE job_id = ?',
+    [job_id]
+  );
+  console.log(jobSkills, 'jobSkills');
+  const totalSkillsIds = jobSkills.map((skill) => skill.skill_id);
+  const totalSkillsPlaceholders = totalSkillsIds.map((id) => id).join(', ');
+  // Get all skills that a user has
+  const userSkills = await promisePool.execute<RowDataPacket[] & UserSkill[]>(
+    `SELECT * FROM UserSkills WHERE user_id = ? AND skill_id IN (?)`,
+    [user_id, totalSkillsPlaceholders]
+  );
+  const totalTestsLength = totalTests.length;
+  const testParticipationPercentage =
+    (takenTestsLength / totalTestsLength) * 100;
+  // check that the user has skill ids that are in the job skill ids
+  const userSkillIds = userSkills[0].map((skill) => skill.skill_id);
+  const skillMatch = userSkillIds.filter((id) => totalSkillsIds.includes(id));
+  const skillMatchPercentage =
+    (skillMatch.length / totalSkillsIds.length) * 100;
+
+  const skillMatchWeight = 0.7;
+  const testParticipationWeight = 0.3;
+  const percentage =
+    skillMatchPercentage * skillMatchWeight +
+    testParticipationPercentage * testParticipationWeight;
+
+  return percentage;
+};
+
 export {
   getJobsByCompany,
   getFields,
@@ -368,4 +420,5 @@ export {
   postJob,
   putJob,
   deleteJob,
+  calculatePercentage,
 };

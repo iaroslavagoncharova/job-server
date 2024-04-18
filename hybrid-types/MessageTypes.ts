@@ -1,4 +1,13 @@
-import { Attachment, Job, JobWithSkillsAndKeywords, Message, Notification, Swipe, UnauthorizedUser } from "./DBTypes";
+import {
+  Attachment,
+  Job,
+  JobWithSkillsAndKeywords,
+  Message,
+  Notification,
+  Swipe,
+  Test,
+  UnauthorizedUser,
+} from "./DBTypes";
 type MessageResponse = {
   message: string;
 };
@@ -38,4 +47,18 @@ export type MediaResponse = MessageResponse & {
   media: Attachment | Attachment[];
 };
 
-export type { MessageResponse, ErrorResponse, UserResponse, ChatResponse, LoginResponse, JobResponse, SwipeResponse, NotificationResponse };
+type TestResponse = MessageResponse & {
+  test: Test;
+};
+
+export type {
+  MessageResponse,
+  ErrorResponse,
+  UserResponse,
+  ChatResponse,
+  LoginResponse,
+  JobResponse,
+  SwipeResponse,
+  NotificationResponse,
+  TestResponse,
+};

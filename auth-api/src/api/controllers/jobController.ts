@@ -4,6 +4,7 @@ import {JobResponse, MessageResponse} from '@sharedTypes/MessageTypes';
 import {validationResult} from 'express-validator';
 import {Job, JobWithSkillsAndKeywords, JobWithUser, UpdateJob} from '@sharedTypes/DBTypes';
 import {
+  calculatePercentage,
   deleteJob,
   getAllJobs,
   getFields,
@@ -209,6 +210,26 @@ const removeJob = async (
   }
 };
 
+const handleCalculatePercentage = async (
+  req: Request<{id: string}>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user_id = res.locals.user.user_id;
+    const job_id = req.params.id;
+    console.log(user_id, job_id);
+    const result = await calculatePercentage(user_id, +job_id);
+    if (result) {
+      res.json(result);
+      return;
+    }
+    next(new CustomError('Error calculating percentage', 500));
+  } catch (e) {
+    next(new CustomError((e as Error).message, 500));
+  }
+};
+
 export {
   fetchJobsByCompany,
   fetchFields,
@@ -220,4 +241,5 @@ export {
   addJob,
   removeJob,
   updateJob,
+  handleCalculatePercentage,
 };
