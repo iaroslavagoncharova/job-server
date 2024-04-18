@@ -11,6 +11,7 @@ import {
   User,
 } from '../../../../hybrid-types/DBTypes';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
+import {deleteReport} from './reportModel';
 
 const getUsers = async (): Promise<UnauthorizedUser[] | null> => {
   try {
@@ -442,6 +443,55 @@ const deleteUser = async (id: number): Promise<MessageResponse> => {
     throw new Error((e as Error).message);
   }
 };
+
+const deleteUserAsAdmin = async (
+  id: number,
+  adminId: number
+): Promise<MessageResponse> => {
+  const [adminCheck] = await promisePool.execute<RowDataPacket[]>(
+    'SELECT * FROM Users WHERE user_id = ? AND user_level_id = "3"',
+    [adminId]
+  );
+
+  if (adminCheck.length === 0) {
+    throw new Error('Unauthorized');
+  }
+
+  // Verify if the user exists and attempt to delete it
+  const handleDelete = await deleteUser(id);
+
+  if (!handleDelete) {
+    throw new Error('User not deleted');
+  }
+
+  console.log(handleDelete, 'handleDelete');
+
+  // Check if there are any reports associated with the user and delete them
+  const [reportCheck] = await promisePool.execute<RowDataPacket[]>(
+    'SELECT * FROM Reports WHERE reported_item_type = "User" AND reported_item_id = ?',
+    [id]
+  );
+
+  console.log(reportCheck, 'reportCheck');
+
+  if (reportCheck.length > 0) {
+    const [handleDeleteReport] = await promisePool.execute<ResultSetHeader>(
+      'DELETE FROM Reports WHERE reported_item_type = "User" AND reported_item_id = ?',
+      [id]
+    );
+
+    console.log(handleDeleteReport, 'handleDeleteReport');
+
+    if (handleDeleteReport.affectedRows === 0) {
+      throw new Error('Report not deleted');
+    }
+  } else {
+    console.log('No reports found for deletion');
+  }
+
+  return {message: 'User deleted'};
+};
+
 export {
   getUsers,
   getUser,
@@ -452,4 +502,5 @@ export {
   getUserByEmail,
   deleteUser,
   putUser,
+  deleteUserAsAdmin,
 };

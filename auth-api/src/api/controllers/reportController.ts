@@ -12,7 +12,7 @@ import {
   resolveReport,
   deleteReport,
 } from '../models/reportModel';
-import {Report} from '@sharedTypes/DBTypes';
+import {Report, ReportedJob, ReportedUser, User} from '@sharedTypes/DBTypes';
 
 const handleGetAllReports = async (
   req: Request,
@@ -104,7 +104,7 @@ const handleGetReportsByUser = async (
 
 const handleGetReportedUsers = async (
   req: Request,
-  res: Response<Report[]>,
+  res: Response<ReportedUser[]>,
   next: NextFunction
 ) => {
   try {
@@ -121,7 +121,7 @@ const handleGetReportedUsers = async (
 
 const handleGetReportedJobs = async (
   req: Request,
-  res: Response<Report[]>,
+  res: Response<ReportedJob[]>,
   next: NextFunction
 ) => {
   try {
@@ -170,8 +170,8 @@ const handleResolveReport = async (
       parseInt(req.params.id),
       res.locals.user.user_id
     );
-    if (result.affectedRows === 1) {
-      res.json({message: 'Report resolved'});
+    if (result.message === 'Report resolved') {
+      res.json(result);
       return;
     }
     next(new CustomError('Report not resolved', 500));

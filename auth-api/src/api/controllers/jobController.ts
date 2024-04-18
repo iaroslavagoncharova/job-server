@@ -2,10 +2,16 @@ import {Request, Response, NextFunction} from 'express';
 import CustomError from '../../classes/CustomError';
 import {JobResponse, MessageResponse} from '@sharedTypes/MessageTypes';
 import {validationResult} from 'express-validator';
-import {Job, JobWithSkillsAndKeywords, JobWithUser, UpdateJob} from '@sharedTypes/DBTypes';
+import {
+  Job,
+  JobWithSkillsAndKeywords,
+  JobWithUser,
+  UpdateJob,
+} from '@sharedTypes/DBTypes';
 import {
   calculatePercentage,
   deleteJob,
+  deleteJobAsAdmin,
   getAllJobs,
   getFields,
   getJobByField,
@@ -135,7 +141,7 @@ const fetchJobForApplication = async (
   } catch (error) {
     next(new CustomError((error as Error).message, 500));
   }
-}
+};
 
 const addJob = async (
   req: Request,
@@ -210,6 +216,25 @@ const removeJob = async (
   }
 };
 
+const removeJobAsAdmin = async (
+  req: Request,
+  res: Response<MessageResponse>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const tokenUser = res.locals.user;
+    const id = req.params.id;
+    const result = await deleteJobAsAdmin(+id, tokenUser.user_id);
+    if (!result) {
+      next(new CustomError('Job deletion failed', 500));
+      return;
+    }
+    res.json({message: 'Job deleted'});
+  } catch (error) {
+    next(new CustomError((error as Error).message, 500));
+  }
+};
+
 const handleCalculatePercentage = async (
   req: Request<{id: string}>,
   res: Response,
@@ -240,6 +265,7 @@ export {
   fetchKeywords,
   addJob,
   removeJob,
+  removeJobAsAdmin,
   updateJob,
   handleCalculatePercentage,
 };

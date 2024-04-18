@@ -25,6 +25,6 @@ reportRoute.route('/:id')
 .get(authenticate, handleGetReportById)
 .delete(authenticate, handleDeleteReport);
 reportRoute.post('/', authenticate, handleSendReport);
-reportRoute.post('/resolve/:id', authenticate, handleResolveReport);
+reportRoute.put('/resolve/:id', authenticate, handleResolveReport);
 
 export default reportRoute;

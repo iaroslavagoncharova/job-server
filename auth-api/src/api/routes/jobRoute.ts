@@ -1,6 +1,6 @@
 import express from 'express';
 import { authenticate } from '../../middlewares';
-import {addJob, fetchAllJobs, fetchFields, fetchJobById, fetchJobForApplication, fetchJobsByCompany, fetchJobsByField, fetchKeywords, handleCalculatePercentage, removeJob, updateJob} from '../controllers/jobController';
+import {addJob, fetchAllJobs, fetchFields, fetchJobById, fetchJobForApplication, fetchJobsByCompany, fetchJobsByField, fetchKeywords, handleCalculatePercentage, removeJob, removeJobAsAdmin, updateJob} from '../controllers/jobController';
 
 const jobRoute = express.Router();
 
@@ -17,6 +17,7 @@ jobRoute.route('/:id')
 jobRoute.get('/application/:job_id', authenticate, fetchJobForApplication);
 jobRoute.get('/:field', fetchJobsByField);
 jobRoute.get('/calculate/:id', authenticate, handleCalculatePercentage);
+jobRoute.delete('/admin/:id', authenticate, removeJobAsAdmin)
 
 
 export default jobRoute;

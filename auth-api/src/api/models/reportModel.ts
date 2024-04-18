@@ -1,7 +1,8 @@
 import {ResultSetHeader, RowDataPacket} from 'mysql2';
 import CustomError from '../../classes/CustomError';
 import {promisePool} from '../../lib/db';
-import {Report} from '@sharedTypes/DBTypes';
+import {Report, ReportedJob, ReportedUser, User} from '@sharedTypes/DBTypes';
+import {MessageResponse} from '@sharedTypes/MessageTypes';
 
 const getAllReports = async (user_id: number): Promise<Report[] | null> => {
   try {
@@ -95,7 +96,9 @@ const getReportsByUser = async (user_id: number): Promise<Report[] | null> => {
   }
 };
 
-const getReportedUsers = async (user_id: number): Promise<Report[] | null> => {
+const getReportedUsers = async (
+  user_id: number
+): Promise<ReportedUser[] | null> => {
   try {
     const [adminCheck] = await promisePool.query<RowDataPacket[]>(
       'SELECT * FROM Users WHERE user_id = ? AND user_level_id = "3"',
@@ -105,15 +108,25 @@ const getReportedUsers = async (user_id: number): Promise<Report[] | null> => {
       throw new CustomError('You do not have permission to view reports', 403);
     }
     const [results] = await promisePool.query<RowDataPacket[]>(
-      'SELECT * FROM Reports WHERE reported_item_type = "User"'
+      'SELECT * FROM Reports WHERE reported_item_type = "User" AND is_resolved = "not_resolved"'
     );
-    return results as Report[];
+    if (results.length === 0) {
+      return null;
+    }
+    // Get the user_id of each reported user
+    const userIds = results.map((report) => report.reported_item_id);
+    // Get the user data for each reported user except the password, also get info about what a user was reported for and by whom
+    const [users] = await promisePool.query<RowDataPacket[]>(
+      'SELECT Users.user_id, Users.username, Users.fullname, Users.email, Users.phone, Users.about_me, Users.status, Users.link, Users.field, Users.address, Users.user_type, Reports.report_reason FROM Users JOIN  Reports ON Users.user_id = Reports.reported_item_id WHERE Reports.reported_item_type = "User" AND Users.user_id IN (?)',
+      [userIds]
+    );
+    return users as ReportedUser[];
   } catch (e) {
     throw new Error((e as Error).message);
   }
 };
 
-const getReportedJobs = async (user_id: number): Promise<Report[] | null> => {
+const getReportedJobs = async (user_id: number): Promise<ReportedJob[] | null> => {
   try {
     const [adminCheck] = await promisePool.query<RowDataPacket[]>(
       'SELECT * FROM Users WHERE user_id = ? AND user_level_id = "3"',
@@ -123,9 +136,22 @@ const getReportedJobs = async (user_id: number): Promise<Report[] | null> => {
       throw new CustomError('You do not have permission to view reports', 403);
     }
     const [results] = await promisePool.query<RowDataPacket[]>(
-      'SELECT * FROM Reports WHERE reported_item_type = "Job"'
+      'SELECT * FROM Reports WHERE reported_item_type = "Job" AND is_resolved = "not_resolved"'
     );
-    return results as Report[];
+    if (results.length === 0) {
+      return null;
+    }
+    // Get the job_id of each reported job
+    const jobIds = results.map((report) => report.reported_item_id);
+    // Get the job data for each reported job, also get info about what a job was reported for and by whom
+    const [jobs] = await promisePool.query<RowDataPacket[]>(
+      'SELECT JobAds.job_id, JobAds.job_title, JobAds.job_description, JobAds.job_address, JobAds.salary, JobAds.user_id, JobAds.deadline_date, JobAds.field, Reports.report_reason FROM JobAds JOIN Reports ON JobAds.job_id = Reports.reported_item_id WHERE Reports.reported_item_type = "Job" AND JobAds.job_id IN (?)',
+      [jobIds]
+    );
+    if (jobs.length === 0) {
+      return null;
+    }
+    return jobs as ReportedJob[];
   } catch (e) {
     throw new Error((e as Error).message);
   }
@@ -158,7 +184,7 @@ const sendReport = async (
 const resolveReport = async (
   report_id: number,
   user_id: number
-): Promise<ResultSetHeader> => {
+): Promise<MessageResponse> => {
   try {
     const [adminCheck] = await promisePool.query<RowDataPacket[]>(
       'SELECT * FROM Users WHERE user_id = ? AND user_level_id = "3"',
@@ -174,7 +200,10 @@ const resolveReport = async (
       'UPDATE Reports SET is_resolved = "resolved" WHERE report_id = ?',
       [report_id]
     );
-    return result;
+    if (result.affectedRows === 0) {
+      throw new CustomError('Report not found', 404);
+    }
+    return {message: 'Report resolved'};
   } catch (e) {
     throw new Error((e as Error).message);
   }

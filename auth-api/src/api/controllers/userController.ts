@@ -15,6 +15,7 @@ import {
   getUserAsCandidate,
   getAllCandidates,
   getOneCandidate,
+  deleteUserAsAdmin,
 } from '../models/userModel';
 import CustomError from '../../classes/CustomError';
 import {validationResult} from 'express-validator';
@@ -204,6 +205,24 @@ const removeUser = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const removeUserAsAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const tokenUser = res.locals.user;
+    const response = await deleteUserAsAdmin(+req.params.id,tokenUser.user_id);
+    if (response === null) {
+      next(new CustomError('User not deleted', 404));
+      return;
+    }
+    res.json(response);
+  } catch (e) {
+    next(new CustomError((e as Error).message, 500));
+  }
+};
+
 export {
   getAllUsers,
   getUserById,
@@ -213,4 +232,5 @@ export {
   getUserByToken,
   removeUser,
   updateUser,
+  removeUserAsAdmin,
 };

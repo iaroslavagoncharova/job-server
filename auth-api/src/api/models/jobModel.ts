@@ -349,6 +349,11 @@ const deleteJob = async (
     ]);
     // delete job tests where the job_id is the job_id
     await connection.execute('DELETE FROM JobTests WHERE job_id = ?', [job_id]);
+    // delete from reports where the reported item id is the job_id and the reported item type is job
+    await connection.execute(
+      'DELETE FROM Reports WHERE reported_item_id = ? AND reported_item_type = "Job"',
+      [job_id]
+    );
     const [result] = await connection.execute<ResultSetHeader>(
       'DELETE FROM JobAds WHERE job_id = ? AND user_id = ?',
       [job_id, user_id]
@@ -363,6 +368,34 @@ const deleteJob = async (
   }
 };
 
+const deleteJobAsAdmin = async (
+  job_id: number,
+  user_id: number
+): Promise<MessageResponse> => {
+  try {
+    const [adminCheck] = await promisePool.execute<RowDataPacket[]>(
+      'SELECT * FROM Users WHERE user_id = ? AND user_level_id = "3"',
+      [user_id]
+    );
+    if (adminCheck.length === 0) {
+      throw new CustomError('You do not have permission to delete jobs', 403);
+    }
+    const [employerId] = await promisePool.execute<RowDataPacket[]>(
+      'SELECT user_id FROM JobAds WHERE job_id = ?',
+      [job_id]
+    );
+    if (employerId.length === 0) {
+      throw new CustomError('Job not found', 404);
+    }
+    const result = await deleteJob(job_id, employerId[0].user_id);
+    if (!result) {
+      throw new CustomError('Job not found', 404);
+    }
+    return {message: 'Job deleted'};
+  } catch (err) {
+    throw new CustomError('deleteJobAsAdmin failed', 500);
+  }
+};
 // calculate a compatibility percentage based on the skills required for a job, skills that a candidate has, the amount of tests needed and the amount the candidate has taken
 const calculatePercentage = async (user_id: number, job_id: number) => {
   // Get all tests for job
@@ -420,5 +453,6 @@ export {
   postJob,
   putJob,
   deleteJob,
+  deleteJobAsAdmin,
   calculatePercentage,
 };
