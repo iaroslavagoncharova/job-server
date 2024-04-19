@@ -86,12 +86,13 @@ const handleGetReportById = async (
 };
 
 const handleGetReportsByUser = async (
-  req: Request,
+  req: Request<{id: string}>,
   res: Response<Report[]>,
   next: NextFunction
 ) => {
   try {
-    const reports = await getReportsByUser(res.locals.user.user_id);
+    const tokenUser = res.locals.user as User;
+    const reports = await getReportsByUser(parseInt(req.params.id), tokenUser.user_id);
     if (reports === null) {
       next(new CustomError('Reports not found', 404));
       return;

@@ -210,6 +210,53 @@ const postChat = async (matchId: number): Promise<Chat | null> => {
   }
 };
 
+// start a chat with admin
+const postAdminChat = async (user1Id: number): Promise<Chat | null> => {
+  try {
+    // find an admin
+    const [admin] = await promisePool.execute<
+      RowDataPacket[] & Pick<User, 'user_id'>[]
+    >(`SELECT user_id FROM Users WHERE user_level_id = 3`);
+    if (admin.length === 0) {
+      return null;
+    }
+    const user2Id = admin[0].user_id;
+    // check if a chat already exists
+    const [existingChat] = await promisePool.execute<
+      RowDataPacket[] & Chat[]
+    >(
+      `SELECT * FROM Chats WHERE (user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)`,
+      [user1Id, user2Id, user2Id, user1Id]
+    );
+    console.log(existingChat);
+    if (existingChat) {
+      return existingChat[0];
+    }
+    console.log(user1Id, user2Id);
+    // create a chat
+    const chat = await promisePool.execute<ResultSetHeader>(
+      `INSERT INTO Chats (user1_id, user2_id) VALUES (?, ?)`,
+      [user1Id, user2Id]
+    );
+    if (chat[0].affectedRows === 0) {
+      return null;
+    }
+    console.log(chat[0]);
+    const [rows] = await promisePool.execute<RowDataPacket[] & Chat[]>(
+      'SELECT * FROM Chats WHERE chat_id = ?',
+      [chat[0].insertId]
+    );
+    console.log(rows[0]);
+    if (rows.length === 0) {
+      return null;
+    }
+
+    return rows[0];
+  } catch (e) {
+    throw new Error((e as Error).message);
+  }
+};
+
 // delete a chat
 const deleteChat = async (
   chatId: number,
@@ -294,6 +341,7 @@ export {
   getMessagesByChatAndUser,
   postMessage,
   postChat,
+  postAdminChat,
   deleteChat,
   sendInterviewInvitation,
   acceptInterviewInvitation,

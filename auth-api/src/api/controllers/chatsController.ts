@@ -8,6 +8,7 @@ import {
   getMessage,
   getMessagesByChatAndUser,
   getOtherChatUser,
+  postAdminChat,
   postChat,
   postMessage,
   sendInterviewInvitation,
@@ -147,6 +148,24 @@ export const handlePostChat = async (
 ): Promise<Chat | void> => {
   try {
     const chat = await postChat(req.body.match_id);
+    if (chat === null) {
+      next(new CustomError('Chat not created', 404));
+      return;
+    }
+    res.json(chat);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handlePostAdminChat = async (
+  req: Request,
+  res: Response<Chat>,
+  next: NextFunction
+): Promise<Chat | void> => {
+  try {
+    const tokenUser = res.locals.user;
+    const chat = await postAdminChat(tokenUser.user_id);
     if (chat === null) {
       next(new CustomError('Chat not created', 404));
       return;

@@ -84,8 +84,15 @@ const getReportById = async (
   }
 };
 
-const getReportsByUser = async (user_id: number): Promise<Report[] | null> => {
+const getReportsByUser = async (user_id: number, admin_id: number): Promise<Report[] | null> => {
   try {
+    const [adminCheck] = await promisePool.query<RowDataPacket[]>(
+      'SELECT * FROM Users WHERE user_id = ? AND user_level_id = "3"',
+      [admin_id]
+    );
+    if (adminCheck.length === 0) {
+      throw new CustomError('You do not have permission to view reports', 403);
+    }
     const [results] = await promisePool.query<RowDataPacket[]>(
       'SELECT * FROM Reports WHERE user_id = ?',
       [user_id]

@@ -18,7 +18,7 @@ const reportRoute = express.Router();
 reportRoute.get('/all', authenticate, handleGetAllReports);
 reportRoute.get('/unresolved', authenticate, handleGetUnresolvedReports);
 reportRoute.get('/resolved', authenticate, handleGetResolvedReports);
-reportRoute.get('/user', authenticate, handleGetReportsByUser);
+reportRoute.get('/user/:id', authenticate, handleGetReportsByUser);
 reportRoute.get('/reported/users', authenticate, handleGetReportedUsers);
 reportRoute.get('/reported/jobs', authenticate, handleGetReportedJobs);
 reportRoute.route('/:id')

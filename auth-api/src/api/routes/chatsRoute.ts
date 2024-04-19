@@ -8,6 +8,7 @@ import {
   handleGetMessage,
   handleGetMessagesByChatAndUser,
   handleGetOtherChatUser,
+  handlePostAdminChat,
   handlePostChat,
   handlePostMessage,
   handleSendInterviewInvitation,
@@ -17,6 +18,8 @@ import {authenticate} from '../../middlewares';
 const chatsRoute = express.Router();
 
 chatsRoute.post('/', authenticate, handlePostChat);
+
+chatsRoute.post('/admin', authenticate, handlePostAdminChat);
 
 chatsRoute.get('/messages/:messageId', authenticate, handleGetMessage);
 chatsRoute.get('/user', authenticate, handleGetChatsByUser);
