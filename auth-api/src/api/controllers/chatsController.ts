@@ -185,13 +185,12 @@ export const handleDeleteChat = async (
   try {
     const userId = res.locals.user.user_id;
     const chatId = parseInt(req.params.chatId);
-    const chat = await getChatById(chatId);
-    if (chat === null) {
-      next(new CustomError('Chat not found', 404));
-      return null;
+    const result = await deleteChat(chatId, userId);
+    if (result) {
+      res.json({message: 'Chat deleted'});
+      return;
     }
-    await deleteChat(chatId, userId);
-    return {message: 'Chat deleted'};
+    next(new CustomError('Failed to delete chat', 500));
   } catch (error) {
     next(error);
   }

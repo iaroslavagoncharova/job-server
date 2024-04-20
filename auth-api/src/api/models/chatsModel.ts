@@ -228,8 +228,7 @@ const postAdminChat = async (user1Id: number): Promise<Chat | null> => {
       `SELECT * FROM Chats WHERE (user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)`,
       [user1Id, user2Id, user2Id, user1Id]
     );
-    console.log(existingChat);
-    if (existingChat) {
+    if (existingChat && existingChat.length > 0) {
       return existingChat[0];
     }
     console.log(user1Id, user2Id);
@@ -263,6 +262,7 @@ const deleteChat = async (
   userId: number
 ): Promise<MessageResponse> => {
   const chat = await getChatById(chatId);
+  console.log(chat, userId, 'chat', 'userId', chatId, 'chatId');
 
   if (!chat) {
     return {message: 'Chat not found'};
@@ -271,16 +271,18 @@ const deleteChat = async (
   const connection = await promisePool.getConnection();
   try {
     await connection.beginTransaction();
-    await promisePool.execute(`DELETE FROM Messages WHERE chat_id = ?`, [
+    const [messages] = await connection.execute(`DELETE FROM Messages WHERE chat_id = ?`, [
       chatId,
     ]);
-    const [result] = await promisePool.execute<ResultSetHeader>(
+   console.log(messages, 'messages');
+    const [result] = await connection.execute<ResultSetHeader>(
       `DELETE FROM Chats WHERE chat_id = ? AND (user1_id = ? OR user2_id = ?);`,
       [chatId, userId, userId]
     );
+    console.log(result, 'result');
 
     if (result.affectedRows === 0) {
-      return {message: 'Chat not deleted'};
+      throw new Error('Chat not deleted');
     }
 
     await connection.commit();
