@@ -185,9 +185,9 @@ CREATE TABLE Reports (
   user_id int(11) NOT NULL,
   reported_item_type varchar(255) NOT NULL,
   reported_item_id int(11) NOT NULL,
-  report_reason text NOT NULL,
+  report_reason varchar(255) NOT NULL,
   reported_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  is_resolved TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  is_resolved varchar(255) NOT NULL,
   FOREIGN KEY (user_id) REFERENCES Users (user_id)
 );
 
@@ -210,11 +210,11 @@ CREATE TABLE Notifications (
 
 
 INSERT INTO UserLevels (level_name) VALUES ("Candidate"), ("Employer"), ("Admin");
-INSERT INTO Users (username, password, email, user_level_id, fullname, phone, user_type) VALUES ("Slava", "$2a$10$0.XQQChT9PUlSLKhXe4kweNqkCqcdizWVh45CmZxJ5gEPx5EWm/J2", "slava@example.com", 1, "Iaroslava Goncharova", "+358410000000", "candidate");
+INSERT INTO Users (username, password, email, user_level_id, fullname, phone, user_type, status) VALUES ("Slava", "$2a$10$0.XQQChT9PUlSLKhXe4kweNqkCqcdizWVh45CmZxJ5gEPx5EWm/J2", "slava@example.com", 1, "Iaroslava Goncharova", "+358410000000", "candidate", "Active");
 INSERT INTO Users (username, password, email, user_level_id, fullname, phone, user_type) VALUES ("Kamilla", "$2a$10$0.XQQChT9PUlSLKhXe4kweNqkCqcdizWVh45CmZxJ5gEPx5EWm/J2", "kamilla@example.com", 2, "Kamilla Karenius", "+358410000000", "employer");
 INSERT INTO Users (username, password, email, user_level_id, fullname, phone, user_type) VALUES ("Anna", "$2a$10$0.XQQChT9PUlSLKhXe4kweNqkCqcdizWVh45CmZxJ5gEPx5EWm/J2", "anna@example.com", 3, "Anna Malassu", "+358410000000", "admin");
-INSERT INTO Users (username, password, email, user_level_id, fullname, phone, user_type) VALUES ('Bob', '12345', 'bob@example.com', 1, 'Bob Smith', '+358410000000', 'candidate');
-INSERT INTO Users (username, password, email, user_level_id, fullname, phone, user_type) VALUES ('Jane', '67890', 'jane@example.com', 1, 'Jane Smith', '+358110000000', 'candidate');
+INSERT INTO Users (username, password, email, user_level_id, fullname, phone, user_type, status) VALUES ('Bob', '12345', 'bob@example.com', 1, 'Bob Smith', '+358410000000', 'candidate', "Active");
+INSERT INTO Users (username, password, email, user_level_id, fullname, phone, user_type, status) VALUES ('Jane', '67890', 'jane@example.com', 1, 'Jane Smith', '+358110000000', 'candidate', "Active");
 INSERT INTO Education (user_id, school, degree, field, graduation) VALUES (1, 'ammattikoulu', 'ammattitutkinto', 'matkailu', '2022-06-01'), (2, 'amk', 'alempi korkeakoulututkinto', 'it', '2023-08-20'), (3, 'amk', 'ylempi korkeakoulututkinto', 'tietoturva', '2024-03-24');
 INSERT INTO JobExperience (user_id, job_title, job_place, job_city, start_date) VALUES (1, 'barista', 'cafe', 'Helsinki', '2022-10-10'), (2, 'hr-manager', 'Kamilla Oy', 'Espoo', '2023-11-11'), (3, 'admin', 'JobMeIn Oy', 'Helsinki', '2024-03-24');
 INSERT INTO Attachments (attachment_name, user_id, filename, filesize, media_type) VALUES ('Resume', 1, 'https://example.com/resume.pdf', 256, 'pdf'), ('Cover Letter', 2, 'https://example.com/cover_letter.docx', 24626, 'docx'), ('Portfolio', 3, 'https://example.com/portfolio.pdf', 500, 'pdf');
@@ -226,14 +226,14 @@ INSERT INTO KeyWords (keyword_name) VALUES ('Full Stack'), ('Ravintola'), ('Marj
 INSERT INTO KeywordsJobs (keyword_id, job_id) VALUES (1, 1), (2, 2), (3, 3);
 INSERT INTO Applications (user_id, job_id, status) VALUES (1, 2, 'Pending'), (1, 1, 'Submitted'), (1, 3, 'Pending');
 INSERT INTO ApplicationLinks (application_id, link) VALUES (1, 'https://example.com/application1'), (2, 'https://example.com/application2'), (3, 'https://example.com/application3');
-INSERT INTO Tests (test_type, user_id, test_link) VALUES ('Java-testi',  2, 'https://example.com/java_test'), ('Persoonallisuustesti', NULL, 'https://example.com/personality_test'), ('Empatiatesti', 2, 'https://example.com/empathy_test');
+INSERT INTO Tests (test_type, user_id, test_link) VALUES ('Kommunikaatio-testi',  2, 'https://forms.gle/LPxh8wnxB6a1JAHe8'), ('Tiimityöskentely-tiimi', NULL, 'https://forms.gle/RbYGC1tvz5LepXRm7'), ('Ongelmanratkaisu-testi', 2, 'https://forms.gle/QuJhbEPp4t93vEkK6'), ('Sopeutumiskyky-testi', NULL, 'https://forms.gle/Lkr9D98ha8Ch5G7p8');
 INSERT INTO JobTests (job_id, test_id) VALUES (1, 1), (2, 2), (3, 3);
 INSERT INTO UserTests (test_id, user_id, completed_at) VALUES (1, 1, '2024-03-24'), (3, 1, '2024-03-23');
 INSERT INTO Chats (user1_id, user2_id) VALUES (1, 2), (2, 3);
 INSERT INTO Messages (user_id, chat_id, message_text) VALUES (1, 1, 'Hei, olen maailman paras ohjelmistokehittäjä'), (2, 1, 'Ok, kiva');
 INSERT INTO Swipes (swiper_id, swiped_id, swipe_direction, swipe_type) VALUES (1, 2, 'right', 'candidate'), (2, 1, 'right', 'job');
 INSERT INTO Matches (user1_id, user2_id) VALUES (1, 2);
-INSERT INTO Reports (user_id, reported_item_type, reported_item_id, report_reason) VALUES (2, 'User', 1, 'Kysyi henkilökohtaisia kysymyksiä'), (1, 'Job', 3, 'Marjamyyjä ei voi saada 800 euroa');
+INSERT INTO Reports (user_id, reported_item_type, reported_item_id, report_reason, is_resolved) VALUES (2, 'User', 1, 'Kysyi henkilökohtaisia kysymyksiä', 'not_resolved'), (1, 'Job', 3, 'Marjamyyjä ei voi saada 800 euroa', 'resolved');
 INSERT INTO Animals (animal_name) VALUES ('Leijona'), ('Kissa'), ('Delfiini');
 INSERT INTO Adjectives (adj_name) VALUES ('Ystävällinen'), ('Ahkera'), ('Luova');
 INSERT INTO Notifications (match_id) VALUES (1);
