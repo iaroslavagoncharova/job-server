@@ -431,18 +431,18 @@ const updateAttachment = async (
 
 const removeAttachment = async (
   req: Request<{attachment_id: string}>,
-  res: Response,
+  res: Response<MessageResponse | null>,
   next: NextFunction
-): Promise<void> => {
+) => {
   try {
     const attachment_id = req.params.attachment_id;
     const user_id = res.locals.user.user_id;
     const result = await deleteAttachment(user_id, +attachment_id);
-    if (!result) {
-      next(new CustomError('Failed to delete attachment', 500));
+    if (result) {
+      res.json({message: 'Attachment deleted'})
       return;
     }
-    res.json(result);
+    next(new CustomError('Failed to delete attachment', 500));
   } catch (error) {
     next(new CustomError('Failed to delete attachment', 500));
   }
