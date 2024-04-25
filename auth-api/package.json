@@ -4,7 +4,7 @@
   "description": "auth server for JobMeIn project",
   "main": "dist/src/index.js",
   "scripts": {
-    "start": "node dist/auth-server/src/index.js",
+    "start": "node dist/auth-api/src/index.js",
     "dev": "nodemon src/index.ts",
     "build": "tsc",
     "postbuild": "npm run apidoc",
