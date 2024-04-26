@@ -76,7 +76,7 @@ const getCandidateUser = async (
   try {
     const user = await getOneCandidate(req.params.id);
     if (user === null) {
-      next(new CustomError('User not found', 404));
+      next(new CustomError('Candidate not found', 404));
       return;
     }
     res.json(user);
@@ -108,17 +108,21 @@ const getUserByToken = async (
   res: Response<UserResponse, {user: TokenUser}>,
   next: NextFunction
 ) => {
-  const tokenUser = res.locals.user;
-  const user = await getUser(tokenUser.user_id);
-  if (!user) {
-    next(new CustomError('User not found', 404));
-    return;
+  try {
+    const tokenUser = res.locals.user;
+    const user = await getUser(tokenUser.user_id);
+    if (!user) {
+      next(new CustomError('User not found', 404));
+      return;
+    }
+    const response: UserResponse = {
+      message: 'token is valid',
+      user: user,
+    };
+    res.json(response);
+  } catch (e) {
+    next(new CustomError((e as Error).message, 500));
   }
-  const response: UserResponse = {
-    message: 'token is valid',
-    user: user,
-  };
-  res.json(response);
 };
 
 const addUser = async (
@@ -155,7 +159,7 @@ const addUser = async (
     user.password = bcrypt.hashSync(user.password, salt);
     const createdUser = await postUser(user);
     if (!createdUser) {
-      next(new CustomError('User not created', 500));
+      next(new CustomError('User not created', 400));
       return;
     }
     const response: UserResponse = {
@@ -177,7 +181,7 @@ const updateUser = async (
     const tokenUser = res.locals.user;
     const result = await putUser(tokenUser.user_id, req.body);
     if (!result) {
-      next(new CustomError('User not updated', 500));
+      next(new CustomError('User not updated', 404));
       return;
     }
     const response = {
@@ -212,9 +216,9 @@ const removeUserAsAdmin = async (
 ) => {
   try {
     const tokenUser = res.locals.user;
-    const response = await deleteUserAsAdmin(+req.params.id,tokenUser.user_id);
+    const response = await deleteUserAsAdmin(+req.params.id, tokenUser.user_id);
     if (response === null) {
-      next(new CustomError('User not deleted', 404));
+      next(new CustomError('User not found', 404));
       return;
     }
     res.json(response);
