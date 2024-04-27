@@ -50,7 +50,7 @@ it('should return an object of user', async () => {
 });
 
 it('should return an object of user', async () => {
-  const user = await putUser(1, {
+  const user = await putUser(6, {
     email: 'test2@example.com',
     password: 'password',
     fullname: 'Test User',

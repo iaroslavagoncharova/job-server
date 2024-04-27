@@ -43,3 +43,15 @@ describe('UserModel', () => {
     });
   });
 });
+
+describe('MatchModel', () => {
+  describe('GET /matches', () => {
+    it('should return an array of matches', async () => {
+      const response = await request(app)
+        .get('/api/v1/matches')
+        .set('content-type', 'application/json');
+      expect(response.status).toBe(200);
+      expect(Array.isArray(response.body)).toBe(true);
+    });
+  });
+});
