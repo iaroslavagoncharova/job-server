@@ -2,7 +2,6 @@ import {ResultSetHeader, RowDataPacket} from 'mysql2';
 import {promisePool} from '../../lib/db';
 import {Chat, Match, MatchWithUser} from '@sharedTypes/DBTypes';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
-import {postNotification} from './notificartionModel';
 import {getUserById} from '../controllers/userController';
 import {getUser} from './userModel';
 import {postChat} from './chatsModel';

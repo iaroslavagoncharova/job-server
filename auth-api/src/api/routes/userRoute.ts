@@ -17,10 +17,11 @@ const userRoute = express.Router();
 
 userRoute
   /**
-   * @api {get} /api/v1/users Get all users
+   * @api {get} /users Get all users
    * @apiName GetAllUsers
    * @apiGroup Users
    * @apiVersion 1.0.0
+   * @apiPermission all
    * @apiSuccess {Object[]} users List of users
    * @apiSuccess {String} users._id User id
    * @apiSuccess {String} users.username User username
@@ -78,10 +79,11 @@ userRoute
   .get('/', getAllUsers);
 userRoute
   /**
- * @api {get} /api/v1/users/candidates Get all candidates
+ * @api {get} /users/candidates Get all candidates
  * @apiName GetCandidates
  * @apiGroup Users
  * @apiVersion 1.0.0
+ * @apiPermission employer user
  * @apiSuccess {Object[]} users List of users as candidates
 //  * SELECT Users.username, Users.email, Users.fullname, Users.phone, Users.about_me, Users.link, Users.field FROM Users WHERE user_id = ?',
  * @apiSuccess {String} users._id User id
@@ -128,10 +130,11 @@ userRoute
   .get('/candidates', authenticate, getCandidates);
 userRoute
   /**
-   * @api {get} /api/v1/users/candidate/:id Get a candidate
+   * @api {get} /users/candidate/:id Get a candidate
    * @apiName GetCandidate
    * @apiGroup Users
    * @apiVersion 1.0.0
+   * @apiPermission all
    * @apiParam {Number} id Candidate id
    * @apiSuccess {String} user_id User id
    * @apiSuccess {String} username User username
@@ -228,11 +231,11 @@ userRoute
 
 userRoute
   /**
-   * @api {get} /api/v1/users/token Get a user by token
+   * @api {get} /users/token Get a user by token
    * @apiName GetUserByToken
    * @apiGroup Users
    * @apiVersion 1.0.0
-   * @apiAccess user
+   * @apiPermission token user
    * @apiSuccess {String} user_id User id
    * @apiSuccess {String} username User username
    * @apiSuccess {String} email User email
@@ -278,11 +281,11 @@ userRoute
 
 userRoute
   /**
-   * @api {post} /api/v1/users Add a user
+   * @api {post} /users Add a user
    * @apiName AddUser
    * @apiGroup Users
    * @apiVersion 1.0.0
-   * @apiAccess all
+   * @apiPermission all
    * @apiParam {String} fullname User fullname
    * @apiParam {String} password User password
    * @apiParam {String} email User email
@@ -348,11 +351,11 @@ userRoute
 
 userRoute
   /**
-   * @api {get} /api/v1/users/:id Get a user
+   * @api {get} /users/:id Get a user
    * @apiName GetUser
    * @apiGroup Users
    * @apiVersion 1.0.0
-   * @apiAccess all
+   * @apiPermission all
    * @apiParam {Number} id User id
    * @apiSuccess {String} user_id User id
    * @apiSuccess {String} username User username
@@ -399,11 +402,11 @@ userRoute
 
 userRoute
   /**
-   * @api {put} /api/v1/users Update a user
+   * @api {put} /users Update a user
    * @apiName UpdateUser
    * @apiGroup Users
    * @apiVersion 1.0.0
-   * @apiAccess user
+   * @apiPermission user
    * @apiParam {String} [email] User email
    * @apiParam {String} [fullname] User fullname
    * @apiParam {String} [username] User username
@@ -462,11 +465,11 @@ userRoute
 
 userRoute
   /**
-   * @api {delete} /api/v1/users/:id Delete a user
+   * @api {delete} /users/:id Delete a user
    * @apiName DeleteUser
    * @apiGroup Users
    * @apiVersion 1.0.0
-   * @apiAccess user
+   * @apiPermission user
    * @apiParam {Number} id User id
    * @apiSuccess {String} message User deleted
    * @apiSuccessExample {json} Success
@@ -492,7 +495,7 @@ userRoute
    * @apiName DeleteUserAsAdmin
    * @apiGroup Users
    * @apiVersion 1.0.0
-   * @apiAccess admin
+   * @apiPermission admin
    * @apiParam {Number} id User id
    * @apiSuccess {String} message User deleted
    * @apiSuccessExample {json} Success

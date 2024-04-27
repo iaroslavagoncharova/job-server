@@ -37,7 +37,7 @@ const handleGetAllTests = async (
   }
 };
 
-const handleGetTests = async (
+const handleGetGeneralTests = async (
   req: Request,
   res: Response<Test[]>,
   next: NextFunction
@@ -106,7 +106,7 @@ const handlePutTest = async (
       res.json(result);
       return;
     }
-    next(new CustomError('Error posting test', 500));
+    next(new CustomError('Error updating test', 500));
   } catch (e) {
     next(new CustomError((e as Error).message, 500));
   }
@@ -246,7 +246,7 @@ const handleTakeTest = async (
 
 export {
   handleGetAllTests,
-  handleGetTests,
+  handleGetGeneralTests,
   handleGetTestsByUser,
   handlePostTest,
   handlePutTest,

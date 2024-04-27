@@ -10,7 +10,7 @@ authRoute
    * @apiName Login
    * @apiGroup Auth
    * @apiVersion  1.0.0
-   * @apiAccess all
+   * @apiPermission all
    * @apiParam  {String} email User email
    * @apiParam  {String} password User password
    * @apiSuccess {Object[]} message Message object
