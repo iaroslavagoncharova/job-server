@@ -3,7 +3,6 @@ import {
   Job,
   JobWithSkillsAndKeywords,
   Message,
-  Notification,
   Swipe,
   Test,
   UnauthorizedUser,

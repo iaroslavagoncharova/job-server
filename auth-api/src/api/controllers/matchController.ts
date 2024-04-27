@@ -39,7 +39,7 @@ const getUserMatches = async (
     }
     res.json(matches);
   } catch (error) {
-    return next(error);
+    next(new CustomError((error as Error).message, 500));
   }
 };
 
@@ -57,7 +57,7 @@ const addMatch = async (
     }
     res.json(match);
   } catch (error) {
-    return next(error);
+    next(new CustomError((error as Error).message, 500));
   }
 };
 
@@ -70,7 +70,7 @@ const removeMatch = async (
     const id = req.params.id;
     const match = await deleteMatch(+id);
     if (!match) {
-      return next(new CustomError('Match not found', 404));
+      return next(new CustomError('Match not deleted', 500));
     }
     res.json(match);
   } catch (error) {
