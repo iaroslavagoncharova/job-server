@@ -1,4 +1,4 @@
-import {Application, ApplicationLink} from '@sharedTypes/DBTypes';
+import { Application, ApplicationLink, Chat, Job } from '@sharedTypes/DBTypes';
 import CustomError from '../../classes/CustomError';
 import {promisePool} from '../../lib/db';
 import {ResultSetHeader} from 'mysql2';
@@ -129,7 +129,7 @@ const putApplication = async (
   applicationId: number,
   applicationText?: string,
   applicationLinks?: string[]
-) => {
+): Promise<MessageResponse | null> => {
   try {
     if (!applicationText && !applicationLinks) {
       throw new CustomError('No data to update', 400);
@@ -278,14 +278,41 @@ const getApplicationsByJob = async (jobId: number): Promise<Application[]> => {
 
 // getting accepted applications for chat
 const getApplicationsForChat = async (
-  userId: number
-): Promise<Application[]> => {
+  userId: number,
+  user2Id: number
+): Promise<Application[] | null> => {
   try {
-    const [result] = await promisePool.execute<ResultSetHeader & Application[]>(
-      'SELECT * FROM Applications WHERE user_id = ? AND status = "Accepted"',
-      [userId]
+    // find a chat for the users
+    const [chat] = await promisePool.execute<ResultSetHeader & Chat[]>(
+      'SELECT * FROM Chats WHERE user1_id = ? AND user2_id = ? OR user1_id = ? AND user2_id = ?',
+      [userId, user2Id, user2Id, userId]
     );
-    return result;
+    if (chat.length === 0) {
+      throw new CustomError('Chat not found', 404);
+    }
+    // find job ads that are owned by the user2
+    const [jobs] = await promisePool.execute<ResultSetHeader & Job[]>(
+      'SELECT * FROM JobAds WHERE user_id = ?',
+      [user2Id]
+    );
+    if (jobs.length === 0) {
+      throw new CustomError('No job ads found', 404);
+    }
+    // find applications for these job ads that are accepted
+    const applications: Application[] = [];
+    for (const job of jobs) {
+      const [result] = await promisePool.execute<ResultSetHeader & Application[]>(
+        'SELECT * FROM Applications WHERE job_id = ? AND status = "Accepted"',
+        [job.job_id]
+      );
+      if (result.length > 0) {
+        applications.push(result[0]);
+      }
+    }
+    if (applications.length === 0) {
+      return null;
+    }
+    return applications;
   } catch (e) {
     throw new Error((e as Error).message);
   }

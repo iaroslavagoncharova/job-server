@@ -19,8 +19,8 @@ import {MessageResponse} from '@sharedTypes/MessageTypes';
 
 // toimii
 export const handleGetApplicationsByUserId = async (
-  req: Request,
-  res: Response,
+  req: Request<{}, {}, {}, {user_id: string}>,
+  res: Response<Application[]>,
   next: NextFunction
 ): Promise<Application[] | void> => {
   try {
@@ -38,11 +38,14 @@ export const handleGetApplicationsByUserId = async (
 
 export const handleGetApplicationsForChat = async (
   req: Request<{id: string}>,
-  res: Response,
+  res: Response<Application[]>,
   next: NextFunction
 ): Promise<Application[] | void> => {
   try {
-    const applications = await getApplicationsForChat(parseInt(req.params.id));
+    const user_id = res.locals.user.user_id;
+    const user2_id = parseInt(req.params.id);
+    console.log(user_id, user2_id);
+    const applications = await getApplicationsForChat(user_id, user2_id);
     if (!applications) {
       next(new CustomError('No applications found', 404));
       return;
@@ -57,8 +60,8 @@ export const handleGetApplicationsForChat = async (
 // getting all sent applications for sent-page
 // status = "Submitted" in database
 export const handleGetSentApplicationsByUserId = async (
-  req: Request,
-  res: Response,
+  req: Request<{}, {}, {}, {user_id: string}>,
+  res: Response<Application[]>,
   next: NextFunction
 ): Promise<Application[] | void> => {
   try {
@@ -78,8 +81,8 @@ export const handleGetSentApplicationsByUserId = async (
 // getting all saved job ads aka pre-made applications for saved-page
 // status = "Pending" in database
 export const handleGetSavedApplicationsByUserId = async (
-  req: Request,
-  res: Response,
+  req: Request<{}, {}, {}, {user_id: string}>,
+  res: Response<Application[]>,
   next: NextFunction
 ): Promise<Application[] | void> => {
   try {
@@ -95,10 +98,27 @@ export const handleGetSavedApplicationsByUserId = async (
   }
 };
 
+export const handleGetApplicationsByJob = async (
+  req: Request<{job_id: string}>,
+  res: Response<Application[]>,
+  next: NextFunction
+): Promise<Application[] | void> => {
+  try {
+    const job_id = req.params.job_id;
+    const applications = await getApplicationsByJob(parseInt(job_id));
+    if (applications.length === 0) {
+      next(new CustomError('No applications found', 404));
+      return;
+    }
+    res.json(applications);
+  } catch (e) {
+    next(new CustomError('Failed to get applications', 500));
+  }
+};
 // toimii
 // getting all application info after clicking it
 export const handleGetApplicationById = async (
-  req: Request,
+  req: Request<{application_id: string}>,
   res: Response<Application>,
   next: NextFunction
 ): Promise<Application | void> => {
@@ -138,10 +158,10 @@ export const handlePostApplication = async (
 
 // toimii
 export const handlePutApplication = async (
-  req: Request,
+  req: Request<{application_id: string}>,
   res: Response<MessageResponse>,
   next: NextFunction
-) => {
+): Promise<MessageResponse | void> => {
   try {
     const {application_text, application_links} = req.body;
     if (!application_text && !application_links) {
@@ -165,7 +185,7 @@ export const handlePutApplication = async (
     const response: MessageResponse = {message: 'Application updated'};
     res.json(response);
   } catch (e) {
-    next(new CustomError('Failed to update application', 500));
+    next(new CustomError((e as Error).message, 500));
   }
 };
 
@@ -174,7 +194,7 @@ export const handleDeleteApplication = async (
   req: Request<{application_id: string}>,
   res: Response<MessageResponse>,
   next: NextFunction
-) => {
+): Promise<MessageResponse | void> => {
   try {
     const application_id = req.params.application_id;
     const user_id = res.locals.user.user_id;
@@ -194,10 +214,10 @@ export const handleDeleteApplication = async (
 };
 
 export const handleDismissApplication = async (
-  req: Request,
+  req: Request<{application_id: string}>,
   res: Response<MessageResponse>,
   next: NextFunction
-) => {
+): Promise<MessageResponse | void> => {
   try {
     const application_id = req.params.application_id;
     const application = await dismissApplication(parseInt(application_id));
@@ -208,16 +228,16 @@ export const handleDismissApplication = async (
     const response: MessageResponse = {message: 'Application dismissed'};
     res.json(response);
   } catch (e) {
-    next(new CustomError('Failed to dismiss application', 500));
+    next(new CustomError((e as Error).message, 500));
   }
 };
 
 // toimii
 export const handeSendApplication = async (
-  req: Request,
+  req: Request<{application_id: string}>,
   res: Response<MessageResponse>,
   next: NextFunction
-) => {
+): Promise<MessageResponse | void> => {
   try {
     const user_id = res.locals.user.user_id;
     const application_id = req.params.application_id;
@@ -232,15 +252,15 @@ export const handeSendApplication = async (
     const response: MessageResponse = {message: 'Application sent'};
     res.json(response);
   } catch (e) {
-    next(new CustomError('Failed to send application', 500));
+    next(new CustomError((e as Error).message, 500));
   }
 };
 
 export const handleAcceptApplication = async (
-  req: Request,
+  req: Request<{application_id: string}>,
   res: Response<MessageResponse>,
   next: NextFunction
-) => {
+): Promise<MessageResponse | void> => {
   try {
     const application_id = req.params.application_id;
     const application = await acceptApplication(parseInt(application_id));
@@ -251,25 +271,6 @@ export const handleAcceptApplication = async (
     const response: MessageResponse = {message: 'Application accepted'};
     res.json(response);
   } catch (e) {
-    next(new CustomError('Failed to accept application', 500));
-  }
-};
-
-// toimii
-export const handleGetApplicationsByJob = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<Application[] | void> => {
-  try {
-    const job_id = req.params.job_id;
-    const applications = await getApplicationsByJob(parseInt(job_id));
-    if (applications.length === 0) {
-      next(new CustomError('No applications found', 404));
-      return;
-    }
-    res.json(applications);
-  } catch (e) {
-    next(new CustomError('Failed to get applications', 500));
+    next(new CustomError((e as Error).message, 500));
   }
 };
