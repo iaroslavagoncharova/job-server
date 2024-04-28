@@ -38,15 +38,15 @@ const fetchAllJobs = async (
     }
     res.json(jobs);
   } catch (error) {
-    return next(error);
+    next(new CustomError((error as Error).message, 500));
   }
 };
 
 const fetchJobsByCompany = async (
   req: Request,
-  res: Response<Job[]>,
+  res: Response<JobWithSkillsAndKeywords[]>,
   next: NextFunction
-): Promise<Job[] | void> => {
+): Promise<JobWithSkillsAndKeywords[] | void> => {
   try {
     const tokenUser = res.locals.user;
     const jobs = await getJobsByCompany(tokenUser.user_id);
@@ -56,7 +56,7 @@ const fetchJobsByCompany = async (
     }
     res.json(jobs);
   } catch (error) {
-    return next(error);
+    next(new CustomError((error as Error).message, 500));
   }
 };
 
@@ -120,9 +120,13 @@ const fetchJobsByField = async (
   try {
     const field = req.params.field;
     const jobs = await getJobByField(field);
+    if (jobs.length === 0) {
+      next(new CustomError('No jobs found', 404));
+      return;
+    }
     res.json(jobs);
   } catch (error) {
-    return next(error);
+    next(new CustomError((error as Error).message, 500));
   }
 };
 
