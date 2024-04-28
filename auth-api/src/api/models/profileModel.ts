@@ -13,7 +13,6 @@ import {
 } from '@sharedTypes/DBTypes';
 import {promisePool} from '../../lib/db';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
-import {NextFunction, Request, Response} from 'express';
 
 // get education by user id
 const getEducationByUser = async (id: number): Promise<EducationInfo[]> => {

@@ -67,7 +67,7 @@ const postEducation = async (
     }
     res.json(result);
   } catch (error) {
-    next(new CustomError('Adding education failed', 500));
+    next(new CustomError((error as Error).message, 500));
   }
 };
 
@@ -108,7 +108,7 @@ const updateEducation = async (
     const response: MessageResponse = {message: 'Education updated'};
     res.json(response);
   } catch (error) {
-    next(new CustomError('Updating education failed', 500));
+    next(new CustomError((error as Error).message, 500));
   }
 };
 
@@ -168,7 +168,7 @@ const postExperience = async (
     const user_id = res.locals.user.user_id;
     const createdExperience = await addExperience(experience, user_id);
     if (!createdExperience) {
-      next(new CustomError('Experience not added', 404));
+      next(new CustomError('Experience not added', 500));
       return;
     }
     res.json(createdExperience);
@@ -213,12 +213,12 @@ const updateExperience = async (
     }
     const result = await putExperience(user_id, +experience_id, experience);
     if (!result) {
-      next(new CustomError('Failed to add experience', 500));
+      next(new CustomError('Failed to update experience', 500));
       return;
     }
     res.json(result);
   } catch (error) {
-    next(new CustomError('Adding experience failed', 500));
+    next(new CustomError((error as Error).message, 500));
   }
 };
 
@@ -237,7 +237,7 @@ const removeExperience = async (
     }
     res.json(result);
   } catch (error) {
-    next(new CustomError('Deleting experience failed', 500));
+    next(new CustomError((error as Error).message, 500));
   }
 };
 
@@ -329,7 +329,7 @@ const updateUserSkill = async (
     }
     res.json(result);
   } catch (error) {
-    next(new CustomError('Failed to update skill', 500));
+    next(new CustomError((error as Error).message, 500));
   }
 };
 
@@ -348,7 +348,7 @@ const removeUserSkill = async (
     }
     res.json(result);
   } catch (error) {
-    next(new CustomError('Failed to remove skill', 500));
+    next(new CustomError((error as Error).message, 500));
   }
 };
 
@@ -421,7 +421,7 @@ const updateAttachment = async (
     console.log(attachment);
     const result = await putAttachment(user_id, +attachment_id, attachment);
     if (!result || result.message === 'Nothing to update') {
-      next(new CustomError('Failed to update attachment', 500));
+      next(new CustomError('Nothing to update', 400));
       return;
     }
     res.json(result);
