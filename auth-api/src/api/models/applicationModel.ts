@@ -1,4 +1,10 @@
-import { Application, ApplicationLink, Chat, Job } from '@sharedTypes/DBTypes';
+import {
+  Application,
+  ApplicationLink,
+  Chat,
+  Job,
+  User,
+} from '@sharedTypes/DBTypes';
 import CustomError from '../../classes/CustomError';
 import {promisePool} from '../../lib/db';
 import {ResultSetHeader} from 'mysql2';
@@ -283,17 +289,30 @@ const getApplicationsForChat = async (
 ): Promise<Application[] | null> => {
   try {
     // find a chat for the users
+    console.log(userId, user2Id);
     const [chat] = await promisePool.execute<ResultSetHeader & Chat[]>(
       'SELECT * FROM Chats WHERE user1_id = ? AND user2_id = ? OR user1_id = ? AND user2_id = ?',
       [userId, user2Id, user2Id, userId]
     );
+    console.log(chat);
     if (chat.length === 0) {
       throw new CustomError('Chat not found', 404);
     }
-    // find job ads that are owned by the user2
+    // determine which user is employer
+    const [employerCheck] = await promisePool.execute<ResultSetHeader & User[]>(
+      'SELECT user_type FROM Users WHERE user_id = ?',
+      [userId]
+    );
+    console.log(employerCheck[0].user_type);
+    if (employerCheck.length === 0) {
+      throw new CustomError('User not found', 404);
+    }
+    const employerId =
+      employerCheck[0].user_type === 'employer' ? userId : user2Id;
+    // find job ads that are owned by the employer
     const [jobs] = await promisePool.execute<ResultSetHeader & Job[]>(
       'SELECT * FROM JobAds WHERE user_id = ?',
-      [user2Id]
+      [employerId]
     );
     if (jobs.length === 0) {
       throw new CustomError('No job ads found', 404);
@@ -301,10 +320,11 @@ const getApplicationsForChat = async (
     // find applications for these job ads that are accepted
     const applications: Application[] = [];
     for (const job of jobs) {
-      const [result] = await promisePool.execute<ResultSetHeader & Application[]>(
-        'SELECT * FROM Applications WHERE job_id = ? AND status = "Accepted"',
-        [job.job_id]
-      );
+      const [result] = await promisePool.execute<
+        ResultSetHeader & Application[]
+      >('SELECT * FROM Applications WHERE job_id = ? AND status = "Accepted"', [
+        job.job_id,
+      ]);
       if (result.length > 0) {
         applications.push(result[0]);
       }
