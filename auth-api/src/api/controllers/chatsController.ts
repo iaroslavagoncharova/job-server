@@ -39,7 +39,7 @@ export const handleGetMessage = async (
     }
     res.json(message);
   } catch (e) {
-    next(e);
+    next(new CustomError((e as Error).message, 500));
   }
 };
 
@@ -58,7 +58,7 @@ export const handleGetOtherChatUser = async (
     }
     res.json(otherUser);
   } catch (e) {
-    next(e);
+    next(new CustomError((e as Error).message, 500));
   }
 };
 
@@ -77,7 +77,7 @@ export const handleGetChatById = async (
     }
     res.json(chat);
   } catch (e) {
-    next(e);
+    next(new CustomError((e as Error).message, 500));
   }
 };
 
@@ -96,7 +96,7 @@ export const handleGetChatsByUser = async (
     }
     res.json(chats);
   } catch (e) {
-    next(e);
+    next(new CustomError((e as Error).message, 500));
   }
 };
 
@@ -116,7 +116,7 @@ export const handleGetMessagesByChatAndUser = async (
     }
     res.json(messages);
   } catch (error) {
-    next(error);
+    next(new CustomError('Failed to get messages', 500));
   }
 };
 
@@ -136,7 +136,7 @@ export const handlePostMessage = async (
     }
     res.json({message: 'Message sent', media: newMessage});
   } catch (error) {
-    next(error);
+    next(new CustomError((error as Error).message, 500));
   }
 };
 
@@ -149,12 +149,12 @@ export const handlePostChat = async (
   try {
     const chat = await postChat(req.body.match_id);
     if (chat === null) {
-      next(new CustomError('Chat not created', 404));
+      next(new CustomError('Chat not created', 500));
       return;
     }
     res.json(chat);
   } catch (error) {
-    next(error);
+    next(new CustomError((error as Error).message, 500));
   }
 };
 
@@ -192,7 +192,7 @@ export const handleDeleteChat = async (
     }
     next(new CustomError('Failed to delete chat', 500));
   } catch (error) {
-    next(error);
+    next(new CustomError((error as Error).message, 500));
   }
 };
 
@@ -212,7 +212,7 @@ export const handleSendInterviewInvitation = async (
     }
     res.json({message: 'Interview invitation sent'});
   } catch (error) {
-    next(error);
+    next(new CustomError((error as Error).message, 500));
   }
 };
 
@@ -252,6 +252,6 @@ export const handleDeclineInterviewInvitation = async (
     }
     res.json({message: 'Interview invitation declined'});
   } catch (error) {
-    next(error);
+    next(new CustomError((error as Error).message, 500));
   }
 };
