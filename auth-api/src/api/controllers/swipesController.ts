@@ -18,7 +18,7 @@ const getAllSwipes = async (
     }
     res.json(result);
   } catch (error) {
-    return next(error);
+    next(new CustomError((error as Error).message, 500));
   }
 };
 
@@ -36,7 +36,7 @@ const getUserSwipes = async (
     }
     res.json(result);
   } catch (error) {
-    return next(error);
+    next(new CustomError((error as Error).message, 500));
   }
 };
 
@@ -71,7 +71,7 @@ const getSwipesRight = async (
     }
     res.json(result);
   } catch (error) {
-    return next(error);
+    next (new CustomError((error as Error).message, 500));
   }
 };
 
@@ -89,7 +89,7 @@ const getUserRightSwipes = async (
     }
     res.json(result);
   } catch (error) {
-    return next(error);
+    next(new CustomError((error as Error).message, 500));
   }
 };
 
@@ -107,7 +107,7 @@ const getSwipeById = async (
     }
     res.json(result);
   } catch (error) {
-    return next(error);
+    next(new CustomError((error as Error).message, 500));
   }
 };
 
@@ -120,6 +120,10 @@ const addSwipe = async (
   const tokenUser = res.locals.user;
   try {
     const result = await postSwipe(tokenUser.user_id, swipe);
+    if (!result) {
+      next(new CustomError('Swipe not added', 500));
+      return;
+    }
     res.json(result);
   } catch (error) {
     return next(error);
@@ -131,6 +135,7 @@ const removeSwipe = async (
   res: Response<MessageResponse>,
   next: NextFunction
 ) => {
+  try {
   const id = req.params.id;
   const result = await deleteSwipe(+id);
   if (!result) {
@@ -138,6 +143,9 @@ const removeSwipe = async (
     return;
   }
   res.json(result);
+  } catch (error) {
+    next(new CustomError((error as Error).message, 500));
+  }
 };
 
 export {getAllSwipes, getUserSwipes, getSwipesRight, getUserRightSwipes, getSwipeById, removeSwipe, getSwipe, addSwipe};
