@@ -57,13 +57,22 @@ describe('MatchModel', () => {
 });
 
 describe('JobModel', () => {
-  describe('GET /jobs', () => {
-    it('should return an array of jobs', async () => {
+  describe('GET /jobs/id', () => {
+    it('should return an object of job', async () => {
       const response = await request(app)
-        .get('/api/v1/jobs')
+        .get('/api/v1/jobs/1')
         .set('content-type', 'application/json');
       expect(response.status).toBe(200);
-      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body).toHaveProperty('job_id');
+      expect(response.body).toHaveProperty('job_address');
+      expect(response.body).toHaveProperty('job_title');
+      expect(response.body).toHaveProperty('salary');
+      expect(response.body).toHaveProperty('user_id');
+      expect(response.body).toHaveProperty('job_description');
+      expect(response.body).toHaveProperty('deadline_date');
+      expect(response.body).toHaveProperty('field');
+      expect(response.body).toHaveProperty('skills');
+      expect(response.body).toHaveProperty('keywords');
     });
   });
 });
