@@ -102,6 +102,7 @@ profileRoute
    * @apiName UpdateEducation
    * @apiGroup Profile
    * @apiPermission authenticated user
+   * @apiParam {Number} education_id Education ID
    * @apiParam {String} school School
    * @apiParam {String} degree Degree
    * @apiParam {String} field Field
@@ -143,6 +144,7 @@ profileRoute
    * @apiName DeleteEducation
    * @apiGroup Profile
    * @apiPermission authenticated user
+   * @apiParam {Number} education_id Education ID
    * @apiSuccess {String} message Success message
    * @apiSuccessExample {json} Success
    * HTTP/1.1 200 OK
@@ -169,6 +171,7 @@ profileRoute
    * @apiName GetExperience
    * @apiGroup Profile
    * @apiPermission authenticated user
+   * @apiParam {Number} experience_id Experience ID
    * @apiSuccess {Object} experience Experience
    * @apiSuccess {String} experience.job_title Job title
    * @apiSuccess {String} experience.job_place Job place
@@ -241,6 +244,7 @@ profileRoute
    * @apiName UpdateExperience
    * @apiGroup Profile
    * @apiPermission authenticated user
+   * @apiParam {Number} experience_id Experience ID
    * @apiParam {String} job_title Job title
    * @apiParam {String} job_place Job place
    * @apiParam {String} job_city Job city
@@ -275,6 +279,7 @@ profileRoute
    * @api {delete} /profile/experience/:experience_id Delete experience
    * @apiName DeleteExperience
    * @apiGroup Profile
+   * @apiParam {Number} experience_id Experience ID
    * @apiPermission authenticated user
    * @apiSuccess {String} message Success message
    * @apiSuccessExample {json} Success
@@ -376,6 +381,7 @@ profileRoute
    * @apiGroup Profile
    * @apiPermission all
    * @apiDescription Get skills by user ID (without token, e.g. for candidate profile)
+   * @apiParam {Number} user_id User ID
    * @apiSuccess {Object[]} skills List of skills
    * @apiSuccess {Number} skills.skill_id Skill ID
    * @apiSuccess {String} skills.skill_name Skill name
@@ -464,6 +470,7 @@ profileRoute
    * @apiName DeleteUserSkill
    * @apiGroup Profile
    * @apiPermission authenticated user
+   * @apiParam {Number} skill_id Skill ID
    * @apiSuccess {String} message Success message
    * @apiSuccessExample {json} Success
    * HTTP/1.1 200 OK
@@ -569,6 +576,7 @@ profileRoute
    * @apiName GetAttachmentById
    * @apiGroup Profile
    * @apiPermission authenticated user
+   * @apiParam {Number} attachment_id Attachment ID
    * @apiSuccess {Object} attachment Attachment
    * @apiSuccess {Number} attachment.attachment_id Attachment ID
    * @apiSuccess {String} attachment.attachment_name Attachment name
@@ -604,6 +612,7 @@ profileRoute
  * @apiName UpdateAttachment
  * @apiGroup Profile
  * @apiPermission authenticated user
+ * @apiParam {Number} attachment_id Attachment ID
  * @apiParam {String} attachment_name Attachment name
  * @apiParam {String} preferred_filename Preferred filename
  * @apiParam {String} filename Filename
@@ -635,6 +644,7 @@ profileRoute
  * @apiName DeleteAttachment
  * @apiGroup Profile
  * @apiPermission authenticated user
+ * @apiParam {Number} attachment_id Attachment ID
  * @apiSuccess {String} message Success message
  * @apiSuccessExample {json} Success
  * HTTP/1.1 200 OK

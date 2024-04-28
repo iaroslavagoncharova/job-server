@@ -26,7 +26,7 @@ applicationRoute
  * @apiName GetApplicationsByUserId
  * @apiGroup Applications
  * @apiDescription Get all applications by user id
- * @apiAccess user
+ * @apiPermission user
  * @apiSuccess {Object[]} applications Applications array
  * @apiSuccess {Number} applications.application_id Application id
  * @apiSuccess {Number} applications.user_id User id
@@ -73,7 +73,7 @@ applicationRoute
  * @apiName GetSentApplicationsByUserId
  * @apiGroup Applications
  * @apiDescription Get all sent applications by user id
- * @apiAccess user
+ * @apiPermission user
  * @apiSuccess {Object[]} applications Applications array
  * @apiSuccess {Number} applications.application_id Application id
  * @apiSuccess {Number} applications.user_id User id
@@ -115,7 +115,7 @@ applicationRoute
  * @apiName GetSavedApplicationsByUserId
  * @apiGroup Applications
  * @apiDescription Get all saved applications by user id
- * @apiAccess user
+ * @apiPermission user
  * @apiSuccess {Object[]} applications Applications array
  * @apiSuccess {Number} applications.application_id Application id
  * @apiSuccess {Number} applications.user_id User id
@@ -157,7 +157,8 @@ applicationRoute
  * @apiName GetApplicationsForChat
  * @apiGroup Applications
  * @apiDescription Get all applications by user for chat by employer id
- * @apiAccess user
+ * @apiPermission user
+ * @apiParam {Number} id Employer id
  * @apiSuccess {Object[]} applications Applications array
  * @apiSuccess {Number} applications.application_id Application id
  * @apiSuccess {Number} applications.user_id User id
@@ -196,7 +197,8 @@ applicationRoute
  * @apiName GetApplicationById
  * @apiGroup Applications
  * @apiDescription Get application by id
- * @apiAccess user
+ * @apiPermission user
+ * @apiParam {Number} application_id Application id
  * @apiSuccess {Number} application_id Application id
  * @apiSuccess {Number} user_id User id
  * @apiSuccess {Number} job_id Job id
@@ -235,7 +237,8 @@ applicationRoute
  * @apiName UpdateApplication
  * @apiGroup Applications
  * @apiDescription Update application
- * @apiAccess user
+ * @apiPermission user
+ * @apiParam {Number} application_id Application id
  * @apiParam {String} application_text Application text
  * @apiParam {String} application_links Application links
  * @apiSuccess {String} message Application updated
@@ -268,7 +271,8 @@ applicationRoute
  * @apiName DismissApplication
  * @apiGroup Applications
  * @apiDescription Dismiss application
- * @apiAccess user
+ * @apiPermission user
+ * @apiParam {Number} application_id Application id
  * @apiSuccess {String} message Application dismissed
  * @apiSuccessExample {json} Success-Response:
  * HTTP/1.1 200 OK
@@ -297,7 +301,8 @@ applicationRoute
  * @apiName AcceptApplication
  * @apiGroup Applications
  * @apiDescription Accept application
- * @apiAccess user
+ * @apiPermission user
+ * @apiParam {Number} application_id Application id
  * @apiSuccess {String} message Application accepted
  * @apiSuccessExample {json} Success-Response:
  * HTTP/1.1 200 OK
@@ -326,7 +331,8 @@ applicationRoute
  * @apiName DeleteApplication
  * @apiGroup Applications
  * @apiDescription Delete application
- * @apiAccess user
+ * @apPermission user
+ * @apiParam {Number} application_id Application id
  * @apiSuccess {String} message Application deleted
  * @apiSuccessExample {json} Success-Response:
  * HTTP/1.1 200 OK
@@ -356,7 +362,8 @@ applicationRoute
  * @apiName GetApplicationsByJob
  * @apiGroup Applications
  * @apiDescription Get all applications by job id
- * @apiAccess user
+ * @apiPermission user
+ * @apiParam {Number} job_id Job id
  * @apiSuccess {Object[]} applications Applications array
  * @apiSuccess {Number} applications.application_id Application id
  * @apiSuccess {Number} applications.user_id User id
@@ -403,7 +410,8 @@ applicationRoute
  * @apiName SendApplication
  * @apiGroup Applications
  * @apiDescription Send application
- * @apiAccess user
+ * @apiPermission user
+ * @apiParam {Number} application_id Application id
  * @apiSuccess {String} message Application sent
  * @apiSuccessExample {json} Success-Response:
  * HTTP/1.1 200 OK

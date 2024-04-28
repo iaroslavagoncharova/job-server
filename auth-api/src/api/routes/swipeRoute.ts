@@ -10,7 +10,7 @@ swipeRoute.route('/')
  * @apiName GetSwipes
  * @apiGroup Swipes
  * @apiDescription Get all swipes
- * @apiAccess all
+ * @apiPermission all
  * @apiSuccess {Object[]} swipes Swipes array
  * @apiSuccess {Number} swipes.swipe_id Swipe id
  * @apiSuccess {Number} swipes.swiper_id Swiper id
@@ -55,7 +55,7 @@ swipeRoute.route('/')
  * @apiName AddSwipe
  * @apiGroup Swipes
  * @apiDescription Add a swipe
- * @apiAccess user
+ * @apiPermission all
  * @apiParam {Number} swiped_id Swiped id
  * @apiParam {String} swipe_direction Swipe direction
  * @apiParam {String} swipe_type Swipe type
@@ -104,7 +104,7 @@ swipeRoute.route('/:id')
  * @apiName GetSwipe
  * @apiGroup Swipes
  * @apiDescription Get a swipe by id
- * @apiAccess all
+ * @apiPermission all
  * @apiParam {Number} id Swipe id
  * @apiSuccess {Object} swipe Swipe object
  * @apiSuccess {Number} swipe.swipe_id Swipe id
@@ -140,7 +140,7 @@ swipeRoute.route('/:id')
  * @apiName RemoveSwipe
  * @apiGroup Swipes
  * @apiDescription Remove a swipe
- * @apiAccess user
+ * @apiPermission all
  * @apiParam {Number} id Swipe id
  * @apiSuccess {String} message Success message
  * @apiSuccessExample {json} Success-Response:
@@ -166,7 +166,7 @@ swipeRoute.route('/user')
  * @apiName GetUserSwipes
  * @apiGroup Swipes
  * @apiDescription Get all swipes by user (where user is the swiper)
- * @apiAccess user
+ * @apiPermission user
  * @apiSuccess {Object[]} swipes Swipes array
  * @apiSuccess {Number} swipes.swipe_id Swipe id
  * @apiSuccess {Number} swipes.swiper_id Swiper id
@@ -212,7 +212,7 @@ swipeRoute.route('/right')
  * @apiName GetSwipesRight
  * @apiGroup Swipes
  * @apiDescription Get all right swipes (no matter the type or user)
- * @apiAccess all
+ * @apiPermission all
  * @apiSuccess {Object[]} swipes Swipes array
  * @apiSuccess {Number} swipes.swipe_id Swipe id
  * @apiSuccess {Number} swipes.swiper_id Swiper id
@@ -258,7 +258,7 @@ swipeRoute.route('/user/right')
  * @apiName GetUserRightSwipes
  * @apiGroup Swipes
  * @apiDescription Get all right swipes by user (where user is the swiper and has swiped right)
- * @apiAccess user
+ * @apiPermission user
  * @apiSuccess {Object[]} swipes Swipes array
  * @apiSuccess {Number} swipes.swipe_id Swipe id
  * @apiSuccess {Number} swipes.swiper_id Swiper id
@@ -304,7 +304,7 @@ swipeRoute.route('/user/:id')
  * @apiName GetUserSwipesById
  * @apiGroup Swipes
  * @apiDescription Get all swipes for user id (where user is either the swiper or the swiped)
- * @apiAccess user
+ * @apiPermission all
  * @apiParam {Number} id User id
  * @apiSuccess {Object[]} swipes Swipes array
  * @apiSuccess {Number} swipes.swipe_id Swipe id

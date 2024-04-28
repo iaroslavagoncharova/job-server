@@ -21,7 +21,7 @@ reportRoute
  * @apiName GetAllReports
  * @apiGroup Reports
  * @apiDescription Get all reports
- * @apiAccess admin
+ * @apiPermission admin
  * @apiSuccess {Object[]} reports Reports array
  * @apiSuccess {Number} reports.report_id Report id
  * @apiSuccess {Number} reports.user_id User id
@@ -75,7 +75,7 @@ reportRoute
  * @apiName GetUnresolvedReports
  * @apiGroup Reports
  * @apiDescription Get all unresolved reports
- * @apiAccess admin
+ * @apiPermission admin
  * @apiSuccess {Object[]} reports Reports array
  * @apiSuccess {Number} reports.report_id Report id
  * @apiSuccess {Number} reports.user_id User id
@@ -120,7 +120,7 @@ reportRoute
  * @apiName GetResolvedReports
  * @apiGroup Reports
  * @apiDescription Get all resolved reports
- * @apiAccess admin
+ * @apiPermission admin
  * @apiSuccess {Object[]} reports Reports array
  * @apiSuccess {Number} reports.report_id Report id
  * @apiSuccess {Number} reports.user_id User id
@@ -165,7 +165,7 @@ reportRoute
  * @apiName GetReportsByUser
  * @apiGroup Reports
  * @apiDescription Get reports by user
- * @apiAccess admin
+ * @apiPermission admin
  * @apiParam {Number} id User id
  * @apiSuccess {Object[]} reports Reports array
  * @apiSuccess {Number} reports.report_id Report id
@@ -220,7 +220,7 @@ reportRoute
  * @apiName GetReportedUsers
  * @apiGroup Reports
  * @apiDescription Get reported users
- * @apiAccess admin
+ * @apiPermission admin
  * @apiSuccess {Object[]} users Users array
  * @apiSuccess {Number} users.user_id User id
  * @apiSuccess {String} users.username Username
@@ -289,7 +289,7 @@ reportRoute
  * @apiName GetReportedJobs
  * @apiGroup Reports
  * @apiDescription Get reported jobs
- * @apiAccess admin
+ * @apiPermission admin
  * @apiSuccess {Object[]} jobs Jobs array
  * @apiSuccess {Number} jobs.job_id Job id
  * @apiSuccess {String} jobs.job_address Job address
@@ -350,7 +350,7 @@ reportRoute.route('/:id')
  * @apiName GetReportById
  * @apiGroup Reports
  * @apiDescription Get report by id
- * @apiAccess admin
+ * @apiPermission admin
  * @apiParam {Number} id Report id
  * @apiSuccess {Number} report_id Report id
  * @apiSuccess {Number} user_id User id
@@ -393,7 +393,7 @@ reportRoute.route('/:id')
  * @apiName DeleteReport
  * @apiGroup Reports
  * @apiDescription Delete report
- * @apiAccess admin
+ * @apiPermission admin
  * @apiParam {Number} id Report id
  * @apiSuccess {String} message Success message
  * @apiSuccessExample {json} Success-Response:
@@ -419,7 +419,7 @@ reportRoute
  * @apiName SendReport
  * @apiGroup Reports
  * @apiDescription Send report
- * @apiAccess user
+ * @apiPermission user
  * @apiParam {Number} reported_item_id Reported item id
  * @apiParam {String} reported_item_type Reported item type
  * @apiParam {String} report_reason Report reason
@@ -448,7 +448,7 @@ reportRoute
  * @apiName ResolveReport
  * @apiGroup Reports
  * @apiDescription Resolve report
- * @apiAccess admin
+ * @apiPermission admin
  * @apiParam {Number} id Report id
  * @apiSuccess {String} message Success message
  * @apiSuccessExample {json} Success-Response:

@@ -207,6 +207,7 @@ testRoute
    * @apiGroup Tests
    * @apiDescription Update a test
    * @apiPermission test owner
+   * @apiParam {Number} id Test id
    * @apiParam {String} test_type Test type
    * @apiParam {String} test_link Test link
    * @apiSuccess {Object[]} testResponse Message and updated test object
@@ -246,6 +247,7 @@ testRoute
    * @apiGroup Tests
    * @apiDescription Delete a test
    * @apiPermission test owner
+   * @apiParam {Number} id Test id
    * @apiSuccess {Object[]} message Message object
    * @apiSuccess {String} message.message Message
    * @apiSuccessExample {json} Success-Response:
@@ -274,6 +276,7 @@ testRoute
    * @apiGroup Tests
    * @apiDescription Get tests for job
    * @apiPermission user
+   * @apiParam {Number} id Job id
    * @apiSuccess {Object[]} jobTests List of test ids for the job
    * @apiSuccess {Number} jobTests.test_id Test id
    * @apiSuccess {Number} jobTests.job_id Job id
@@ -308,7 +311,7 @@ testRoute
    * @apiGroup Tests
    * @apiDescription Add a test to a job
    * @apiPermission job owner
-   * @apiParam {Number} test_id Test id
+   * @apiParam {Number} id Test id
    * @apiSuccess {Object[]} message Message object
    * @apiSuccess {String} message.message Message
    * @apiSuccessExample {json} Success-Response:
@@ -337,6 +340,7 @@ testRoute
    * @apiGroup Tests
    * @apiDescription Get jobs by test
    * @apiPermission job owner
+   * @apiParam {Number} id Test id
    * @apiSuccess {Object[]} jobs List of jobs
    * @apiSuccess {Number} jobs.job_id Job id
    * @apiSuccess {String} jobs.job_address Job address
@@ -388,7 +392,7 @@ testRoute
    * @apiGroup Tests
    * @apiDescription Delete a job from a test
    * @apiPermission job owner
-   * @apiParam {Number} job_id Job id
+   * @apiParam {Number} id Job id
    * @apiSuccess {Object[]} message Message object
    * @apiSuccess {String} message.message Message
    * @apiSuccessExample {json} Success-Response:
@@ -411,7 +415,7 @@ testRoute
  * @apiDescription Take a test
  * @apiPermission candidate user
  * @apiParam {Number} user_id User id
- * @apiParam {Number} test_id Test id
+ * @apiParam {Number} id Test id
  * @apiSuccess {Object[]} message Message object
  * @apiSuccess {String} message.message Message
  * @apiSuccessExample {json} Success-Response:
