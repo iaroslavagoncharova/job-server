@@ -6,6 +6,7 @@ import {
   Job,
   JobWithSkillsAndKeywords,
   JobWithUser,
+  Keyword,
   UpdateJob,
 } from '@sharedTypes/DBTypes';
 import {
@@ -43,7 +44,7 @@ const fetchAllJobs = async (
 
 const fetchJobsByCompany = async (
   req: Request,
-  res: Response,
+  res: Response<Job[]>,
   next: NextFunction
 ): Promise<Job[] | void> => {
   try {
@@ -61,9 +62,9 @@ const fetchJobsByCompany = async (
 
 const fetchKeywords = async (
   req: Request,
-  res: Response,
+  res: Response<Keyword[]>,
   next: NextFunction
-): Promise<void> => {
+): Promise<Keyword[] | void> => {
   try {
     const keywords = await getKeywords();
     if (keywords.length === 0) {
@@ -78,9 +79,9 @@ const fetchKeywords = async (
 
 const fetchFields = async (
   req: Request,
-  res: Response,
+  res: Response<string[]>,
   next: NextFunction
-): Promise<void> => {
+): Promise<string[] | void> => {
   try {
     const fields = await getFields();
     if (fields.length === 0) {
@@ -94,10 +95,10 @@ const fetchFields = async (
 };
 
 const fetchJobById = async (
-  req: Request,
+  req: Request<{id: string}>,
   res: Response<JobWithSkillsAndKeywords>,
   next: NextFunction
-) => {
+): Promise<JobWithSkillsAndKeywords[] | void> => {
   try {
     const id = req.params.id;
     const job = await getJobById(+id);
@@ -112,7 +113,7 @@ const fetchJobById = async (
 };
 
 const fetchJobsByField = async (
-  req: Request,
+  req: Request<{field: string}>,
   res: Response<Job[]>,
   next: NextFunction
 ): Promise<Job[] | void> => {
@@ -126,7 +127,7 @@ const fetchJobsByField = async (
 };
 
 const fetchJobForApplication = async (
-  req: Request,
+  req: Request<{job_id: string}>,
   res: Response<JobWithUser>,
   next: NextFunction
 ): Promise<JobWithUser[] | void> => {
@@ -144,10 +145,10 @@ const fetchJobForApplication = async (
 };
 
 const addJob = async (
-  req: Request,
+  req: Request<UpdateJob>,
   res: Response<JobResponse>,
   next: NextFunction
-): Promise<void> => {
+): Promise<JobResponse | void> => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const messages: string = errors
@@ -173,10 +174,10 @@ const addJob = async (
 };
 
 const updateJob = async (
-  req: Request,
+  req: Request<{id: string}, UpdateJob>,
   res: Response<JobResponse>,
   next: NextFunction
-): Promise<void> => {
+): Promise<JobResponse | void> => {
   try {
     const id = req.params.id;
     const job = req.body;
@@ -193,10 +194,10 @@ const updateJob = async (
 };
 
 const removeJob = async (
-  req: Request,
+  req: Request<{id: string}>,
   res: Response<MessageResponse>,
   next: NextFunction
-): Promise<void> => {
+): Promise<MessageResponse | void> => {
   try {
     const id = req.params.id;
     const tokenUser = res.locals.user;
@@ -217,10 +218,10 @@ const removeJob = async (
 };
 
 const removeJobAsAdmin = async (
-  req: Request,
+  req: Request<{id: string}>,
   res: Response<MessageResponse>,
   next: NextFunction
-): Promise<void> => {
+): Promise<MessageResponse | void> => {
   try {
     const tokenUser = res.locals.user;
     const id = req.params.id;
@@ -237,9 +238,9 @@ const removeJobAsAdmin = async (
 
 const handleCalculatePercentage = async (
   req: Request<{id: string}>,
-  res: Response,
+  res: Response<number>,
   next: NextFunction
-) => {
+): Promise<number | void> => {
   try {
     const user_id = res.locals.user.user_id;
     const job_id = req.params.id;

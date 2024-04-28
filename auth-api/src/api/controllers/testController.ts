@@ -19,12 +19,13 @@ import {
   putTest,
   takeTest,
 } from '../models/testModel';
+import {MessageResponse} from '@sharedTypes/MessageTypes';
 
 const handleGetAllTests = async (
   req: Request,
   res: Response<Test[]>,
   next: NextFunction
-) => {
+): Promise<Test[] | void> => {
   try {
     const tests = await getAllTests();
     if (tests === null) {
@@ -41,7 +42,7 @@ const handleGetGeneralTests = async (
   req: Request,
   res: Response<Test[]>,
   next: NextFunction
-) => {
+): Promise<Test[] | void> => {
   try {
     const tests = await getTests();
     if (tests === null) {
@@ -58,7 +59,7 @@ const handleGetTestsByUser = async (
   req: Request,
   res: Response<Test[]>,
   next: NextFunction
-) => {
+): Promise<Test[] | void> => {
   try {
     const user = res.locals.user;
     const tests = await getTestsByUser(user.user_id);
@@ -73,10 +74,10 @@ const handleGetTestsByUser = async (
 };
 
 const handlePostTest = async (
-  req: Request,
-  res: Response,
+  req: Request<{}, {}, Test>,
+  res: Response<MessageResponse>,
   next: NextFunction
-) => {
+): Promise<MessageResponse | void> => {
   try {
     const user = res.locals.user;
     const test = req.body;
@@ -92,10 +93,10 @@ const handlePostTest = async (
 };
 
 const handlePutTest = async (
-  req: Request<{id: string}>,
-  res: Response,
+  req: Request<{id: string}, {}, Test>,
+  res: Response<MessageResponse>,
   next: NextFunction
-) => {
+): Promise<MessageResponse | void> => {
   try {
     const user = res.locals.user;
     const test = req.body;
@@ -114,9 +115,9 @@ const handlePutTest = async (
 
 const handleDeleteTest = async (
   req: Request<{id: string}>,
-  res: Response,
+  res: Response<MessageResponse>,
   next: NextFunction
-) => {
+): Promise<MessageResponse | void> => {
   try {
     const user = res.locals.user;
     const testId = parseInt(req.params.id);
@@ -136,7 +137,7 @@ const handleGetTestsForJob = async (
   req: Request<{id: string}>,
   res: Response<Test[]>,
   next: NextFunction
-) => {
+): Promise<Test[] | void> => {
   try {
     const jobId = parseInt(req.params.id);
     const tests = await getTestsForJobs(jobId);
@@ -152,9 +153,9 @@ const handleGetTestsForJob = async (
 
 const handleAddTestToJob = async (
   req: Request<{id: string}>,
-  res: Response,
+  res: Response<MessageResponse>,
   next: NextFunction
-) => {
+): Promise<MessageResponse | void> => {
   try {
     const jobId = parseInt(req.params.id);
     const testId = req.body.test_id;
@@ -174,7 +175,7 @@ const handleGetJobsByTest = async (
   req: Request<{id: string}>,
   res: Response<Job[]>,
   next: NextFunction
-) => {
+): Promise<Job[] | void> => {
   try {
     const testId = parseInt(req.params.id);
     const jobs = await getJobsByTest(testId);
@@ -190,9 +191,9 @@ const handleGetJobsByTest = async (
 
 const handleDeleteJobFromTest = async (
   req: Request<{id: string}>,
-  res: Response,
+  res: Response<MessageResponse>,
   next: NextFunction
-) => {
+): Promise<MessageResponse | void> => {
   try {
     const testId = parseInt(req.params.id);
     const jobId = req.body.job_id;
@@ -211,7 +212,7 @@ const handleGetCandidatesTests = async (
   req: Request,
   res: Response<Test[]>,
   next: NextFunction
-) => {
+): Promise<Test[] | void> => {
   try {
     const user = res.locals.user;
     const tests = await getCandidateTests(user.user_id);
@@ -227,9 +228,9 @@ const handleGetCandidatesTests = async (
 
 const handleTakeTest = async (
   req: Request<{id: string}>,
-  res: Response,
+  res: Response<MessageResponse>,
   next: NextFunction
-) => {
+): Promise<MessageResponse | void> => {
   try {
     const user = res.locals.user;
     const test_id = parseInt(req.params.id);

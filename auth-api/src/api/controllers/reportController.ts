@@ -13,12 +13,13 @@ import {
   deleteReport,
 } from '../models/reportModel';
 import {Report, ReportedJob, ReportedUser, User} from '@sharedTypes/DBTypes';
+import {MessageResponse} from '@sharedTypes/MessageTypes';
 
 const handleGetAllReports = async (
   req: Request,
   res: Response<Report[]>,
   next: NextFunction
-) => {
+): Promise<Report[] | void> => {
   try {
     const reports = await getAllReports(res.locals.user.user_id);
     if (reports === null) {
@@ -35,7 +36,7 @@ const handleGetUnresolvedReports = async (
   req: Request,
   res: Response<Report[]>,
   next: NextFunction
-) => {
+): Promise<Report[] | void> => {
   try {
     const reports = await getUnresolvedReports(res.locals.user.user_id);
     if (reports === null) {
@@ -52,7 +53,7 @@ const handleGetResolvedReports = async (
   req: Request,
   res: Response<Report[]>,
   next: NextFunction
-) => {
+): Promise<Report[] | void> => {
   try {
     const reports = await getResolvedReports(res.locals.user.user_id);
     if (reports === null) {
@@ -66,10 +67,10 @@ const handleGetResolvedReports = async (
 };
 
 const handleGetReportById = async (
-  req: Request,
+  req: Request<{id: string}>,
   res: Response<Report>,
   next: NextFunction
-) => {
+): Promise<Report | void> => {
   try {
     const report = await getReportById(
       parseInt(req.params.id),
@@ -89,7 +90,7 @@ const handleGetReportsByUser = async (
   req: Request<{id: string}>,
   res: Response<Report[]>,
   next: NextFunction
-) => {
+): Promise<Report[] | void> => {
   try {
     const tokenUser = res.locals.user as User;
     const reports = await getReportsByUser(parseInt(req.params.id), tokenUser.user_id);
@@ -107,7 +108,7 @@ const handleGetReportedUsers = async (
   req: Request,
   res: Response<ReportedUser[]>,
   next: NextFunction
-) => {
+): Promise<ReportedUser[] | void> => {
   try {
     const reports = await getReportedUsers(res.locals.user.user_id);
     if (reports === null) {
@@ -124,7 +125,7 @@ const handleGetReportedJobs = async (
   req: Request,
   res: Response<ReportedJob[]>,
   next: NextFunction
-) => {
+): Promise<ReportedJob[] | void> => {
   try {
     const reports = await getReportedJobs(res.locals.user.user_id);
     if (reports === null) {
@@ -138,10 +139,10 @@ const handleGetReportedJobs = async (
 };
 
 const handleSendReport = async (
-  req: Request,
-  res: Response,
+  req: Request<{}, {}, {reported_item_id: number; reported_item_type: string; report_reason: string}>,
+  res: Response<MessageResponse>,
   next: NextFunction
-) => {
+): Promise<MessageResponse | void> => {
   try {
     const tokenUser = res.locals.user;
     const {reported_item_id, reported_item_type, report_reason} = req.body;
@@ -162,10 +163,10 @@ const handleSendReport = async (
 };
 
 const handleResolveReport = async (
-  req: Request,
-  res: Response,
+  req: Request<{id: string}>,
+  res: Response<MessageResponse>,
   next: NextFunction
-) => {
+): Promise<MessageResponse | void> => {
   try {
     const result = await resolveReport(
       parseInt(req.params.id),
@@ -182,10 +183,10 @@ const handleResolveReport = async (
 };
 
 const handleDeleteReport = async (
-  req: Request,
-  res: Response,
+  req: Request<{id: string}>,
+  res: Response<MessageResponse>,
   next: NextFunction
-) => {
+): Promise<MessageResponse | void> => {
   try {
     const result = await deleteReport(
       parseInt(req.params.id),

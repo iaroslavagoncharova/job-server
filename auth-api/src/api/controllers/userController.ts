@@ -19,7 +19,7 @@ import {
 } from '../models/userModel';
 import CustomError from '../../classes/CustomError';
 import {validationResult} from 'express-validator';
-import {UserResponse} from '@sharedTypes/MessageTypes';
+import {MessageResponse, UserResponse} from '@sharedTypes/MessageTypes';
 import bcrypt from 'bcryptjs';
 
 const salt = bcrypt.genSaltSync(10);
@@ -28,7 +28,7 @@ const getAllUsers = async (
   req: Request,
   res: Response<UnauthorizedUser[]>,
   next: NextFunction
-) => {
+): Promise<UnauthorizedUser[] | void> => {
   try {
     const users = await getUsers();
     if (users === null) {
@@ -45,7 +45,7 @@ const getUserById = async (
   req: Request<{id: number}>,
   res: Response<UnauthorizedUser>,
   next: NextFunction
-) => {
+): Promise<UnauthorizedUser | void> => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const messages: string = errors
@@ -72,7 +72,7 @@ const getCandidateUser = async (
   req: Request<{id: number}>,
   res: Response<CandidateProfile>,
   next: NextFunction
-) => {
+): Promise<CandidateProfile | void> => {
   try {
     const user = await getOneCandidate(req.params.id);
     if (user === null) {
@@ -89,7 +89,7 @@ const getCandidates = async (
   req: Request,
   res: Response<CandidateProfile[]>,
   next: NextFunction
-) => {
+): Promise<CandidateProfile[] | void> => {
   try {
     const user = res.locals.user;
     const users = await getAllCandidates(user.user_id);
@@ -107,7 +107,7 @@ const getUserByToken = async (
   req: Request,
   res: Response<UserResponse, {user: TokenUser}>,
   next: NextFunction
-) => {
+): Promise<UserResponse | void> => {
   try {
     const tokenUser = res.locals.user;
     const user = await getUser(tokenUser.user_id);
@@ -143,7 +143,7 @@ const addUser = async (
   >,
   res: Response<UserResponse>,
   next: NextFunction
-) => {
+): Promise<UserResponse | void> => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const messages: string = errors
@@ -176,7 +176,7 @@ const updateUser = async (
   req: Request<UpdateUser>,
   res: Response<UserResponse>,
   next: NextFunction
-) => {
+): Promise<UserResponse | void> => {
   try {
     const tokenUser = res.locals.user;
     const result = await putUser(tokenUser.user_id, req.body);
@@ -194,7 +194,11 @@ const updateUser = async (
   }
 };
 
-const removeUser = async (req: Request, res: Response, next: NextFunction) => {
+const removeUser = async (
+  req: Request,
+  res: Response<MessageResponse>,
+  next: NextFunction
+): Promise<MessageResponse | void> => {
   try {
     const tokenUser = res.locals.user;
     const user = await getUser(tokenUser.user_id);
@@ -203,6 +207,10 @@ const removeUser = async (req: Request, res: Response, next: NextFunction) => {
       return;
     }
     const response = await deleteUser(tokenUser.user_id);
+    if (response === null) {
+      next(new CustomError('User not found', 404));
+      return;
+    }
     res.json(response);
   } catch (e) {
     next(new CustomError((e as Error).message, 500));
@@ -211,9 +219,9 @@ const removeUser = async (req: Request, res: Response, next: NextFunction) => {
 
 const removeUserAsAdmin = async (
   req: Request,
-  res: Response,
+  res: Response<MessageResponse>,
   next: NextFunction
-) => {
+): Promise<MessageResponse | void> => {
   try {
     const tokenUser = res.locals.user;
     const response = await deleteUserAsAdmin(+req.params.id, tokenUser.user_id);

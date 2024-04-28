@@ -12,7 +12,7 @@ import {
   handlePostChat,
   handlePostMessage,
   handleSendInterviewInvitation,
-} from '../controllers/chatsController'; // Adjust the import path as necessary
+} from '../controllers/chatsController';
 import {authenticate} from '../../middlewares';
 
 const chatsRoute = express.Router();

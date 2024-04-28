@@ -7,7 +7,7 @@ import {MessageResponse, SwipeResponse} from '@sharedTypes/MessageTypes';
 
 const getAllSwipes = async (
   req: Request,
-  res: Response,
+  res: Response<Swipe[]>,
   next: NextFunction
 ): Promise<Swipe[] | void> => {
   try {
@@ -24,7 +24,7 @@ const getAllSwipes = async (
 
 const getUserSwipes = async (
   req: Request,
-  res: Response,
+  res: Response<Swipe[]>,
   next: NextFunction
 ): Promise<Swipe[] | void> => {
   try {
@@ -60,7 +60,7 @@ const getSwipe = async (
 
 const getSwipesRight = async (
   req: Request,
-  res: Response,
+  res: Response<Swipe[]>,
   next: NextFunction
 ): Promise<Swipe[] | void> => {
   try {
@@ -77,7 +77,7 @@ const getSwipesRight = async (
 
 const getUserRightSwipes = async (
   req: Request,
-  res: Response,
+  res: Response<Swipe[]>,
   next: NextFunction
 ): Promise<Swipe[] | void> => {
   try {
@@ -95,9 +95,9 @@ const getUserRightSwipes = async (
 
 const getSwipeById = async (
   req: Request,
-  res: Response,
+  res: Response<Swipe>,
   next: NextFunction
-): Promise<Swipe[] | void> => {
+): Promise<Swipe | void> => {
   try {
     const id = req.params.id;
     const result = await getSwipeByUserId(+id);
@@ -115,7 +115,7 @@ const addSwipe = async (
   req: Request,
   res: Response<SwipeResponse>,
   next: NextFunction
-): Promise<Swipe | void> => {
+): Promise<SwipeResponse | void> => {
   const swipe = req.body;
   const tokenUser = res.locals.user;
   try {
@@ -134,7 +134,7 @@ const removeSwipe = async (
   req: Request,
   res: Response<MessageResponse>,
   next: NextFunction
-) => {
+): Promise<MessageResponse | void> => {
   try {
   const id = req.params.id;
   const result = await deleteSwipe(+id);

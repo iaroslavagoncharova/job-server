@@ -11,7 +11,7 @@ const login = async (
   req: Request<{}, {}, {email: string; password: string}>,
   res: Response<LoginResponse>,
   next: NextFunction
-) => {
+): Promise<LoginResponse | void> => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const messages: string = errors

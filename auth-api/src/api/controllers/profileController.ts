@@ -23,6 +23,7 @@ import {
 import {
   Attachment,
   AttachmentInfo,
+  Education,
   EducationInfo,
   Experience,
   ExperienceInfo,
@@ -34,8 +35,8 @@ import { MessageResponse, MediaResponse } from '@sharedTypes/MessageTypes';
 import {validationResult} from 'express-validator';
 
 const getEducation = async (
-  req: Request,
-  res: Response,
+  req: Request<{user_id: string}>,
+  res: Response<EducationInfo[]>,
   next: NextFunction
 ): Promise<EducationInfo[] | void> => {
   try {
@@ -52,10 +53,10 @@ const getEducation = async (
 };
 
 const postEducation = async (
-  req: Request,
-  res: Response,
+  req: Request<{}, {}, Omit<Education, 'education_id'>>,
+  res: Response<MessageResponse>,
   next: NextFunction
-): Promise<void> => {
+): Promise<MessageResponse | void> => {
   try {
     const id = res.locals.user.user_id;
     const education = req.body;
@@ -74,7 +75,7 @@ const updateEducation = async (
   req: Request<{education_id: string}>,
   res: Response<MessageResponse>,
   next: NextFunction
-) => {
+): Promise<MessageResponse | void> => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const messages: string = errors
@@ -132,7 +133,7 @@ const removeEducation = async (
 };
 
 const getExperienceById = async (
-  req: Request,
+  req: Request<{experience_id: string}>,
   res: Response<Experience[]>,
   next: NextFunction
 ): Promise<Experience[] | void> => {
@@ -150,10 +151,10 @@ const getExperienceById = async (
 };
 
 const postExperience = async (
-  req: Request,
+  req: Request<{}, {}, Omit<Experience, 'experience_id'>>,
   res: Response<MessageResponse>,
   next: NextFunction
-) => {
+): Promise<MessageResponse | void> => {
   try {
     const experience = req.body;
     if (
@@ -180,7 +181,7 @@ const updateExperience = async (
   req: Request<{experience_id: string}>,
   res: Response<MessageResponse>,
   next: NextFunction
-) => {
+): Promise<MessageResponse | void> => {
   try {
     const {job_title, job_place, job_city, description, start_date, end_date} =
       req.body;
@@ -223,9 +224,9 @@ const updateExperience = async (
 
 const removeExperience = async (
   req: Request<{experience_id: string}>,
-  res: Response,
+  res: Response<MessageResponse>,
   next: NextFunction
-): Promise<void> => {
+): Promise<MessageResponse | void> => {
   try {
     const experience_id = req.params.experience_id;
     const user_id = res.locals.user.user_id;
@@ -241,10 +242,10 @@ const removeExperience = async (
 };
 
 const getSkills = async (
-  req: Request,
-  res: Response,
+  req: Request<{}, {}, Skill[]>,
+  res: Response<Skill[]>,
   next: NextFunction
-): Promise<void> => {
+): Promise<Skill[] | void> => {
   try {
     const result = await getAllSkills();
     if (result.length === 0) {
@@ -258,10 +259,10 @@ const getSkills = async (
 };
 
 const getSkillsByUserId = async (
-  req: Request,
-  res: Response,
+  req: Request<{user_id: string}>,
+  res: Response<Skill[]>,
   next: NextFunction
-): Promise<void> => {
+): Promise<Skill[] | void> => {
   try {
     const id = req.params.user_id;
     const result = await getUserSkills(+id);
@@ -279,7 +280,7 @@ const getSkillsByUser = async (
   req: Request<{user_id: string}>,
   res: Response<Skill[]>,
   next: NextFunction
-): Promise<void> => {
+): Promise<Skill[] | void> => {
   try {
     const id = res.locals.user.user_id;
     const result = await getUserSkills(id);
@@ -316,7 +317,7 @@ const updateUserSkill = async (
   req: Request<{skill_id: string}>,
   res: Response<MessageResponse>,
   next: NextFunction
-): Promise<void> => {
+): Promise<MessageResponse | void> => {
   try {
     const id = res.locals.user.user_id;
     const skill_id = req.params.skill_id;
@@ -336,7 +337,7 @@ const removeUserSkill = async (
   req: Request<{skill_id: string}>,
   res: Response<MessageResponse>,
   next: NextFunction
-): Promise<void> => {
+): Promise<MessageResponse | void> => {
   try {
     const id = res.locals.user.user_id;
     const skill_id = req.params.skill_id;
@@ -352,7 +353,7 @@ const removeUserSkill = async (
 };
 
 const getUserAttachments = async (
-  req: Request,
+  req: Request<{user_id: string}>,
   res: Response<Attachment[]>,
   next: NextFunction
 ): Promise<Attachment[] | void> => {
@@ -431,9 +432,9 @@ const updateAttachment = async (
 
 const removeAttachment = async (
   req: Request<{attachment_id: string}>,
-  res: Response,
+  res: Response<MessageResponse>,
   next: NextFunction
-): Promise<void> => {
+): Promise<MessageResponse | void> => {
   try {
     const attachment_id = req.params.attachment_id;
     const user_id = res.locals.user.user_id;
