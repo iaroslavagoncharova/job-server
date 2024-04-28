@@ -55,3 +55,15 @@ describe('MatchModel', () => {
     });
   });
 });
+
+describe('JobModel', () => {
+  describe('GET /jobs', () => {
+    it('should return an array of jobs', async () => {
+      const response = await request(app)
+        .get('/api/v1/jobs')
+        .set('content-type', 'application/json');
+      expect(response.status).toBe(200);
+      expect(Array.isArray(response.body)).toBe(true);
+    });
+  });
+});
