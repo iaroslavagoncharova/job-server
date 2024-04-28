@@ -151,8 +151,8 @@ const handleSendReport = async (
       reported_item_id,
       report_reason
     );
-    if (result.affectedRows === 1) {
-      res.json({message: 'Report sent'});
+    if (result.message === 'Report sent') {
+      res.json(result);
       return;
     }
     next(new CustomError('Report not sent', 500));
@@ -191,8 +191,8 @@ const handleDeleteReport = async (
       parseInt(req.params.id),
       res.locals.user.user_id
     );
-    if (result.affectedRows === 1) {
-      res.json({message: 'Report deleted'});
+    if (result.message === 'Report deleted') {
+      res.json(result);
       return;
     }
     next(new CustomError('Report not deleted', 500));

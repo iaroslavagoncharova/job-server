@@ -169,7 +169,7 @@ const sendReport = async (
   reported_item_type: string,
   reported_item_id: number,
   report_reason: string
-): Promise<ResultSetHeader> => {
+): Promise<MessageResponse> => {
   try {
     const [reportCheck] = await promisePool.query<RowDataPacket[]>(
       'SELECT * FROM Reports WHERE user_id = ? AND reported_item_id = ?',
@@ -182,7 +182,10 @@ const sendReport = async (
       'INSERT INTO Reports (user_id, reported_item_type, reported_item_id, report_reason, is_resolved) VALUES (?, ?, ?, ?, "not_resolved")',
       [user_id, reported_item_type, reported_item_id, report_reason]
     );
-    return result;
+    if (result.affectedRows === 0) {
+      throw new CustomError('Report not sent', 500);
+    }
+    return {message: 'Report sent'};
   } catch (e) {
     throw new Error((e as Error).message);
   }
@@ -219,7 +222,7 @@ const resolveReport = async (
 const deleteReport = async (
   report_id: number,
   user_id: number
-): Promise<ResultSetHeader> => {
+): Promise<MessageResponse> => {
   try {
     const [adminCheck] = await promisePool.query<RowDataPacket[]>(
       'SELECT * FROM Users WHERE user_id = ? AND user_level_id = "3"',
@@ -235,7 +238,10 @@ const deleteReport = async (
       'DELETE FROM Reports WHERE report_id = ?',
       [report_id]
     );
-    return result;
+    if (result.affectedRows === 0) {
+      throw new CustomError('Report not found', 404);
+    }
+    return {message: 'Report deleted'};
   } catch (e) {
     throw new Error((e as Error).message);
   }
