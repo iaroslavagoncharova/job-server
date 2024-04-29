@@ -88,9 +88,6 @@ const deleteMatch = async (id: number): Promise<MessageResponse> => {
   const connection = await promisePool.getConnection();
   try {
     await connection.beginTransaction();
-    await connection.execute('DELETE FROM Notifications WHERE match_id = ?', [
-      id,
-    ]);
     const [result] = await connection.execute<ResultSetHeader>(
       'DELETE FROM Matches WHERE match_id = ?',
       [id]

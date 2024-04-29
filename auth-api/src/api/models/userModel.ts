@@ -419,11 +419,6 @@ const deleteUser = async (id: number): Promise<MessageResponse> => {
       'DELETE FROM Swipes WHERE swiped_id = ? OR swiper_id = ?',
       [id, id]
     );
-    //delete from notifications that are from the matches that have user id
-    await connection.execute(
-      'DELETE FROM Notifications WHERE match_id IN (SELECT match_id FROM Matches WHERE user1_id = ? OR user2_id = ?)',
-      [id, id]
-    );
     await connection.execute(
       'DELETE FROM Matches WHERE user1_id = ? OR user2_id = ?',
       [id, id]
