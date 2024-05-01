@@ -90,10 +90,6 @@ const deleteFile = async (
     }
 
     // delete  from uploads folder
-    if (fs.existsSync(`./uploads/${filename}-thumb.png`)) {
-      fs.unlinkSync(`./uploads/${filename}-thumb.png`);
-    }
-
     if (!fs.existsSync(`./uploads/${filename}`)) {
       const err = new CustomError('file not found', 404);
       next(err);

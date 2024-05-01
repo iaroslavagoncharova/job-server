@@ -31,7 +31,7 @@ import {
   TokenContent,
   UpdateAttachment,
 } from '@sharedTypes/DBTypes';
-import { MessageResponse, MediaResponse } from '@sharedTypes/MessageTypes';
+import {MessageResponse, MediaResponse} from '@sharedTypes/MessageTypes';
 import {validationResult} from 'express-validator';
 
 const getEducation = async (
@@ -432,13 +432,16 @@ const updateAttachment = async (
 
 const removeAttachment = async (
   req: Request<{attachment_id: string}>,
-  res: Response<MessageResponse>,
+  res: Response<MessageResponse, {user: TokenContent; token: string}>,
   next: NextFunction
 ): Promise<MessageResponse | void> => {
   try {
     const attachment_id = req.params.attachment_id;
     const user_id = res.locals.user.user_id;
-    const result = await deleteAttachment(user_id, +attachment_id);
+    const token = res.locals.token;
+
+    // Proceed with the rest of the logic
+    const result = await deleteAttachment(user_id, +attachment_id, token);
     if (!result) {
       next(new CustomError('Failed to delete attachment', 500));
       return;

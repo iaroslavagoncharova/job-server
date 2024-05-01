@@ -57,6 +57,7 @@ const authenticate = async (
     }
 
     res.locals.user = user;
+    res.locals.token = token;
 
     next();
   } catch (e) {

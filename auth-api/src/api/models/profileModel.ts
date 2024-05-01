@@ -13,6 +13,8 @@ import {
 } from '@sharedTypes/DBTypes';
 import {promisePool} from '../../lib/db';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
+import {fetchData} from '../../lib/functions';
+import {log} from 'console';
 
 // get education by user id
 const getEducationByUser = async (id: number): Promise<EducationInfo[]> => {
@@ -353,7 +355,10 @@ const getAttachments = async (id: number): Promise<Attachment[]> => {
   }
 };
 
-const getAttachment = async (attachmentId: number, userId: number): Promise<Attachment> => {
+const getAttachment = async (
+  attachmentId: number,
+  userId: number
+): Promise<Attachment> => {
   try {
     const [result] = await promisePool.execute<RowDataPacket[] & Attachment[]>(
       'SELECT * FROM Attachments WHERE attachment_id = ? AND user_id = ?',
@@ -405,10 +410,16 @@ const putAttachment = async (
   try {
     const updateAttachment: UpdateAttachment = {};
     let changeSql = [];
-    if (attachment.attachment_name === undefined && attachment.filename === undefined) {
+    if (
+      attachment.attachment_name === undefined &&
+      attachment.filename === undefined
+    ) {
       return {message: 'Nothing to update'};
     }
-    if (attachment.attachment_name !== undefined && attachment.attachment_name !== '') {
+    if (
+      attachment.attachment_name !== undefined &&
+      attachment.attachment_name !== ''
+    ) {
       updateAttachment.attachment_name = attachment.attachment_name;
       changeSql.push(`attachment_name = '${attachment.attachment_name}'`);
     }
@@ -426,7 +437,9 @@ const putAttachment = async (
     const changeString = changeSql.join(', ');
 
     const sql = promisePool.format(
-      `UPDATE Attachments SET ` + changeString + ` WHERE attachment_id = ? AND user_id = ?`,
+      `UPDATE Attachments SET ` +
+        changeString +
+        ` WHERE attachment_id = ? AND user_id = ?`,
       [attachment_id, user_id]
     );
     console.log(sql);
@@ -443,19 +456,67 @@ const putAttachment = async (
 
 const deleteAttachment = async (
   user_id: number,
-  attachment_id: number
+  attachment_id: number,
+  token: string
 ): Promise<MessageResponse> => {
+  const attachment = await getAttachment(attachment_id, user_id);
+  if (!attachment) {
+    throw new CustomError('Attachment not found', 404);
+  }
+  if (attachment.user_id !== user_id) {
+    throw new CustomError('Unauthorized', 401);
+  }
+  attachment.filename = attachment?.filename.replace(
+    process.env.UPLOAD_URL as string,
+    ''
+  );
+
+  const connection = await promisePool.getConnection();
   try {
-    const result = await promisePool.execute(
+    await connection.beginTransaction();
+    const sql = connection.format(
       'DELETE FROM Attachments WHERE attachment_id = ? AND user_id = ?',
       [attachment_id, user_id]
     );
-    if (!result) {
+
+    console.log(sql, 'sql');
+
+    const result = await connection.execute<ResultSetHeader>(sql);
+
+    if (result[0].affectedRows === 0) {
       throw new CustomError('Failed to delete attachment', 500);
     }
+
+    const options = {
+      method: 'DELETE',
+      headers: {
+        Authorization: 'Bearer ' + token,
+      },
+    };
+
+    console.log(options, 'options');
+
+    try {
+      console.log(process.env.UPLOAD_SERVER, 'process.env.UPLOAD_SERVER');
+      const deleteResult = await fetchData<MessageResponse>(
+        `${process.env.UPLOAD_SERVER}/delete/${attachment.filename}`,
+        options
+      );
+      console.log(deleteResult, 'deleteResult');
+    } catch (error) {
+      console.log('error', error);
+      throw new CustomError('Failed to delete attachment', 500);
+    }
+
+    await connection.commit();
+
     return {message: 'Attachment deleted'};
   } catch (error) {
+    await connection.rollback();
+    console.error('deleteAttachment error', error);
     throw new CustomError('Failed to delete attachment', 500);
+  } finally {
+    connection.release();
   }
 };
 

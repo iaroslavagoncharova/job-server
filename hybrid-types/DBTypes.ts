@@ -65,11 +65,7 @@ export type CandidateProfile = {
   attachments: Attachment[];
 };
 
-export type TokenUser = {
-  user_id: number;
-  user_level_id: number;
-  user_type: string;
-};
+export type TokenUser = Pick<User, "user_id">;
 
 export type TokenContent = Pick<User, "user_id"> &
   Pick<UserLevel, "level_name">;
