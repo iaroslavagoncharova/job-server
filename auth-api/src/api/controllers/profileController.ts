@@ -440,7 +440,6 @@ const removeAttachment = async (
     const user_id = res.locals.user.user_id;
     const token = res.locals.token;
 
-    // Proceed with the rest of the logic
     const result = await deleteAttachment(user_id, +attachment_id, token);
     if (!result) {
       next(new CustomError('Failed to delete attachment', 500));
