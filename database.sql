@@ -201,14 +201,6 @@ CREATE TABLE Animals (
   animal_name varchar(255) NOT NULL
 );
 
-CREATE TABLE Notifications (
-  notification_id int(11) PRIMARY KEY AUTO_INCREMENT NOT NULL,
-  match_id int(11) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (match_id) REFERENCES Matches(match_id)
-);
-
-
 INSERT INTO UserLevels (level_name) VALUES ("Candidate"), ("Employer"), ("Admin");
 INSERT INTO Users (username, password, email, user_level_id, fullname, phone, user_type, status) VALUES ("Slava", "$2a$10$0.XQQChT9PUlSLKhXe4kweNqkCqcdizWVh45CmZxJ5gEPx5EWm/J2", "slava@example.com", 1, "Iaroslava Goncharova", "+358410000000", "candidate", "Active");
 INSERT INTO Users (username, password, email, user_level_id, fullname, phone, user_type) VALUES ("Kamilla", "$2a$10$0.XQQChT9PUlSLKhXe4kweNqkCqcdizWVh45CmZxJ5gEPx5EWm/J2", "kamilla@example.com", 2, "Kamilla Karenius", "+358410000000", "employer");
@@ -236,4 +228,3 @@ INSERT INTO Matches (user1_id, user2_id) VALUES (1, 2);
 INSERT INTO Reports (user_id, reported_item_type, reported_item_id, report_reason, is_resolved) VALUES (2, 'User', 1, 'Kysyi henkilökohtaisia kysymyksiä', 'not_resolved'), (1, 'Job', 3, 'Marjamyyjä ei voi saada 800 euroa', 'resolved');
 INSERT INTO Animals (animal_name) VALUES ('Leijona'), ('Kissa'), ('Delfiini');
 INSERT INTO Adjectives (adj_name) VALUES ('Ystävällinen'), ('Ahkera'), ('Luova');
-INSERT INTO Notifications (match_id) VALUES (1);
