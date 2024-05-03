@@ -13,10 +13,15 @@ import {
   UserTest,
   JobSkill,
   UserSkill,
+  Field,
 } from '@sharedTypes/DBTypes';
 import {getUserById} from '../controllers/userController';
 import {getUser} from './userModel';
-import {getTestsForJobs} from './testModel';
+import {
+  getCountUserTestsOutOfJobTests,
+  getJobTestsCount,
+  getTestsForJobs,
+} from './testModel';
 import {getSkillsByUserId} from '../controllers/profileController';
 import {getUserSkills} from './profileModel';
 
@@ -51,7 +56,8 @@ const getJobsByCompany = async (
       'SELECT JobAds.*, GROUP_CONCAT(DISTINCT Skills.skill_name) AS skills, GROUP_CONCAT(DISTINCT KeyWords.keyword_name) AS keywords FROM JobAds LEFT JOIN JobSkills ON JobAds.job_id = JobSkills.job_id LEFT JOIN Skills ON JobSkills.skill_id = Skills.skill_id LEFT JOIN KeywordsJobs ON JobAds.job_id = KeywordsJobs.job_id LEFT JOIN KeyWords ON KeywordsJobs.keyword_id = KeyWords.keyword_id WHERE JobAds.user_id = ? GROUP BY JobAds.job_id;',
       [id]
     );
-    if (jobs[0].length === 0) {
+    console.log(jobs, 'jobs');
+    if (!jobs) {
       throw new CustomError('No jobs found', 404);
     }
     return jobs;
@@ -60,29 +66,48 @@ const getJobsByCompany = async (
   }
 };
 
-const getFields = async (): Promise<string[]> => {
+const getFields = async (): Promise<Field[]> => {
   try {
-    const [rows] = await promisePool.execute<
-      RowDataPacket[] & {field: string}[]
-    >('SELECT DISTINCT field FROM JobAds');
-    return rows.map((row) => row.field);
+    const [rows] = await promisePool.execute<RowDataPacket[] & Field[]>(
+      'SELECT * FROM Fields'
+    );
+    console.log(rows, 'rows');
+    return rows;
   } catch (err) {
     throw new CustomError('getFields failed', 500);
   }
 };
 
 const getJobForApplication = async (
-  job_id: number
+  job_id: number,
+  user_id: number
 ): Promise<JobWithUser | null> => {
   try {
     const [result] = await promisePool.execute<RowDataPacket[] & JobWithUser[]>(
       'SELECT JobAds.*, Users.username FROM JobAds LEFT JOIN Users ON JobAds.user_id = Users.user_id WHERE JobAds.job_id = ?;',
       [job_id]
     );
-    if (result.length === 0) {
+    // select user tests for the job
+    const userTests = await getCountUserTestsOutOfJobTests(user_id, job_id);
+    console.log(userTests, 'userTests');
+    const jobTests = await getJobTestsCount(job_id);
+    console.log(jobTests, 'jobTests');
+    const job = result[0];
+    console.log(job, 'job');
+    if (!job) {
       return null;
     }
-    return result[0];
+    const percentage = await calculatePercentage(user_id, job_id);
+    console.log(percentage, 'percentage');
+    const jobResult: JobWithUser = {
+      ...job,
+      userTestsCount: userTests,
+      jobTestsCount: jobTests,
+      percentage,
+    };
+    console.log(jobResult, 'jobResult');
+    return jobResult;
+    // return result[0];
   } catch (err) {
     throw new Error((err as Error).message);
   }
@@ -403,14 +428,20 @@ const calculatePercentage = async (user_id: number, job_id: number) => {
   if (!totalTests) {
     throw new CustomError('No tests found', 404);
   }
+  console.log(totalTests, 'totalTests');
   const totalTestIds = totalTests.map((test) => test.test_id);
+  console.log(totalTestIds, 'totalTestIds');
   const totalTestIdPlaceholders = totalTestIds.map((id) => id).join(', ');
+  console.log(totalTestIdPlaceholders, 'totalTestIdPlaceholders');
   // select a count of all tests that a user has taken that are in the tests required for the job
   const testsTaken = await promisePool.execute<RowDataPacket[] & UserTest[]>(
     `SELECT * FROM UserTests WHERE user_id = ? AND test_id IN (?)`,
     [user_id, totalTestIdPlaceholders]
   );
+  console.log(user_id, 'user_id');
+  console.log(testsTaken, 'testsTaken');
   const takenTestsLength = testsTaken[0].length;
+  console.log(takenTestsLength, 'takenTestsLength');
   // Get all required skills for job
   const [jobSkills] = await promisePool.execute<RowDataPacket[] & JobSkill[]>(
     'SELECT * FROM JobSkills WHERE job_id = ?',
@@ -418,26 +449,34 @@ const calculatePercentage = async (user_id: number, job_id: number) => {
   );
   console.log(jobSkills, 'jobSkills');
   const totalSkillsIds = jobSkills.map((skill) => skill.skill_id);
+  console.log(totalSkillsIds, 'totalSkillsIds');
   const totalSkillsPlaceholders = totalSkillsIds.map((id) => id).join(', ');
+  console.log(totalSkillsPlaceholders, 'totalSkillsPlaceholders');
   // Get all skills that a user has
   const userSkills = await promisePool.execute<RowDataPacket[] & UserSkill[]>(
     `SELECT * FROM UserSkills WHERE user_id = ? AND skill_id IN (?)`,
     [user_id, totalSkillsPlaceholders]
   );
+  console.log(userSkills, 'userSkills');
   const totalTestsLength = totalTests.length;
+  console.log(totalTestsLength, 'totalTestsLength');
   const testParticipationPercentage =
     (takenTestsLength / totalTestsLength) * 100;
+  console.log(testParticipationPercentage, 'testParticipationPercentage');
   // check that the user has skill ids that are in the job skill ids
   const userSkillIds = userSkills[0].map((skill) => skill.skill_id);
+  console.log(userSkillIds, 'userSkillIds');
   const skillMatch = userSkillIds.filter((id) => totalSkillsIds.includes(id));
+  console.log(skillMatch, 'skillMatch');
   const skillMatchPercentage =
     (skillMatch.length / totalSkillsIds.length) * 100;
-
+  console.log(skillMatchPercentage, 'skillMatchPercentage');
   const skillMatchWeight = 0.7;
   const testParticipationWeight = 0.3;
   const percentage =
     skillMatchPercentage * skillMatchWeight +
     testParticipationPercentage * testParticipationWeight;
+  console.log(percentage, 'percentage');
 
   return percentage;
 };

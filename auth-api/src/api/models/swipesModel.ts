@@ -107,8 +107,10 @@ const postSwipe = async (
     if (!result) {
       throw new Error('Failed to post swipe');
     }
+    console.log(result, 'result');
     const insertId = result.insertId;
     const newSwipe = await getSwipeBySwipeId(insertId);
+    console.log(newSwipe, 'newSwipe');
     if (!newSwipe) {
       throw new Error('Failed to get new swipe');
     }
@@ -124,18 +126,18 @@ const postSwipe = async (
         'SELECT * FROM Swipes WHERE swiper_id = ? AND swiped_id = ?';
       const [result] = await promisePool.execute<RowDataPacket[] & Swipe[]>(
         sqlCheck,
-        [newSwipe.swiper_id, newSwipe.swiped_id]
+        [candidateUser.user_id, newSwipe.swiped_id]
       );
+      console.log(result, 'result');
       if (result.length === 0) {
         return {message: 'Swipe posted', swipe: newSwipe};
       }
-      const match = await postMatch(
-        newSwipe.swiper_id,
-        newSwipe.swiped_id
-      );
+      // if there is a match, post the match
+      const match = await postMatch(candidateUser.user_id, newSwipe.swiped_id);
       if (!match) {
         throw new Error('Failed to post match');
       }
+      console.log(match, 'match');
     }
     if (newSwipe.swipe_direction === 'right' && newSwipe.swipe_type === 'job') {
       // create an application for the job
@@ -159,8 +161,9 @@ const postSwipe = async (
         'SELECT * FROM Swipes WHERE swiper_id = ? AND swiped_id = ?';
       const [result] = await promisePool.execute<RowDataPacket[] & Swipe[]>(
         sqlCheck,
-        [newSwipe.swiper_id, jobUserResult[0][0].user_id]
+        [jobUserResult[0][0].user_id, newSwipe.swiper_id]
       );
+      console.log(result, 'result');
       if (result.length === 0) {
         return {message: 'Swipe posted', swipe: newSwipe};
       }

@@ -16,6 +16,7 @@ import {
   getAllCandidates,
   getOneCandidate,
   deleteUserAsAdmin,
+  checkEmail,
 } from '../models/userModel';
 import CustomError from '../../classes/CustomError';
 import {validationResult} from 'express-validator';
@@ -23,6 +24,19 @@ import {MessageResponse, UserResponse} from '@sharedTypes/MessageTypes';
 import bcrypt from 'bcryptjs';
 
 const salt = bcrypt.genSaltSync(10);
+
+const checkEmailExists = async (
+  req: Request<{email: string}>,
+  res: Response<{exists: boolean}>,
+  next: NextFunction
+): Promise<{exists: boolean} | void> => {
+  try {
+    const exists = await checkEmail(req.params.email);
+    res.json({exists: exists});
+  } catch (e) {
+    next(new CustomError((e as Error).message, 500));
+  }
+};
 
 const getAllUsers = async (
   req: Request,
@@ -245,4 +259,5 @@ export {
   removeUser,
   updateUser,
   removeUserAsAdmin,
+  checkEmailExists,
 };

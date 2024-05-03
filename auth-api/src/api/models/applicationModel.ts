@@ -10,6 +10,7 @@ import {promisePool} from '../../lib/db';
 import {ResultSetHeader} from 'mysql2';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 import {postMatch} from './matchModel';
+import {getJobTestsCount} from './testModel';
 
 // getting all applications of a user
 const getApplicationsByUserId = async (

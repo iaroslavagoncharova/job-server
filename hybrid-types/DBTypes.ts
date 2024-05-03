@@ -223,6 +223,15 @@ export type JobWithSkillsAndKeywords = Job & {
 
 export type JobWithUser = Job & {
   username: string;
+  userTestsCount: number | null;
+  jobTestsCount: number | null;
+  percentage: number | null;
+};
+
+export type JobWithSkillSKeywordsAndUser = JobWithSkillsAndKeywords & {
+  userTestsCount: number;
+  jobTestsCount: number;
+  percentage: number;
 };
 
 export type UpdateJob = {
@@ -280,4 +289,9 @@ export type Report = {
   report_reason: string;
   reported_at: Date | string;
   is_resolved: string;
+};
+
+export type Field = {
+  field_id: number;
+  field_name: string;
 };

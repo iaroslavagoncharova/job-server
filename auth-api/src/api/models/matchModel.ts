@@ -37,14 +37,14 @@ const getMatchesByUser = async (id: number): Promise<Match[] | null> => {
         const response = {
           match: result,
           user: user,
-        }
+        };
       } else {
         const user = await getUser(match.user1_id);
         match.user = user;
         const response = {
           match: result,
           user: user,
-        }
+        };
       }
     }
     return result;
@@ -64,6 +64,23 @@ const postMatch = async (
     );
     if (result.affectedRows === 0) {
       throw new Error('Match not created');
+    }
+    // check if there is an application (if a user has applied to another user's job)
+    const checkApplication = await promisePool.execute<RowDataPacket[]>(
+      'SELECT * FROM Applications where user_id = ? AND job_id IN (SELECT job_id FROM JobAds WHERE user_id = ?) OR user_id = ? AND job_id IN (SELECT job_id FROM JobAds WHERE user_id = ?)',
+      [user1_id, user2_id, user2_id, user1_id]
+    );
+    console.log(checkApplication[0]);
+    if (checkApplication[0].length > 0) {
+      // set applications status to Accepted
+      const updateStatus = await promisePool.execute<ResultSetHeader>(
+        'UPDATE Applications SET status = "Accepted" WHERE user_id = ? AND application_id = ?',
+        [checkApplication[0][0].user_id, checkApplication[0][0].application_id]
+      );
+      if (updateStatus[0].affectedRows === 0) {
+        throw new Error('Application status not updated');
+      }
+      console.log('Application status updated');
     }
     // check if a chat aready exists between the two users
     const checkChat = await promisePool.execute<RowDataPacket[] & Chat[]>(

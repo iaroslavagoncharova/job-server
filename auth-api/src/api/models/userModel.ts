@@ -13,6 +13,17 @@ import {
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 import {deleteReport} from './reportModel';
 
+const checkEmail = async (email: string): Promise<boolean> => {
+  const [result] = await promisePool.execute<RowDataPacket[]>(
+    'SELECT * FROM Users WHERE email = ?',
+    [email]
+  );
+  if (result.length === 0) {
+    return false;
+  }
+  return true;
+};
+
 const getUsers = async (): Promise<UnauthorizedUser[] | null> => {
   try {
     const [result] = await promisePool.execute<
@@ -498,4 +509,5 @@ export {
   deleteUser,
   putUser,
   deleteUserAsAdmin,
+  checkEmail,
 };

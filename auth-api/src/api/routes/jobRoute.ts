@@ -359,12 +359,13 @@ jobRoute
   .delete(authenticate, removeJob);
 jobRoute
   /**
-   * @api {get} /application/:job_id Get job for application
+   * @api {get} /application/:job_id/:application_id Get job for application
    * @apiName GetJobForApplication
    * @apiGroup Jobs
    * @apiPermission authenticated user
    * @apiDescription Get job for application
    * @apiParam {Number} job_id Job ID
+   * @apiParam {Number} application_id Application ID
    * @apiSuccess {Object} job Job
    * @apiSuccess {Number} job.job_id Job ID
    * @apiSuccess {String} job.job_address Job address

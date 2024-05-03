@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   addUser,
+  checkEmailExists,
   getAllUsers,
   getCandidateUser,
   getCandidates,
@@ -14,6 +15,28 @@ import {body} from 'express-validator';
 import {authenticate} from '../../middlewares';
 
 const userRoute = express.Router();
+
+userRoute
+/**
+ * @api {get} /users/email/:email Check if email exists
+ * @apiName CheckEmailExists
+ * @apiGroup Users
+ * @apiVersion 1.0.0
+ * @apiPermission all
+ * @apiParam {String} email User email
+ * @apiSuccess {Boolean} exists Email exists
+ * @apiSuccessExample {json} Success
+ * HTTP/1.1 200 OK
+ * {
+ *  "exists": true
+ * }
+ * @apiErrorExample {json} List error
+ * HTTP/1.1 404 Not Found
+ * {
+ *  "message": "Email not found"
+ * }
+ */
+.get('/email/:email', checkEmailExists);
 
 userRoute
   /**

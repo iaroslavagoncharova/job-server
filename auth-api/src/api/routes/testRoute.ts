@@ -13,6 +13,8 @@ import {
   handlePostTest,
   handlePutTest,
   handleTakeTest,
+  handleGetCountUserTestsOutOfJobTests,
+  handleGetJobTestsCount,
 } from '../controllers/testController';
 
 const testRoute = express.Router();
@@ -122,83 +124,83 @@ testRoute
    */
   .post(authenticate, handlePostTest);
 testRoute
-/**
- * @api {get} /tests/byuser Get tests by user
- * @apiName Get tests by user
- * @apiGroup Tests
- * @apiDescription Get tests by user
- * @apiPermission user
- * @apiSuccess {Object[]} tests List of tests
- * @apiSuccess {Number} tests.id Test id
- * @apiSuccess {String} tests.test_type Test type
- * @apiSuccess {Number} tests.user_id User id
- * @apiSuccess {String} tests.test_link Test link
- * @apiSuccessExample {json} Success-Response:
- * HTTP/1.1 200 OK
- * [
- *  {
- *   "test_id": 1,
- *   "test_type": "Javascript",
- *   "user_id": 1,
- *   "test_link": "https://www.test.com"
- *  },
- *  {
- *   "test_id": 2,
- *   "test_type": "Kommunikaatio",
- *   "user_id": 1,
- *   "test_link": "https://www.test.com"
- *  }
- * ]
- * @apiErrorExample {json} Error-Response:
- * HTTP/1.1 404 Not Found
- * {
- *  "message": "Tests not found"
- * }
- * @apiErrorExample {json} Error-Response:
- * HTTP/1.1 500 Internal Server Error
- * {
- *  "message": "Error getting tests"
- * }
- */
-.get('/byuser', authenticate, handleGetTestsByUser);
+  /**
+   * @api {get} /tests/byuser Get tests by user
+   * @apiName Get tests by user
+   * @apiGroup Tests
+   * @apiDescription Get tests by user
+   * @apiPermission user
+   * @apiSuccess {Object[]} tests List of tests
+   * @apiSuccess {Number} tests.id Test id
+   * @apiSuccess {String} tests.test_type Test type
+   * @apiSuccess {Number} tests.user_id User id
+   * @apiSuccess {String} tests.test_link Test link
+   * @apiSuccessExample {json} Success-Response:
+   * HTTP/1.1 200 OK
+   * [
+   *  {
+   *   "test_id": 1,
+   *   "test_type": "Javascript",
+   *   "user_id": 1,
+   *   "test_link": "https://www.test.com"
+   *  },
+   *  {
+   *   "test_id": 2,
+   *   "test_type": "Kommunikaatio",
+   *   "user_id": 1,
+   *   "test_link": "https://www.test.com"
+   *  }
+   * ]
+   * @apiErrorExample {json} Error-Response:
+   * HTTP/1.1 404 Not Found
+   * {
+   *  "message": "Tests not found"
+   * }
+   * @apiErrorExample {json} Error-Response:
+   * HTTP/1.1 500 Internal Server Error
+   * {
+   *  "message": "Error getting tests"
+   * }
+   */
+  .get('/byuser', authenticate, handleGetTestsByUser);
 testRoute
-/**
- * @api {get} /tests/candidate Get candidate tests
- * @apiName Get candidate tests
- * @apiGroup Tests
- * @apiDescription Get candidate tests
- * @apiPermission user
- * @apiSuccess {Object[]} userTests List of tests
- * @apiSuccess {Number} userTests.test_id Test id
- * @apiSuccess {String} userTests.user_id User id
- * @apiSuccess {String} userTests.created_at Test created at
- * @apiSuccessExample {json} Success-Response:
- * HTTP/1.1 200 OK
- * [
- *  {
- *   "test_id": 1,
- *   "user_id": 1,
- *   "created_at": "2021-01-01T00:00:00.000Z"
- *  },
- *  {
- *   "test_id": 2,
- *   "user_id": 1,
- *   "created_at": "2021-01-01T00:00:00.000Z"
- *  }
- * ]
- * @apiErrorExample {json} Error-Response:
- * HTTP/1.1 404 Not Found
- * {
- *  "message": "Tests not found"
- * }
- * @apiErrorExample {json} Error-Response:
- * HTTP/1.1 500 Internal Server Error
- * {
- *  "message": "Error getting tests"
- * }
- *
- */
-.get('/candidate', authenticate, handleGetCandidatesTests);
+  /**
+   * @api {get} /tests/candidate Get candidate tests
+   * @apiName Get candidate tests
+   * @apiGroup Tests
+   * @apiDescription Get candidate tests
+   * @apiPermission user
+   * @apiSuccess {Object[]} userTests List of tests
+   * @apiSuccess {Number} userTests.test_id Test id
+   * @apiSuccess {String} userTests.user_id User id
+   * @apiSuccess {String} userTests.created_at Test created at
+   * @apiSuccessExample {json} Success-Response:
+   * HTTP/1.1 200 OK
+   * [
+   *  {
+   *   "test_id": 1,
+   *   "user_id": 1,
+   *   "created_at": "2021-01-01T00:00:00.000Z"
+   *  },
+   *  {
+   *   "test_id": 2,
+   *   "user_id": 1,
+   *   "created_at": "2021-01-01T00:00:00.000Z"
+   *  }
+   * ]
+   * @apiErrorExample {json} Error-Response:
+   * HTTP/1.1 404 Not Found
+   * {
+   *  "message": "Tests not found"
+   * }
+   * @apiErrorExample {json} Error-Response:
+   * HTTP/1.1 500 Internal Server Error
+   * {
+   *  "message": "Error getting tests"
+   * }
+   *
+   */
+  .get('/candidate', authenticate, handleGetCandidatesTests);
 testRoute
   .route('/:id')
   /**
@@ -408,31 +410,38 @@ testRoute
    */
   .delete(authenticate, handleDeleteJobFromTest);
 testRoute
-/**
- * @api {post} /tests/take/test/:id Take test
- * @apiName Take test
- * @apiGroup Tests
- * @apiDescription Take a test
- * @apiPermission candidate user
- * @apiParam {Number} user_id User id
- * @apiParam {Number} id Test id
- * @apiSuccess {Object[]} message Message object
- * @apiSuccess {String} message.message Message
- * @apiSuccessExample {json} Success-Response:
- * HTTP/1.1 200 OK
- * {
- *  "message": "Test taken"
- * }
- * @apiErrorExample {json} Error-Response:
- * HTTP/1.1 500 Internal Server Error
- * {
- *  "message": "Error taking test"
- * }
- * @apiErrorExample {json} Error-Response:
- * HTTP/1.1 500 Internal Server Error
- * {
- *  "message": "Internal server error"
- * }
- */
-.post('/take/test/:id', authenticate, handleTakeTest);
+  /**
+   * @api {post} /tests/take/test/:id Take test
+   * @apiName Take test
+   * @apiGroup Tests
+   * @apiDescription Take a test
+   * @apiPermission candidate user
+   * @apiParam {Number} user_id User id
+   * @apiParam {Number} id Test id
+   * @apiSuccess {Object[]} message Message object
+   * @apiSuccess {String} message.message Message
+   * @apiSuccessExample {json} Success-Response:
+   * HTTP/1.1 200 OK
+   * {
+   *  "message": "Test taken"
+   * }
+   * @apiErrorExample {json} Error-Response:
+   * HTTP/1.1 500 Internal Server Error
+   * {
+   *  "message": "Error taking test"
+   * }
+   * @apiErrorExample {json} Error-Response:
+   * HTTP/1.1 500 Internal Server Error
+   * {
+   *  "message": "Internal server error"
+   * }
+   */
+  .post('/take/test/:id', authenticate, handleTakeTest);
+
+testRoute.get(
+  '/count/:job_id/user',
+  authenticate,
+  handleGetCountUserTestsOutOfJobTests
+);
+testRoute.get('/count/:job_id', handleGetJobTestsCount);
 export default testRoute;

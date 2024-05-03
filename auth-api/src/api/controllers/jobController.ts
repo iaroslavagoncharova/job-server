@@ -3,6 +3,7 @@ import CustomError from '../../classes/CustomError';
 import {JobResponse, MessageResponse} from '@sharedTypes/MessageTypes';
 import {validationResult} from 'express-validator';
 import {
+  Field,
   Job,
   JobWithSkillsAndKeywords,
   JobWithUser,
@@ -79,9 +80,9 @@ const fetchKeywords = async (
 
 const fetchFields = async (
   req: Request,
-  res: Response<string[]>,
+  res: Response<Field[]>,
   next: NextFunction
-): Promise<string[] | void> => {
+): Promise<Field[] | void> => {
   try {
     const fields = await getFields();
     if (fields.length === 0) {
@@ -137,11 +138,14 @@ const fetchJobForApplication = async (
 ): Promise<JobWithUser[] | void> => {
   try {
     const id = req.params.job_id;
-    const job = await getJobForApplication(+id);
+    const user_id = res.locals.user.user_id;
+    console.log(id, user_id);
+    const job = await getJobForApplication(+id, user_id);
     if (job === null) {
       next(new CustomError('Job not found', 404));
       return;
     }
+    console.log(job);
     res.json(job);
   } catch (error) {
     next(new CustomError((error as Error).message, 500));
@@ -250,11 +254,10 @@ const handleCalculatePercentage = async (
     const job_id = req.params.id;
     console.log(user_id, job_id);
     const result = await calculatePercentage(user_id, +job_id);
-    if (result) {
-      res.json(result);
-      return;
+    if (result === 0) {
+      return 0;
     }
-    next(new CustomError('Error calculating percentage', 500));
+    res.json(result);
   } catch (e) {
     next(new CustomError((e as Error).message, 500));
   }

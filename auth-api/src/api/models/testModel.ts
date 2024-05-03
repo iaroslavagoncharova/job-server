@@ -10,10 +10,7 @@ const getAllTests = async (): Promise<Test[] | null> => {
       'SELECT * FROM Tests'
     );
     if (result.length === 0) {
-      return null;
-    }
-    if (!result) {
-      throw new Error('Error getting tests');
+      throw new Error('No tests found');
     }
     return result;
   } catch (error) {
@@ -29,10 +26,7 @@ const getTests = async (): Promise<Test[] | null> => {
       'SELECT * FROM Tests WHERE user_id IS NULL'
     );
     if (result.length === 0) {
-      return null;
-    }
-    if (!result) {
-      throw new Error('Error getting tests');
+      throw new Error('No tests found');
     }
     return result;
   } catch (error) {
@@ -197,7 +191,18 @@ const getTestsForJobs = async (job_id: number): Promise<Test[] | null> => {
     if (!result) {
       throw new Error('Error getting tests');
     }
-    return result;
+    // get test info for each test
+    const tests: Test[] = [];
+    for (const test of result) {
+      const [testResult] = await promisePool.execute<RowDataPacket[] & Test[]>(
+        'SELECT * FROM Tests WHERE test_id = ?',
+        [test.test_id]
+      );
+      if (testResult.length > 0) {
+        tests.push(testResult[0]);
+      }
+    }
+    return tests;
   } catch (error) {
     console.log(error);
     throw new Error('Error getting tests');
@@ -295,6 +300,40 @@ const takeTest = async (
   }
 };
 
+const getJobTestsCount = async (job_id: number): Promise<number> => {
+  try {
+    const [result] = await promisePool.execute<RowDataPacket[]>(
+      'SELECT COUNT(*) FROM JobTests WHERE job_id = ?',
+      [job_id]
+    );
+    console.log(result[0]['COUNT(*)']);
+    return result[0]['COUNT(*)'];
+  } catch (error) {
+    console.log(error);
+    throw new Error('Error getting job tests count');
+  }
+};
+
+const getCountUserTestsOutOfJobTests = async (
+  user_id: number,
+  job_id: number
+): Promise<number> => {
+  try {
+    const [result] = await promisePool.execute<RowDataPacket[]>(
+      'SELECT COUNT(*) FROM UserTests WHERE user_id = ? AND test_id IN (SELECT test_id FROM JobTests WHERE job_id = ?)',
+      [user_id, job_id]
+    );
+    if (result[0]['COUNT(*)'] === 0) {
+      console.log('No tests taken');
+      return result[0]['COUNT(*)'];
+    }
+    return result[0]['COUNT(*)'];
+  } catch (error) {
+    console.log(error);
+    throw new Error('Error getting user tests count');
+  }
+};
+
 export {
   getTests,
   getTestsByUser,
@@ -308,4 +347,6 @@ export {
   deleteJobFromTest,
   getCandidateTests,
   takeTest,
+  getJobTestsCount,
+  getCountUserTestsOutOfJobTests,
 };

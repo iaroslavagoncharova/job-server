@@ -18,6 +18,8 @@ import {
   postTest,
   putTest,
   takeTest,
+  getJobTestsCount,
+  getCountUserTestsOutOfJobTests,
 } from '../models/testModel';
 import {MessageResponse} from '@sharedTypes/MessageTypes';
 
@@ -245,6 +247,37 @@ const handleTakeTest = async (
   }
 };
 
+const handleGetJobTestsCount = async (
+  req: Request<{job_id: string}>,
+  res: Response<number>,
+  next: NextFunction
+): Promise<number | void> => {
+  try {
+    const jobId = parseInt(req.params.job_id);
+    const result = await getJobTestsCount(jobId);
+    res.json(result);
+  } catch (e) {
+    next(new CustomError((e as Error).message, 500));
+  }
+};
+
+const handleGetCountUserTestsOutOfJobTests = async (
+  req: Request<{job_id: string}>,
+  res: Response<number>,
+  next: NextFunction
+): Promise<number | void> => {
+  try {
+    const jobId = parseInt(req.params.job_id);
+    const userId = res.locals.user.user_id;
+    console.log(res.locals.user, 'user');
+    console.log(jobId, 'job');
+    const result = await getCountUserTestsOutOfJobTests(userId, jobId);
+    res.json(result);
+  } catch (e) {
+    next(new CustomError((e as Error).message, 500));
+  }
+};
+
 export {
   handleGetAllTests,
   handleGetGeneralTests,
@@ -258,4 +291,6 @@ export {
   handleDeleteJobFromTest,
   handleGetCandidatesTests,
   handleTakeTest,
+  handleGetJobTestsCount,
+  handleGetCountUserTestsOutOfJobTests,
 };
